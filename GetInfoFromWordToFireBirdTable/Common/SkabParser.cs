@@ -11,17 +11,15 @@ namespace GetInfoFromWordToFireBirdTable.Common
     public class SkabParser : CableDataParcer
     {
         private WordTableParser _wordTableParser;
-        private FileInfo _fBDatabaseFile;
         private FileInfo _mSWordFile;
         private FirebirdDBTableProvider<CableEntityes.Skab> _skabTableProvider;
         private StringBuilder _stringBuilder = new StringBuilder();
 
         public override event Action<int, int> ParseReport;
-        public SkabParser(FileInfo fBDatabaseFile, FileInfo mSWordFile)
+        public SkabParser(FileInfo mSWordFile)
         {
-            _fBDatabaseFile = fBDatabaseFile;
             _mSWordFile = mSWordFile;
-            _skabTableProvider = new FirebirdDBTableProvider<CableEntityes.Skab>(_fBDatabaseFile);
+            _skabTableProvider = new FirebirdDBTableProvider<CableEntityes.Skab>();
         }
         public override int ParseDataToDatabase()
         {

@@ -17,8 +17,8 @@ namespace GetInfoFromWordToFireBirdTable
         {
             _cableTypesDict = new Dictionary<string, Func<CableDataParcer>>
             {
-                {"КУНРС", () => new KunrsParser(_view.FBDatabaseFile, _view.MSWordFile) },
-                {"СКАБ", () => new SkabParser(_view.FBDatabaseFile, _view.MSWordFile) }
+                {"КУНРС", () => new KunrsParser(_view.MSWordFile) },
+                {"СКАБ", () => new SkabParser(_view.MSWordFile) }
             };
 
             _view = view;

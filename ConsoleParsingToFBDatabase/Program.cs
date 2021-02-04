@@ -15,15 +15,14 @@ namespace ConsoleParsingToFBDatabase
 
         static void ParseSkabBillet()
         {
-            var dbFile = new FileInfo(@"E:\databases\database_repository\CABLES_BRANDS.FDB");
-            var parser = new SkabInsulatedBilletParser(dbFile);
+            var parser = new SkabInsulatedBilletParser();
             int recordsCount = 0;
-            Console.WriteLine("Нажмите любую клавишу для начала парсинга...");
-            Console.ReadKey();
+            //Console.WriteLine("Нажмите любую клавишу для начала парсинга...");
+            //Console.ReadKey();
             try
             {
                 Console.WriteLine("Тест");
-                //recordsCount = parser.ParseDataToDatabase();
+                recordsCount = parser.ParseDataToDatabase();
             }
             catch (Exception ex)
             {
@@ -38,8 +37,7 @@ namespace ConsoleParsingToFBDatabase
 
         private void Select()
         {
-            var dbFile = new FileInfo(@"E:\databases\database_repository\CABLES_BRANDS.FDB");
-            var parser = new SkabParser(dbFile, null);
+            var parser = new SkabParser(null);
             //var billetId1 = parser.GetInsBilletId(4, 660, 0.5);
             //var billetId2 = parser.GetInsBilletId(4, 660, 1.5);
             EndOfProgram();
@@ -47,11 +45,8 @@ namespace ConsoleParsingToFBDatabase
 
         private static void CreateTable()
         {
-            //Users/Shared/databases/hello.fdb
-
-            var dbFile = new FileInfo(@"E:\databases\CABLES_BRANDS.FDB");
             //var dbProvider = new FirebirdDBTableProvider<Kunrs>(dbFile);
-            var dbProvider = new FirebirdDBTableProvider<Skab>(dbFile);
+            var dbProvider = new FirebirdDBTableProvider<Skab>();
             //FirebirdDBTableProvider<Skab>.CreateBoolIntDBDomain(dbFile, "BOOLEAN_INT");
             dbProvider.OpenConnection();
             dbProvider.CreateTableIfNotExists();

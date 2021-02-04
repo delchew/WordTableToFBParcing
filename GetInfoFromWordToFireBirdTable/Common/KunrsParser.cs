@@ -9,11 +9,9 @@ namespace GetInfoFromWordToFireBirdTable.Common
     public class KunrsParser : CableDataParcer
     {
         private WordTableParser _wordTableParser;
-        private FileInfo _fBDatabaseFile;
         private FileInfo _mSWordFile;
-        public KunrsParser(FileInfo fBDatabaseFile, FileInfo mSWordFile)
+        public KunrsParser(FileInfo mSWordFile)
         {
-            _fBDatabaseFile = fBDatabaseFile;
             _mSWordFile = mSWordFile;
         }
 
@@ -67,7 +65,7 @@ namespace GetInfoFromWordToFireBirdTable.Common
                         { 5, new [] { PowerWiresColorScheme.PEN, PowerWiresColorScheme.none } }
                     };
 
-                    var kunrsTableProvider = new FirebirdDBTableProvider<Kunrs>(_fBDatabaseFile);
+                    var kunrsTableProvider = new FirebirdDBTableProvider<Kunrs>();
                     kunrsTableProvider.OpenConnection();
                     for (int i = 0; i < hasFoilShieldDictionary.Count; i++)
                     {

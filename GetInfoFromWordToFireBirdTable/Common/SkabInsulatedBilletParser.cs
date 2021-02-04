@@ -1,19 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using GetInfoFromWordToFireBirdTable.CableEntityes;
 
 namespace GetInfoFromWordToFireBirdTable.Common
 {
     public class SkabInsulatedBilletParser : CableDataParcer
     {
-        private FileInfo _fBDatabaseFile;
-
-        public SkabInsulatedBilletParser(FileInfo fBDatabaseFile)
-        {
-            _fBDatabaseFile = fBDatabaseFile;
-        }
-
         public override int ParseDataToDatabase()
         {
             int recordsCount = 0;
@@ -23,7 +15,7 @@ namespace GetInfoFromWordToFireBirdTable.Common
             var cableShortNamesList = new List<int> { 1, 4 }; //1 - СКАБ250, 4 - СКАБ660
 
             var cableBillet = new CableBillet();
-            var billetTableProvider = new FirebirdDBTableProvider<CableBillet>(_fBDatabaseFile);
+            var billetTableProvider = new FirebirdDBTableProvider<CableBillet>();
             billetTableProvider.OpenConnection();
 
             foreach (var nameId in cableShortNamesList)
