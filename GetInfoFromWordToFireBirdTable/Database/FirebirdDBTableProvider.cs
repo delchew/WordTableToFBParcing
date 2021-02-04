@@ -5,17 +5,20 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using GetInfoFromWordToFireBirdTable.Database.Extensions;
+using System.Reflection;
+using System.Linq;
 
 namespace GetInfoFromWordToFireBirdTable
 {
     public class FirebirdDBTableProvider<T>
     {
         private static Type _tableEntityType;
+        private static readonly string _tableName;
+        private static readonly Dictionary<FBTableFieldAttribute, string> _tableFieldInfoDict;
 
         private readonly string _connectionString;
         private FbConnection _connection;
         private FbCommand _command;
-        private readonly static string _tableName;
 
         static FirebirdDBTableProvider()
         {
@@ -24,6 +27,22 @@ namespace GetInfoFromWordToFireBirdTable
             if (attrs.Length == 0)
                 throw new Exception("Class is not marked as a \"Table\" by TableNameAttribute!");
             _tableName = ((FBTableNameAttribute)attrs[0]).TableName;
+
+            _tableFieldInfoDict = new Dictionary<FBTableFieldAttribute, string>();
+            var properties = _tableEntityType.GetProperties();
+
+            string propertyName;
+            FBTableFieldAttribute fieldAttribute;
+            for (int i = 0; i < properties.Length; i++)
+            {
+                var propAttr = properties[i].GetCustomAttributes(typeof(FBTableFieldAttribute), true).First();
+                if (propAttr != null)
+                {
+                    propertyName = properties[i].Name;
+                    fieldAttribute = propAttr as FBTableFieldAttribute;
+                    _tableFieldInfoDict.Add(fieldAttribute, propertyName);
+                }
+            }
         }
 
         public FirebirdDBTableProvider(FileInfo databaseFile)
@@ -46,31 +65,51 @@ namespace GetInfoFromWordToFireBirdTable
             _connection.Dispose();
         }
 
-        public void CreateTableIfNotExists() //TODO доделать
+        public void CreateTableIfNotExists()
         {
             if (!TableExists(_tableName))
             {
-                var sqlRequestStringBuilder = new StringBuilder($@"CREATE TABLE {_tableName} (");
-                var properties = _tableEntityType.GetProperties();
+                var createTableQueryBuilder = new StringBuilder($@"CREATE TABLE {_tableName} (");
+
                 string fieldName, fieldDBType, notNull, primaryKey, comma = string.Empty;
-                for (int i = 0; i < properties.Length; i++)
+                var otherQueries = new List<(string tableFieldName, Action<string> queryAction)>();
+                foreach (var fieldAttr in _tableFieldInfoDict.Keys)
                 {
-                    var propAttrs = properties[i].GetCustomAttributes(typeof(FBTableFieldAttribute), true);
-                    if (propAttrs.Length > 0)
+                    fieldName = fieldAttr.TableFieldName;
+                    fieldDBType = fieldAttr.TypeName;
+                    notNull = fieldAttr.IsNotNull ? " NOT NULL" : string.Empty;
+                    primaryKey = fieldAttr.IsPrymaryKey ? " PRIMARY KEY" : string.Empty;
+                    createTableQueryBuilder.Append($"{comma}{fieldName} {fieldDBType}{notNull}{primaryKey}");
+                    comma = ", ";
+                    if (fieldAttr.Autoincrement)
                     {
-                        var fieldAttr = (FBTableFieldAttribute)propAttrs[0];
-                        fieldName = fieldAttr.TableFieldName;
-                        fieldDBType = fieldAttr.TypeName;
-                        notNull = fieldAttr.IsNotNull ? " NOT NULL" : string.Empty;
-                        primaryKey = fieldAttr.IsPrymaryKey ? " PRIMARY KEY" : string.Empty;
-                        sqlRequestStringBuilder.Append($"{comma}{fieldName} {fieldDBType}{notNull}{primaryKey}");
-                        comma = ", ";
+                        otherQueries.Add((fieldName, CreateFieldAutoincrement));
                     }
                 }
-                sqlRequestStringBuilder.Append(");");
-                _command = new FbCommand(sqlRequestStringBuilder.ToString(), _connection);
+
+                createTableQueryBuilder.Append(");");
+                _command = new FbCommand(createTableQueryBuilder.ToString(), _connection);
                 _command.ExecuteNonQuery();
+                foreach(var pair in otherQueries)
+                {
+                    pair.queryAction.Invoke(pair.tableFieldName);
+                }
             }
+        }
+
+        public void CreateFieldAutoincrement(string tableFieldName)
+        {
+            var genName = $@"{_tableName}_{tableFieldName}_GEN";
+            var command = new FbCommand($@"CREATE GENERATOR {genName};", _connection);
+            command.ExecuteNonQuery();
+            CreateFieldAutoincrement(tableFieldName, genName);
+        }
+
+        public void CreateFieldAutoincrement(string tableFieldName, string existsGeneratorName)
+        {
+            var builder = new StringBuilder($@"CREATE TRIGGER TRG_{_tableName}_{tableFieldName} FOR {_tableName} ACTIVE BEFORE INSERT AS BEGIN ");
+            builder.Append($@"IF (NEW.{tableFieldName} IS NULL) THEN NEW.{tableFieldName} = GEN_ID({existsGeneratorName}, 1); END;");
+            var command = new FbCommand(builder.ToString(), _connection);
         }
 
         public void AddItem(T item)

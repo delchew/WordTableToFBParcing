@@ -4,7 +4,7 @@ namespace GetInfoFromWordToFireBirdTable.CableEntityes
 {
     public abstract class Cable
     {
-        //[FBTableField(TableFieldName = "CABLE_ID", TypeName = "INTEGER", IsNotNull = true, IsPrymaryKey = true)]
+        [FBTableField(TableFieldName = "CABLE_ID", TypeName = "INTEGER", IsNotNull = true, IsPrymaryKey = true, Autoincrement = true)]
         public int CableId { get; set; }
 
         [FBTableField(TableFieldName = "BILLET_ID", TypeName = "INTEGER", IsNotNull = true)]

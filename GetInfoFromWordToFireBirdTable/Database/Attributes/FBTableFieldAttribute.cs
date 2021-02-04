@@ -11,5 +11,7 @@ namespace GetInfoFromWordToFireBirdTable.Attributes
         public bool IsPrymaryKey { get; set; }
 
         public bool IsNotNull { get; set; }
+
+        public bool Autoincrement { get; set; }
     }
 }
