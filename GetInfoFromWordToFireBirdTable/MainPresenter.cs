@@ -55,14 +55,19 @@ namespace GetInfoFromWordToFireBirdTable
                     int recordsCount = await Task<int>.Factory.StartNew(parser.ParseDataToDatabase);
 
                     _messageService.ShowMessage($"Успешно! Число записей, занесённых в базу: {recordsCount}");
-                    _view.ParseFinishReport();
                 }
                 else
+                {
                     _messageService.ShowError("Не задан парсер для этого типа кабеля!");
+                }
             }
             catch (Exception ex)
             {
                 _messageService.ShowError($"Parse failed. Exception message: {ex.Message}" );
+            }
+            finally
+            {
+                _view.ParseFinishReport();
             }
         }
 

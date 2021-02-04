@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace GetInfoFromWordToFireBirdTable
@@ -9,7 +8,6 @@ namespace GetInfoFromWordToFireBirdTable
     {
         private readonly OpenFileDialog _openDBDialog;
         private readonly OpenFileDialog _openDocDialog;
-        private TaskScheduler _scheduler;
 
         public event Action TableParseStarted;
         public event Action<string> CableNameChanged;
@@ -21,11 +19,6 @@ namespace GetInfoFromWordToFireBirdTable
         public FileInfo MSWordFile
         {
             get { return new FileInfo(msWordFilePathTextBox.Text); }
-        }
-
-        public TaskScheduler MainTaskScheduler
-        {
-            get { return _scheduler; }
         }
 
         public MainForm()
@@ -41,7 +34,6 @@ namespace GetInfoFromWordToFireBirdTable
                 Filter = "MS Word 2007 (*.docx)|*.docx|MS Word 2003 (*.doc)|*.doc",
                 Title = "Выберите документ Microsoft Word"
             };
-            _scheduler = TaskScheduler.FromCurrentSynchronizationContext();
 
             progressBar.Step = 1;
 
