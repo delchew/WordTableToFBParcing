@@ -2,6 +2,7 @@
 using GetInfoFromWordToFireBirdTable.CableEntityes;
 using GetInfoFromWordToFireBirdTable.Common;
 using System;
+using System.IO;
 
 namespace ConsoleParsingToFBDatabase
 {
@@ -9,10 +10,33 @@ namespace ConsoleParsingToFBDatabase
     {
         static void Main()
         {
-            ParseSkabBillet();
+            CreateTable();
+            //ParseKunrsCable();
         }
 
-        static void ParseSkabBillet()
+        private static void ParseKunrsCable()
+        {
+            var fileInfo = new FileInfo(@"C:\Users\a.bondarenko\Desktop\kunrs.docx");
+            var parser = new KunrsParser(fileInfo);
+            int recordsCount = 0;
+            Console.WriteLine("Нажмите любую клавишу для начала парсинга...");
+            Console.ReadKey();
+            try
+            {
+                //Console.WriteLine("Тест");
+                recordsCount = parser.ParseDataToDatabase();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Произошла ошибка: {0}", ex.Message);
+            }
+            finally
+            {
+                Console.WriteLine("Добавлено {0} записей.", recordsCount);
+                EndOfProgram();
+            }
+        }
+        private static void ParseSkabBillet()
         {
             var parser = new SkabInsulatedBilletParser();
             int recordsCount = 0;
@@ -34,7 +58,7 @@ namespace ConsoleParsingToFBDatabase
             }
         }
 
-        private void Select()
+        private static void Select()
         {
             var parser = new SkabParser(null);
             //var billetId1 = parser.GetInsBilletId(4, 660, 0.5);
@@ -45,11 +69,23 @@ namespace ConsoleParsingToFBDatabase
         private static void CreateTable()
         {
             //var dbProvider = new FirebirdDBTableProvider<Kunrs>(dbFile);
-            var dbProvider = new FirebirdDBTableProvider<Skab>();
-            //FirebirdDBTableProvider<Skab>.CreateBoolIntDBDomain(dbFile, "BOOLEAN_INT");
+            var dbProvider = new FirebirdDBTableProvider<Kunrs>();
             dbProvider.OpenConnection();
-            dbProvider.CreateTableIfNotExists();
-            dbProvider.CloseConnection();
+            try
+            {
+                //dbProvider.CreateBoolIntDBDomain("BOOLEAN_INT");
+                dbProvider.CreateTableIfNotExists();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Произошла ошибка: {0}", ex.Message);
+            }
+            finally
+            {
+                dbProvider.CloseConnection();
+                EndOfProgram();
+            }
+
         }
 
         private static void EndOfProgram()

@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using GetInfoFromWordToFireBirdTable.Database.Extensions;
-using System.Linq;
 using Microsoft.Extensions.Configuration;
+using System.Reflection;
 
 namespace GetInfoFromWordToFireBirdTable
 {
@@ -37,33 +37,49 @@ namespace GetInfoFromWordToFireBirdTable
         static FirebirdDBTableProvider()
         {
             _tableEntityType = typeof(T);
-            var attrs = _tableEntityType.GetCustomAttributes(typeof(FBTableNameAttribute), true);
+
+            var attrs = _tableEntityType.GetCustomAttributes(typeof(FBTableNameAttribute), false);
             if (attrs.Length == 0)
                 throw new Exception("Class is not marked as a \"Table\" by TableNameAttribute!");
             _tableName = ((FBTableNameAttribute)attrs[0]).TableName;
 
             _tableFieldInfoDict = new Dictionary<string, FBTableFieldAttribute>();
             _tableFieldAutoincrementInfoDict = new Dictionary<string, string>();
-            var properties = _tableEntityType.GetProperties();
 
+            var baseType = _tableEntityType;
+            var inheritTypesList = new List<Type>();
+            do
+            {
+                inheritTypesList.Add(baseType);
+                baseType = baseType.BaseType;
+            }
+            while (baseType != null);
+            inheritTypesList.Reverse();
+
+            PropertyInfo[] properties;
             FBTableFieldAttribute attr;
             string propertyName, fieldName;
-            object [] propAttrs; 
-            for (int i = 0; i < properties.Length; i++)
+            object[] propAttrs;
+
+            foreach (var type in inheritTypesList)
             {
-                propertyName = properties[i].Name;
+                properties = type.GetProperties(BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.DeclaredOnly | BindingFlags.Instance);
 
-                propAttrs = properties[i].GetCustomAttributes(typeof(FBTableFieldAttribute), true);
-                if (propAttrs.Length > 0)
+                for (int i = 0; i < properties.Length; i++)
                 {
-                    attr = propAttrs[0] as FBTableFieldAttribute;
-                    _tableFieldInfoDict.Add(propertyName, attr);
-                    fieldName = attr.TableFieldName;
-                    propAttrs = properties[i].GetCustomAttributes(typeof(FBFieldAutoincrementAttribute), true);
-                    if (propAttrs.Length > 0)
-                        _tableFieldAutoincrementInfoDict.Add(fieldName, (propAttrs[0] as FBFieldAutoincrementAttribute).GeneratorsName);
-                }
+                    propertyName = properties[i].Name;
 
+                    propAttrs = properties[i].GetCustomAttributes(typeof(FBTableFieldAttribute), false);
+                    if (propAttrs.Length > 0)
+                    {
+                        attr = propAttrs[0] as FBTableFieldAttribute;
+                        _tableFieldInfoDict.Add(propertyName, attr);
+                        fieldName = attr.TableFieldName;
+                        propAttrs = properties[i].GetCustomAttributes(typeof(FBFieldAutoincrementAttribute), false);
+                        if (propAttrs.Length > 0)
+                            _tableFieldAutoincrementInfoDict.Add(fieldName, (propAttrs[0] as FBFieldAutoincrementAttribute).GeneratorsName);
+                    }
+                }
             }
         }
 
@@ -77,7 +93,7 @@ namespace GetInfoFromWordToFireBirdTable
             // создаем конфигурацию
             var config = builder.Build();
             // возвращаем из метода строку подключения
-            _dbConnectionString = config.GetConnectionString("JobConnection");
+            _dbConnectionString = config.GetConnectionString("TestJobConnection");
         }
 
         public void OpenConnection()
@@ -202,12 +218,10 @@ namespace GetInfoFromWordToFireBirdTable
         /// </summary>
         /// <param name="tableFieldName">Table field name wich need an autoincrement</param>
         /// <returns>Database Generator name</returns>
-        private string CreateFieldAutoincrement(string tableFieldName, string existsGeneratorName)
+        private void CreateFieldAutoincrement(string tableFieldName, string existsGeneratorName)
         {
             FbCommand command;
-            var genName = $@"{_tableName}_{tableFieldName}_GEN";
-
-            using (command = new FbCommand($@"CREATE GENERATOR {genName};", _connection))
+            using (command = new FbCommand($@"CREATE GENERATOR {existsGeneratorName};", _connection))
             {
                 command.ExecuteNonQuery();
             }
@@ -219,21 +233,16 @@ namespace GetInfoFromWordToFireBirdTable
             {
                 command.ExecuteNonQuery();
             }
-            return genName;
         }
 
-        private int GetGeneratorNextValue(string generatorName)
+        private long GetGeneratorNextValue(string generatorName)
         {
             var sqlRequestString = $@"SELECT GEN_ID({generatorName}, 1) FROM RDB$DATABASE";
             using (var command = new FbCommand(sqlRequestString, _connection))
             {
                 var result = command.ExecuteScalar();
                 if (result != null)
-                {
-                    var genValue = (long)result;
-                    return (int)genValue;
-
-                }
+                    return (long)result;
                 throw new Exception("Не удалось получить следующий номер ID!");
 
             }

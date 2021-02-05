@@ -14,7 +14,7 @@ namespace GetInfoFromWordToFireBirdTable.Common
 
             int recordsCount = 0;
             var conductorsIdList = new List<int> { 21, 2, 4, 6, 8 }; // 0.5, 0.75, 1.0, 1.5, 2.5
-            var polymerGroupsId = new List<int> { 6, 4, 3 }; //6 - PVC-LS, 7 - PVC-LSLTx, 4 - HF, 3 - Rubber
+            var polymerGroupsId = new List<int> { 6, 4, 3 }; //6 - PVC-LS, 4 - HF, 3 - Rubber
             var cableShortNamesList = new List<int> { 1, 4 }; //1 - СКАБ250, 4 - СКАБ660
 
             var cableBillet = new CableBillet();
