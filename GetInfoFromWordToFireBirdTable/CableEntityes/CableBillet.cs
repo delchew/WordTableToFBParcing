@@ -5,7 +5,8 @@ namespace GetInfoFromWordToFireBirdTable.CableEntityes
     [FBTableName("INSULATED_BILLET")]
     public class CableBillet
     {
-        [FBTableField(TableFieldName = "INS_BILLET_ID", TypeName = "INTEGER", IsNotNull = true, IsPrymaryKey = true, Autoincrement = true)]
+        [FBTableField(TableFieldName = "INS_BILLET_ID", TypeName = "INTEGER", IsNotNull = true, IsPrymaryKey = true)]
+        [FBFieldAutoincrement(GeneratorsName = "INS_BILLET_GEN")]
         public int BilletId { get; set; }
 
         [FBTableField(TableFieldName = "COND_ID", TypeName = "INTEGER", IsNotNull = true)]

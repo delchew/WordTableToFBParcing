@@ -5,7 +5,7 @@ namespace GetInfoFromWordToFireBirdTable.CableEntityes
     [FBTableName("CABLE_KUNRS")]
     public class Kunrs : Cable
     {
-        //[FBTableField(TableFieldName = "HAS_FOIL_SHIELD", TypeName = "BOOLEAN_INT", IsNotNull = true)]
+        [FBTableField(TableFieldName = "HAS_FOIL_SHIELD", TypeName = "BOOLEAN_INT", IsNotNull = true)]
         public bool HasFoilShield { get; set; }
 
         [FBTableField(TableFieldName = "HAS_FILLING", TypeName = "BOOLEAN_INT", IsNotNull = true)]

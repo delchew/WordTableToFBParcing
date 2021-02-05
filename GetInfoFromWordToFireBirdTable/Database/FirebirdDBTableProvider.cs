@@ -12,22 +12,23 @@ namespace GetInfoFromWordToFireBirdTable
 {
     public class FirebirdDBTableProvider<T>
     {
+        private const string COMMA_SPLITTER = ", ";
+        private static Type _tableEntityType;
+
         /// <summary>
         /// Table name in database
         /// </summary>
         private static readonly string _tableName;
 
         /// <summary>
-        /// Key - FBTableNameAttribute, value - property name.
+        /// Key - property name, value - FBTableNameAttribute.
         /// </summary>
-        private static readonly Dictionary<FBTableFieldAttribute, string> _tableFieldInfoDict;
-
-        private static Type _tableEntityType;
+        private static readonly Dictionary<string, FBTableFieldAttribute> _tableFieldInfoDict;
 
         /// <summary>
-        /// Key - Autoincremented table field name, value - generator name.
+        /// Key - table field name, value - Autoincrement generators name.
         /// </summary>
-        private static readonly Dictionary<string, string> _tableGeneratorsNamesDict;
+        private static readonly Dictionary<string, string> _tableFieldAutoincrementInfoDict;
 
         private readonly string _dbConnectionString;
         private FbConnection _connection;
@@ -35,28 +36,34 @@ namespace GetInfoFromWordToFireBirdTable
 
         static FirebirdDBTableProvider()
         {
-            _tableGeneratorsNamesDict = new Dictionary<string, string>();
-
             _tableEntityType = typeof(T);
             var attrs = _tableEntityType.GetCustomAttributes(typeof(FBTableNameAttribute), true);
             if (attrs.Length == 0)
                 throw new Exception("Class is not marked as a \"Table\" by TableNameAttribute!");
             _tableName = ((FBTableNameAttribute)attrs[0]).TableName;
 
-            _tableFieldInfoDict = new Dictionary<FBTableFieldAttribute, string>();
+            _tableFieldInfoDict = new Dictionary<string, FBTableFieldAttribute>();
+            _tableFieldAutoincrementInfoDict = new Dictionary<string, string>();
             var properties = _tableEntityType.GetProperties();
 
-            string propertyName;
-            FBTableFieldAttribute fieldAttribute;
+            FBTableFieldAttribute attr;
+            string propertyName, fieldName;
+            object [] propAttrs; 
             for (int i = 0; i < properties.Length; i++)
             {
-                var propAttr = properties[i].GetCustomAttributes(typeof(FBTableFieldAttribute), true).First();
-                if (propAttr != null)
+                propertyName = properties[i].Name;
+
+                propAttrs = properties[i].GetCustomAttributes(typeof(FBTableFieldAttribute), true);
+                if (propAttrs.Length > 0)
                 {
-                    propertyName = properties[i].Name;
-                    fieldAttribute = propAttr as FBTableFieldAttribute;
-                    _tableFieldInfoDict.Add(fieldAttribute, propertyName);
+                    attr = propAttrs[0] as FBTableFieldAttribute;
+                    _tableFieldInfoDict.Add(propertyName, attr);
+                    fieldName = attr.TableFieldName;
+                    propAttrs = properties[i].GetCustomAttributes(typeof(FBFieldAutoincrementAttribute), true);
+                    if (propAttrs.Length > 0)
+                        _tableFieldAutoincrementInfoDict.Add(fieldName, (propAttrs[0] as FBFieldAutoincrementAttribute).GeneratorsName);
                 }
+
             }
         }
 
@@ -70,7 +77,7 @@ namespace GetInfoFromWordToFireBirdTable
             // создаем конфигурацию
             var config = builder.Build();
             // возвращаем из метода строку подключения
-            _dbConnectionString = config.GetConnectionString("DefaultConnection");
+            _dbConnectionString = config.GetConnectionString("JobConnection");
         }
 
         public void OpenConnection()
@@ -91,18 +98,15 @@ namespace GetInfoFromWordToFireBirdTable
             {
                 var createTableQueryBuilder = new StringBuilder($@"CREATE TABLE {_tableName} (");
 
-                string fieldName, fieldDBType, notNull, primaryKey, comma = string.Empty;
-                var autoincrementedTableFieldNames = new List<string>();
-                foreach (var fieldAttr in _tableFieldInfoDict.Keys)
+                string fieldName, fieldDBType, notNull, primaryKey, splitter = string.Empty;
+                foreach (var fieldAttr in _tableFieldInfoDict.Values)
                 {
                     fieldName = fieldAttr.TableFieldName;
                     fieldDBType = fieldAttr.TypeName;
                     notNull = fieldAttr.IsNotNull ? " NOT NULL" : string.Empty;
                     primaryKey = fieldAttr.IsPrymaryKey ? " PRIMARY KEY" : string.Empty;
-                    createTableQueryBuilder.Append($"{comma}{fieldName} {fieldDBType}{notNull}{primaryKey}");
-                    comma = ", ";
-                    if (fieldAttr.Autoincrement)
-                        autoincrementedTableFieldNames.Add(fieldName);
+                    createTableQueryBuilder.Append($"{splitter}{fieldName} {fieldDBType}{notNull}{primaryKey}");
+                    splitter = COMMA_SPLITTER;
                 }
 
                 createTableQueryBuilder.Append(");");
@@ -111,8 +115,8 @@ namespace GetInfoFromWordToFireBirdTable
                     _command.ExecuteNonQuery();
                 }
 
-                foreach (var tableFieldName in autoincrementedTableFieldNames)
-                    _tableGeneratorsNamesDict.Add(tableFieldName, CreateFieldAutoincrement(tableFieldName));
+                foreach (var fieldGenNamesPair in _tableFieldAutoincrementInfoDict)
+                    CreateFieldAutoincrement(fieldGenNamesPair.Key, fieldGenNamesPair.Value);
             }
         }
 
@@ -135,7 +139,7 @@ namespace GetInfoFromWordToFireBirdTable
             return result;
         }
 
-        public void CreateBoolIntDBDomain(FileInfo databaseFile, string domainName)
+        public void CreateBoolIntDBDomain(string domainName)
         {
             var createBoolDomainSql = $@"CREATE DOMAIN {domainName} AS INTEGER DEFAULT 0 NOT NULL CHECK (VALUE IN(0,1));";
             var connection = new FbConnection(_dbConnectionString);
@@ -148,44 +152,9 @@ namespace GetInfoFromWordToFireBirdTable
             connection.Dispose();
         }
 
-        private string GetInsertRequestString(T item) //TODO Доделать!!
+        public bool TableExists()
         {
-            if (!TableExists(_tableName))
-                throw new Exception("Such table name is not exists in current database!");
-
-            foreach (var info in _tableFieldInfoDict)
-            {
-                var propV = _tableEntityType.GetProperty(info.Value).GetValue(item);
-            }
-
-            var sqlRequestStringBuilder = new StringBuilder($@"INSERT INTO {_tableName} (");
-            var properties = _tableEntityType.GetProperties();
-            var propValues = new List<string>();
-            string fieldName, stringValue, comma = string.Empty;
-            object propValue;
-            for (int i = 0; i < properties.Length; i++)
-            {
-                var fieldPropAttrs = properties[i].GetCustomAttributes(typeof(FBTableFieldAttribute), true);
-                if (fieldPropAttrs.Length == 0)
-                    continue;
-                var attr = (FBTableFieldAttribute)fieldPropAttrs[0];
-                fieldName = attr.TableFieldName;
-                propValue = properties[i].GetValue(item);
-                stringValue = GetSqlTypeStringValue(propValue);
-                propValues.Add(stringValue);
-                sqlRequestStringBuilder.Append(comma + fieldName);
-                comma = ", ";
-            }
-            sqlRequestStringBuilder.Append(") VALUES (");
-            comma = string.Empty;
-            for (int i = 0; i < propValues.Count; i++)
-            {
-                sqlRequestStringBuilder.Append(comma + propValues[i]);
-                comma = ", ";
-            }
-            sqlRequestStringBuilder.Append(");");
-            var sqlRequestString = sqlRequestStringBuilder.ToString();
-            return sqlRequestString;
+            return TableExists(_tableName);
         }
 
         private bool TableExists(string tableName)
@@ -200,41 +169,71 @@ namespace GetInfoFromWordToFireBirdTable
             return true;
         }
 
+        private string GetInsertRequestString(T item)
+        {
+            string stringValue, genName, splitter = string.Empty;
+            object propValue;
+            var sqlRequestStringBuilder1 = new StringBuilder($@"INSERT INTO {_tableName} (");
+            var sqlRequestStringBuilder2 = new StringBuilder(") VALUES (");
+
+            foreach (var info in _tableFieldInfoDict)
+            {
+                propValue = _tableEntityType.GetProperty(info.Key).GetValue(item);
+                if(_tableFieldAutoincrementInfoDict.ContainsKey(info.Value.TableFieldName))
+                {
+                    genName = _tableFieldAutoincrementInfoDict[info.Value.TableFieldName];
+                    stringValue = GetGeneratorNextValue(genName).ToString();
+                }
+                else
+                    stringValue = GetSqlTypeStringValue(propValue);
+                
+                sqlRequestStringBuilder1.Append(splitter + info.Value.TableFieldName);
+                sqlRequestStringBuilder2.Append(splitter + stringValue);
+                splitter = COMMA_SPLITTER;
+            }
+            sqlRequestStringBuilder2.Append(");");
+            
+            var sqlRequestString = sqlRequestStringBuilder1.ToString() + sqlRequestStringBuilder2.ToString();
+            return sqlRequestString;
+        }
+
         /// <summary>
         /// Set autoincrement to Table field
         /// </summary>
         /// <param name="tableFieldName">Table field name wich need an autoincrement</param>
         /// <returns>Database Generator name</returns>
-        private string CreateFieldAutoincrement(string tableFieldName)
+        private string CreateFieldAutoincrement(string tableFieldName, string existsGeneratorName)
         {
+            FbCommand command;
             var genName = $@"{_tableName}_{tableFieldName}_GEN";
-            using (var command = new FbCommand($@"CREATE GENERATOR {genName};", _connection))
+
+            using (command = new FbCommand($@"CREATE GENERATOR {genName};", _connection))
             {
                 command.ExecuteNonQuery();
-                CreateFieldAutoincrement(tableFieldName, genName);
+            }
+
+            var builder = new StringBuilder($@"CREATE TRIGGER TRG_{_tableName}_{tableFieldName} FOR {_tableName} ACTIVE BEFORE INSERT AS BEGIN ");
+            builder.Append($@"IF (NEW.{tableFieldName} IS NULL) THEN NEW.{tableFieldName} = GEN_ID({existsGeneratorName}, 1); END;");
+
+            using (command = new FbCommand(builder.ToString(), _connection))
+            {
+                command.ExecuteNonQuery();
             }
             return genName;
         }
 
-        private void CreateFieldAutoincrement(string tableFieldName, string existsGeneratorName)
+        private int GetGeneratorNextValue(string generatorName)
         {
-            var builder = new StringBuilder($@"CREATE TRIGGER TRG_{_tableName}_{tableFieldName} FOR {_tableName} ACTIVE BEFORE INSERT AS BEGIN ");
-            builder.Append($@"IF (NEW.{tableFieldName} IS NULL) THEN NEW.{tableFieldName} = GEN_ID({existsGeneratorName}, 1); END;");
-            using (var command = new FbCommand(builder.ToString(), _connection))
-            {
-                command.ExecuteNonQuery();
-            }
-        }
-
-        private int GetNextValueAutoincrementTableField(string tableFieldName)
-        {
-            var generatorName = _tableGeneratorsNamesDict[tableFieldName];
             var sqlRequestString = $@"SELECT GEN_ID({generatorName}, 1) FROM RDB$DATABASE";
             using (var command = new FbCommand(sqlRequestString, _connection))
             {
                 var result = command.ExecuteScalar();
                 if (result != null)
-                    return (int)result;
+                {
+                    var genValue = (long)result;
+                    return (int)genValue;
+
+                }
                 throw new Exception("Не удалось получить следующий номер ID!");
 
             }

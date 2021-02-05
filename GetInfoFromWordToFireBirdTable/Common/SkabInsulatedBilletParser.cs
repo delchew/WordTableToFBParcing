@@ -8,14 +8,16 @@ namespace GetInfoFromWordToFireBirdTable.Common
     {
         public override int ParseDataToDatabase()
         {
-            int recordsCount = 0;
+            var billetTableProvider = new FirebirdDBTableProvider<CableBillet>();
+            if (!billetTableProvider.TableExists())
+                throw new Exception("Таблицы соответствующей размеченному классу не существует в текущей базе данных!");
 
+            int recordsCount = 0;
             var conductorsIdList = new List<int> { 21, 2, 4, 6, 8 }; // 0.5, 0.75, 1.0, 1.5, 2.5
-            var polymerGroupsId = new List<int> { 6, 7, 4, 3, 8 }; //6 - PVC-LS, 7 - PVC-LSLTx, 4 - HF, 3 - Rubber, 8 - Rubber LTx
+            var polymerGroupsId = new List<int> { 6, 4, 3 }; //6 - PVC-LS, 7 - PVC-LSLTx, 4 - HF, 3 - Rubber
             var cableShortNamesList = new List<int> { 1, 4 }; //1 - СКАБ250, 4 - СКАБ660
 
             var cableBillet = new CableBillet();
-            var billetTableProvider = new FirebirdDBTableProvider<CableBillet>();
             billetTableProvider.OpenConnection();
 
             foreach (var nameId in cableShortNamesList)

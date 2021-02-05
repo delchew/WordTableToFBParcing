@@ -2,7 +2,6 @@
 using GetInfoFromWordToFireBirdTable.CableEntityes;
 using GetInfoFromWordToFireBirdTable.Common;
 using System;
-using System.IO;
 
 namespace ConsoleParsingToFBDatabase
 {
