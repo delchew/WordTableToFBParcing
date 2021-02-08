@@ -6,7 +6,7 @@ namespace GetInfoFromWordToFireBirdTable.CableEntityes
     public class CableBillet
     {
         [FBTableField(TableFieldName = "INS_BILLET_ID", TypeName = "INTEGER", IsNotNull = true, IsPrymaryKey = true)]
-        [FBFieldAutoincrement(GeneratorsName = "INS_BILLET_GEN")]
+        [FBFieldAutoincrement(GeneratorName = "INS_BILLET_GEN")]
         public long BilletId { get; set; }
 
         [FBTableField(TableFieldName = "COND_ID", TypeName = "INTEGER", IsNotNull = true)]
@@ -16,13 +16,13 @@ namespace GetInfoFromWordToFireBirdTable.CableEntityes
         public int PolymerGroupId { get; set; }
 
         [FBTableField(TableFieldName = "DIAMETER", TypeName = "NUMERIC(3, 2)", IsNotNull = true)]
-        public double Diameter { get; set; }
+        public decimal Diameter { get; set; }
 
         [FBTableField(TableFieldName = "MIN_THICKNESS", TypeName = "NUMERIC(2, 2)", IsNotNull = true)]
-        public double MinThickness { get; set; }
+        public decimal MinThickness { get; set; }
 
         [FBTableField(TableFieldName = "NOMINAL_THICKNESS", TypeName = "NUMERIC(2, 2)")]
-        public double? NominalThickness { get; set; }
+        public decimal? NominalThickness { get; set; }
 
         [FBTableField(TableFieldName = "SHRT_N_ID", TypeName = "INTEGER", IsNotNull = true)]
         public int CableShortNameId { get; set; }

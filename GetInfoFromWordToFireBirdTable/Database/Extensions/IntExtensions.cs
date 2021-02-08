@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GetInfoFromWordToFireBirdTable
+namespace GetInfoFromWordToFireBirdTable.Database.Extensions
 {
     internal static class IntExtensions
     {

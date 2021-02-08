@@ -5,46 +5,56 @@ using System;
 using Cables;
 using System.Text;
 using GetInfoFromWordToFireBirdTable.Database.Extensions;
+using GetInfoFromWordToFireBirdTable.CableEntityes;
+using System.Linq;
 
 namespace GetInfoFromWordToFireBirdTable.Common
 {
-    public class SkabParser : CableDataParcer
+    public class SkabParser : ICableDataParcer
     {
         private WordTableParser _wordTableParser;
         private FileInfo _mSWordFile;
         private FirebirdDBTableProvider<CableEntityes.Skab> _skabTableProvider;
         private StringBuilder _stringBuilder = new StringBuilder();
 
-        public override event Action<int, int> ParseReport;
+        private Random random = new Random(); //TODO Удалить нахер потом эту шляпу!
+
+        public event Action<int, int> ParseReport;
         public SkabParser(FileInfo mSWordFile)
         {
             _mSWordFile = mSWordFile;
-            _skabTableProvider = new FirebirdDBTableProvider<CableEntityes.Skab>();
         }
-        public override int ParseDataToDatabase()
+        public int ParseDataToDatabase()
         {
+            _skabTableProvider = new FirebirdDBTableProvider<CableEntityes.Skab>();
+            _skabTableProvider.OpenConnection();
+            if (!_skabTableProvider.TableExists())
+            {
+                _skabTableProvider.CloseConnection();
+                throw new Exception($"Table \"{_skabTableProvider.TableName}\",associated with {typeof(CableEntityes.Skab)}, is not exists!");
+            }
+
             int recordsCount = 0;
 
-            var app = new WordObj.Application { Visible = false };
-            object fileName = _mSWordFile.FullName;
-            _skabTableProvider.OpenConnection();
+            //var app = new WordObj.Application { Visible = false };
+            //object fileName = _mSWordFile.FullName;
 
             try
             {
-                app.Documents.Open(ref fileName);
-                var document = app.ActiveDocument;
-                var tables = document.Tables;
+                //app.Documents.Open(ref fileName);
+                //var document = app.ActiveDocument;
+                //var tables = document.Tables;
 
-                if (tables.Count > 0)
+                if (true/*tables.Count > 0*/)
                 {
-                    var maxDiamTableCount = tables.Count / 2;
+                    var maxDiamTableCount = 96;//tables.Count / 2;
                     int tableNumber = 1;
-                    _wordTableParser = new WordTableParser
-                    {
-                        DataRowsCount = 5,
-                        RowHeadersColumnIndex = 2,
-                        DataStartColumnIndex = 3,
-                    };
+                    //_wordTableParser = new WordTableParser
+                    //{
+                    //    DataRowsCount = 5,
+                    //    RowHeadersColumnIndex = 2,
+                    //    DataStartColumnIndex = 3,
+                    //};
 
                     var skabModifycationsList = new List<(bool HasWaterblockStripe, bool HasFilling, bool HasBraidShield)>
                     {
@@ -80,16 +90,18 @@ namespace GetInfoFromWordToFireBirdTable.Common
 
                     var plasticInsMaterialParams = new List<(int fireProtectID, int insPolymerGroupId, int coverPolymerGroupId)>
                     {
-                        (7, 6, 6), (31, 7, 7), (12, 4, 4)
+                        (7, 6, 6), /*(31, 7, 7), */(12, 4, 4) //закомментировал СКАБ LTx
                     };
                     var rubberInsMaterialParams = new List<(int fireProtectID, int insPolymerGroupId, int coverPolymerGroupId)>
                     {
-                        (17, 3, 6), (41, 8, 7), (22, 3, 4), (24, 3, 5)
+                        (17, 3, 6), /*(41, 8, 7), */(22, 3, 4), (24, 3, 5) //закомментировал СКАБ LTx
                     };
 
                     var exiParams = new List<bool> { false, true };
 
                     var skab = new CableEntityes.Skab { TechCondId = 17, HasFoilShield = true };
+
+                    var billets = GetInsulatedBillets();
 
                     while (tableNumber < maxDiamTableCount)
                     {
@@ -101,33 +113,35 @@ namespace GetInfoFromWordToFireBirdTable.Common
                                 {
                                     foreach (var armourType in hasArmourList)
                                     {
-                                        var table = tables[tableNumber];
-                                        if (table.Rows.Count > 0 && table.Columns.Count > 0)
+                                        ///var table = tables[tableNumber];
+                                        if (true/*table.Rows.Count > 0 && table.Columns.Count > 0*/)
                                         {
-                                            List<TableCellData> tableData;
+                                            //List<TableCellData> tableData;
                                             foreach (var twistTypeParams in twistTypesParamsList)
                                             {
-                                                _wordTableParser.DataColumnsCount = twistTypeParams.dataColumnsCount;
-                                                _wordTableParser.ColumnHeadersRowIndex = twistTypeParams.ColumnHeadersRowIndex;
-                                                _wordTableParser.DataStartRowIndex = twistTypeParams.dataStartRowIndex;
+                                                //_wordTableParser.DataColumnsCount = twistTypeParams.dataColumnsCount;
+                                                //_wordTableParser.ColumnHeadersRowIndex = twistTypeParams.ColumnHeadersRowIndex;
+                                                //_wordTableParser.DataStartRowIndex = twistTypeParams.dataStartRowIndex;
 
-                                                tableData = _wordTableParser.GetCableCellsCollection(table);
+                                                //tableData = _wordTableParser.GetCableCellsCollection(table);
                                                 List<(int fireProtectID, int insPolymerGroupId, int coverPolymerGroupId)> materialParams;
-                                                foreach (var tableCellData in tableData)
+                                                for (int i = 0; i < 65; i++)//foreach (var tableCellData in tableData)
                                                 {
-                                                    if (int.TryParse(tableCellData.ColumnHeaderData, out int elementsCount) &&
+                                                    if (true/*int.TryParse(tableCellData.ColumnHeaderData, out int elementsCount) &&
                                                         double.TryParse(tableCellData.CellData, out double maxCoverDiameter) &&
-                                                        double.TryParse(tableCellData.RowHeaderData, out double conductorAreaInSqrMm))
+                                                        double.TryParse(tableCellData.RowHeaderData, out double conductorAreaInSqrMm)*/)
                                                     {
                                                         materialParams = insType == 0 ? plasticInsMaterialParams : rubberInsMaterialParams;
                                                         foreach (var matParam in materialParams)
                                                         {
                                                             foreach (var exiParam in exiParams)
                                                             {
-                                                                skab.BilletId = GetInsBilletId(matParam.insPolymerGroupId, voltageType, conductorAreaInSqrMm);
-                                                                skab.ElementsCount = elementsCount;
+                                                                skab.BilletId = billets.Where(b => b.CableShortNameId == (voltageType == 250 ? 1 : 4) &&
+                                                                                                   b.PolymerGroupId == matParam.insPolymerGroupId)
+                                                                                       .First().BilletId;//GetInsBilletId(matParam.insPolymerGroupId, voltageType, i/*conductorAreaInSqrMm*/);
+                                                                skab.ElementsCount = i;//elementsCount;
                                                                 skab.TwistedElementTypeId = (int)twistTypeParams.twistMode;
-                                                                skab.MaxCoverDiameter = maxCoverDiameter;
+                                                                skab.MaxCoverDiameter = i;//maxCoverDiameter;
                                                                 skab.FireProtectionId = matParam.fireProtectID;
                                                                 skab.CoverPolimerGroupId = matParam.coverPolymerGroupId;
                                                                 skab.SparkSafety = exiParam;
@@ -146,7 +160,7 @@ namespace GetInfoFromWordToFireBirdTable.Common
                                                     }
                                                     else throw new Exception($"Не удалось распарсить ячейку таблицы №{tableNumber}!");
                                                 }
-                                                tableData.Clear();
+                                                //tableData.Clear();
                                             }
                                         }
                                         else throw new Exception("Таблица пуста!");
@@ -166,7 +180,7 @@ namespace GetInfoFromWordToFireBirdTable.Common
             finally
             {
                 _skabTableProvider.CloseConnection();
-                app.Quit();
+                //app.Quit();
             }
             return recordsCount;
         }
@@ -181,13 +195,23 @@ namespace GetInfoFromWordToFireBirdTable.Common
             _stringBuilder.Append($@"AREA_IN_SQR_MM = {conductorAreaInSqrMm.ToFBSqlString()});");
             var sqlRequest = _stringBuilder.ToString();
             _stringBuilder.Clear();
-            var result =_skabTableProvider.GetSingleObjBySQL(sqlRequest);
+            var result = _skabTableProvider.GetSingleObjBySQL(sqlRequest);
             if (result != null)
             {
                 var billetId = (int)result;
                 return billetId;
             }
             throw new NullReferenceException("SQL запрос вернул null!");
+        }
+
+        private ICollection<CableBillet> GetInsulatedBillets()
+        {
+            var billetProvider = new FirebirdDBTableProvider<CableBillet>();
+            billetProvider.OpenConnection();
+            var result = billetProvider.GetAllItemsFromTable();
+            billetProvider.CloseConnection();
+            return result;
+
         }
     }
 }

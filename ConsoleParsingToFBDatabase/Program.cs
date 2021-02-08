@@ -3,6 +3,8 @@ using GetInfoFromWordToFireBirdTable.CableEntityes;
 using GetInfoFromWordToFireBirdTable.Common;
 using System;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ConsoleParsingToFBDatabase
 {
@@ -10,8 +12,73 @@ namespace ConsoleParsingToFBDatabase
     {
         static void Main()
         {
-            CreateTable();
-            //ParseKunrsCable();
+            CreateTableAndParsingsSkabData();
+        }
+
+        static void CreateTableAndParsingsSkabData()
+        {
+            //var provider = new FirebirdDBTableProvider<Skab>();
+            //provider.OpenConnection();
+            //provider.CreateTableIfNotExists();
+            //provider.CloseConnection();
+
+            var parser = new SkabParser(null);
+            //parser.ParseReport += (num1, num2) => { Console.Write($"{num2}.."); };
+            //var result = await Task<int>.Factory.StartNew(parser.ParseDataToDatabase);
+            var result = parser.ParseDataToDatabase();
+            Console.WriteLine(Environment.NewLine);
+            Console.WriteLine("Добавлено {0} записей.", result);
+            Console.ReadKey();
+        }
+
+        static void MakeSelect()
+        {
+            var provider = new FirebirdDBTableProvider<CableBillet>();
+            try
+            {
+                provider.OpenConnection();
+                if (provider.TableExists())
+                {
+                    var result = provider.GetAllItemsFromTable();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Произошла ошибка: {0}", ex.Message);
+            }
+            finally
+            {
+                provider.CloseConnection();
+                EndOfProgram();
+            }
+        }
+
+        private static void ParseComplete(int result)
+        {
+            Console.WriteLine("Добавлено {0} записей.", result);
+        }
+
+        static void CreateTableAndParsingBilletData()
+        {
+            int recordsCount = 0;
+            try
+            {
+                var provider = new FirebirdDBTableProvider<CableBillet>();
+                provider.OpenConnection();
+                provider.CreateTableIfNotExists();
+                provider.CloseConnection();
+                var parser = new SkabInsulatedBilletParser();
+                recordsCount = parser.ParseDataToDatabase();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Произошла ошибка: {0}", ex.Message);
+            }
+            finally
+            {
+                Console.WriteLine("Добавлено {0} записей.", recordsCount);
+                EndOfProgram();
+            }
         }
 
         private static void ParseKunrsCable()
@@ -46,6 +113,7 @@ namespace ConsoleParsingToFBDatabase
             {
                 Console.WriteLine("Тест");
                 recordsCount = parser.ParseDataToDatabase();
+                Console.WriteLine("Добавлено {0} записей.", recordsCount);
             }
             catch (Exception ex)
             {
@@ -53,7 +121,6 @@ namespace ConsoleParsingToFBDatabase
             }
             finally
             {
-                Console.WriteLine("Добавлено {0} записей.", recordsCount);
                 EndOfProgram();
             }
         }
@@ -66,9 +133,8 @@ namespace ConsoleParsingToFBDatabase
             EndOfProgram();
         }
 
-        private static void CreateTable()
+        private static void CreateKunrsTable()
         {
-            //var dbProvider = new FirebirdDBTableProvider<Kunrs>(dbFile);
             var dbProvider = new FirebirdDBTableProvider<Kunrs>();
             dbProvider.OpenConnection();
             try

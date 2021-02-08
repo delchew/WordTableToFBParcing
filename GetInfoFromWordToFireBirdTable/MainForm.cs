@@ -24,6 +24,7 @@ namespace GetInfoFromWordToFireBirdTable
         public MainForm()
         {
             InitializeComponent();
+
             _openDBDialog = new OpenFileDialog()
             {
                 Filter = "Firebird Database (*.fdb)|*.fdb",
@@ -35,12 +36,12 @@ namespace GetInfoFromWordToFireBirdTable
                 Title = "Выберите документ Microsoft Word"
             };
 
-            progressBar.Step = 1;
-
             openDBButton.Click += OpenDBButton_Click;
             openDocButton.Click += OpenDocButton_Click;
             cableBrandCheckComboBox.SelectedValueChanged += CableBrandCheckComboBox_SelectedValueChanged;
             wordTableParseStartButton.Click += WordTableParseStartButton_Click;
+
+            progressBar.Step = 1;
         }
 
         public void SetCablesNames(string[] cablesNames)
@@ -60,7 +61,6 @@ namespace GetInfoFromWordToFireBirdTable
                 this.Invoke(action);
             else
                 action();
-
         }
 
         public void ParseFinishReport()

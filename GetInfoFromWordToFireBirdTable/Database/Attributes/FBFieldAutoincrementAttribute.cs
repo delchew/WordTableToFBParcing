@@ -8,6 +8,6 @@ namespace GetInfoFromWordToFireBirdTable.Attributes
         /// <summary>
         /// Имя генератора автоинкремента
         /// </summary>
-        public string GeneratorsName { get; set; }
+        public string GeneratorName { get; set; }
     }
 }

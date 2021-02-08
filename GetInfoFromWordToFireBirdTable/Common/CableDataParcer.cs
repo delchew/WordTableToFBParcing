@@ -2,14 +2,14 @@
 
 namespace GetInfoFromWordToFireBirdTable.Common
 {
-    public abstract class CableDataParcer
+    public interface ICableDataParcer
     {
         /// <summary>
         /// Метод парсит данные из таблицы MSWord в базу данных Firebird
         /// </summary>
         /// <returns>Возвращает число добавленных записей</returns>
-        public abstract int ParseDataToDatabase();
+        int ParseDataToDatabase();
 
-        public abstract event Action<int, int> ParseReport;
+        event Action<int, int> ParseReport;
     }
 }

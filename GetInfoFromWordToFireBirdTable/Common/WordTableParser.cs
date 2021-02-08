@@ -11,17 +11,21 @@ namespace GetInfoFromWordToFireBirdTable.Common
         public int DataRowsCount { get; set; }
         public int ColumnHeadersRowIndex { get; set; }
         public int RowHeadersColumnIndex { get; set; }
+
         public List<TableCellData> GetCableCellsCollection(WordObj.Table table)
         {
             var tableCellDataList = new List<TableCellData>();
+            string rowHeaderData;
             for (int i = 0; i < DataRowsCount; i++)
             {
-                var rowHeaderData = GetStringFromWordTableCell(table, DataStartRowIndex + i, RowHeadersColumnIndex);
+                string columnHeaderData, cellData;
+                TableCellData tableCellData;
+                rowHeaderData = GetStringFromWordTableCell(table, DataStartRowIndex + i, RowHeadersColumnIndex);
                 for (int j = 0; j < DataColumnsCount; j++)
                 {
-                    var columnHeaderData = GetStringFromWordTableCell(table, ColumnHeadersRowIndex, DataStartColumnIndex + j);
-                    var cellData = GetStringFromWordTableCell(table, DataStartRowIndex + i, DataStartColumnIndex + j);
-                    var tableCellData = new TableCellData
+                    columnHeaderData = GetStringFromWordTableCell(table, ColumnHeadersRowIndex, DataStartColumnIndex + j);
+                    cellData = GetStringFromWordTableCell(table, DataStartRowIndex + i, DataStartColumnIndex + j);
+                    tableCellData = new TableCellData
                     {
                         RowHeaderData = rowHeaderData,
                         ColumnHeaderData = columnHeaderData,

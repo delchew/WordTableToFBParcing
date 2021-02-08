@@ -11,11 +11,11 @@ namespace GetInfoFromWordToFireBirdTable
     {
         private readonly IView _view;
         private readonly IMessageService _messageService;
-        private readonly Dictionary<string, Func<CableDataParcer>> _cableTypesDict;
+        private readonly Dictionary<string, Func<ICableDataParcer>> _cableTypesDict;
         private string _cableName;
         public MainPresenter(IView view, IMessageService messageService)
         {
-            _cableTypesDict = new Dictionary<string, Func<CableDataParcer>>
+            _cableTypesDict = new Dictionary<string, Func<ICableDataParcer>>
             {
                 {"КУНРС", () => new KunrsParser(_view.MSWordFile) },
                 {"СКАБ", () => new SkabParser(_view.MSWordFile) }

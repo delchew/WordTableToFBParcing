@@ -1,4 +1,4 @@
-﻿namespace GetInfoFromWordToFireBirdTable
+﻿namespace GetInfoFromWordToFireBirdTable.Database.Extensions
 {
     internal static class BoolExtensions
     {

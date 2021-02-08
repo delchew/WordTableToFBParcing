@@ -6,29 +6,38 @@ using WordObj = Microsoft.Office.Interop.Word;
 
 namespace GetInfoFromWordToFireBirdTable.Common
 {
-    public class KunrsParser : CableDataParcer
+    public class KunrsParser : ICableDataParcer
     {
         private WordTableParser _wordTableParser;
         private FileInfo _mSWordFile;
+        private FirebirdDBTableProvider<Kunrs> _kunrsTableProvider;
         public KunrsParser(FileInfo mSWordFile)
         {
             _mSWordFile = mSWordFile;
+            _kunrsTableProvider = new FirebirdDBTableProvider<Kunrs>();
         }
 
-        public override event Action<int, int> ParseReport;
-        public override int ParseDataToDatabase()
+        public event Action<int, int> ParseReport;
+        public int ParseDataToDatabase()
         {
+            _kunrsTableProvider.OpenConnection();
+            if(!_kunrsTableProvider.TableExists())
+            {
+                _kunrsTableProvider.CloseConnection();
+                throw new Exception($"Table \"{_kunrsTableProvider.TableName}\",associated with {typeof(Kunrs)}, is not exists!");
+            }
+
             int recordsCount = 0;
 
             var app = new WordObj.Application { Visible = false };
             object fileName = _mSWordFile.FullName;
-            app.Documents.Open(ref fileName);
 
             try
             {
+                app.Documents.Open(ref fileName);
                 var document = app.ActiveDocument;
-
                 var table = document.Tables[1];
+
                 if (table.Rows.Count > 0 && table.Columns.Count > 0)
                 {
                     _wordTableParser = new WordTableParser
@@ -65,8 +74,6 @@ namespace GetInfoFromWordToFireBirdTable.Common
                         { 5, new [] { PowerWiresColorScheme.PEN, PowerWiresColorScheme.none } }
                     };
 
-                    var kunrsTableProvider = new FirebirdDBTableProvider<Kunrs>();
-                    kunrsTableProvider.OpenConnection();
                     for (int i = 0; i < hasFoilShieldDictionary.Count; i++)
                     {
                         var tableData = _wordTableParser.GetCableCellsCollection(table);
@@ -97,7 +104,7 @@ namespace GetInfoFromWordToFireBirdTable.Common
                                             PowerColorSchemeId = (int)powerColorSchemeArray[k],
                                             CoverColorId = polimerGroupIdDictionary[j] == 5 ? 8 : 2
                                         };
-                                        kunrsTableProvider.AddItem(kunrs);
+                                        _kunrsTableProvider.AddItem(kunrs);
                                         recordsCount++;
                                     }
                                 }
@@ -107,7 +114,7 @@ namespace GetInfoFromWordToFireBirdTable.Common
                         _wordTableParser.DataStartRowIndex += _wordTableParser.DataRowsCount;
                         tableData.Clear();
                     }
-                    kunrsTableProvider.CloseConnection();
+                    _kunrsTableProvider.CloseConnection();
                 }
             }
             finally
