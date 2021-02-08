@@ -10,10 +10,10 @@ namespace GetInfoFromWordToFireBirdTable.CableEntityes
         public long BilletId { get; set; }
 
         [FBTableField(TableFieldName = "COND_ID", TypeName = "INTEGER", IsNotNull = true)]
-        public int ConductorId { get; set; }
+        public long ConductorId { get; set; }
 
         [FBTableField(TableFieldName = "POLYMER_GROUP_ID", TypeName = "INTEGER", IsNotNull = true)]
-        public int PolymerGroupId { get; set; }
+        public long PolymerGroupId { get; set; }
 
         [FBTableField(TableFieldName = "DIAMETER", TypeName = "NUMERIC(3, 2)", IsNotNull = true)]
         public decimal Diameter { get; set; }
@@ -25,6 +25,6 @@ namespace GetInfoFromWordToFireBirdTable.CableEntityes
         public decimal? NominalThickness { get; set; }
 
         [FBTableField(TableFieldName = "SHRT_N_ID", TypeName = "INTEGER", IsNotNull = true)]
-        public int CableShortNameId { get; set; }
+        public long CableShortNameId { get; set; }
     }
 }

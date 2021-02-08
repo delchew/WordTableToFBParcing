@@ -131,6 +131,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CableEntityes\Conductor.cs" />
+    <Compile Include="Common\SkabConductorsParcer.cs" />
     <Compile Include="Common\SkabParser.cs" />
     <Compile Include="Database\Attributes\FBFieldAutoincrementAttribute.cs" />
     <Compile Include="Database\Attributes\FBTableFieldAttribute.cs" />
@@ -140,6 +142,7 @@
     <Compile Include="CableEntityes\Skab.cs" />
     <Compile Include="Common\CableDataParcer.cs" />
     <Compile Include="Database\Extensions\BoolExtensions.cs" />
+    <Compile Include="Database\Extensions\DecimalExtensions.cs" />
     <Compile Include="Database\Extensions\DoubleExtensions.cs" />
     <Compile Include="Database\Extensions\IntExtensions.cs" />
     <Compile Include="Database\FirebirdDBTableProvider.cs" />

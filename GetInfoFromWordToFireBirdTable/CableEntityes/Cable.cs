@@ -21,7 +21,7 @@ namespace GetInfoFromWordToFireBirdTable.CableEntityes
         public int TechCondId { get; set; }
 
         [FBTableField(TableFieldName = "MAX_COVER_DIAMETER", TypeName = "NUMERIC(3, 2)", IsNotNull = true)]
-        public double MaxCoverDiameter { get; set; }
+        public decimal MaxCoverDiameter { get; set; }
 
         [FBTableField(TableFieldName = "FIRE_PROTECT_ID", TypeName = "INTEGER", IsNotNull = true)]
         public int FireProtectionId { get; set; }

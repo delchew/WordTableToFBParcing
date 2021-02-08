@@ -40,7 +40,7 @@ namespace GetInfoFromWordToFireBirdTable
         {
             try
             {
-                if (!FileExists(_view.FBDatabaseFile) || !FileExists(_view.MSWordFile))
+                if (/*!FileExists(_view.FBDatabaseFile) || */!FileExists(_view.MSWordFile))
                     return;
                 if(string.IsNullOrEmpty(_cableName))
                 {

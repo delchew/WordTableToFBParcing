@@ -62,9 +62,9 @@ namespace GetInfoFromWordToFireBirdTable.Common
                     {
                         { 0, 1 }, { 1, 4 }, { 2, 5 }
                     };
-                    var insBilletKunrsIdDictionary = new Dictionary<double, int>
+                    var insBilletKunrsIdDictionary = new Dictionary<decimal, int>
                     {
-                        { 0.75, 8 }, { 1.0, 7 }, { 1.5, 6 }, { 2.5, 5 }, { 4.0, 4 }, { 6.0, 3 }, { 10.0, 2 }, { 16.0, 1 }
+                        { 0.75m, 8 }, { 1.0m, 7 }, { 1.5m, 6 }, { 2.5m, 5 }, { 4.0m, 4 }, { 6.0m, 3 }, { 10.0m, 2 }, { 16.0m, 1 }
                     };
                     var powerColorsDict = new Dictionary<int, PowerWiresColorScheme[]>
                     {
@@ -80,8 +80,8 @@ namespace GetInfoFromWordToFireBirdTable.Common
                         foreach (var tableCellData in tableData)
                         {
                             if (int.TryParse(tableCellData.ColumnHeaderData, out int elementsCount) &&
-                                double.TryParse(tableCellData.CellData, out double maxCoverDiameter) &&
-                                double.TryParse(tableCellData.RowHeaderData, out double conductorAreaInSqrMm))
+                                decimal.TryParse(tableCellData.CellData, out decimal maxCoverDiameter) &&
+                                decimal.TryParse(tableCellData.RowHeaderData, out decimal conductorAreaInSqrMm))
                             {
                                 for (int j = 0; j < polimerGroupIdDictionary.Count; j++)
                                 {

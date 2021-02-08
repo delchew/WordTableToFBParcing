@@ -110,7 +110,7 @@ namespace GetInfoFromWordToFireBirdTable
             // создаем конфигурацию
             var config = builder.Build();
             // возвращаем из метода строку подключения
-            _dbConnectionString = config.GetConnectionString("TestHomeMacConnection");
+            _dbConnectionString = config.GetConnectionString("TestJobConnection");
         }
 
         public void OpenConnection()
@@ -189,16 +189,19 @@ namespace GetInfoFromWordToFireBirdTable
             connection.Dispose();
         }
 
-        public bool TableExists()
+        public bool TableExists() => DatabaseMemberExists("RDB$RELATIONS", "RDB$RELATION_NAME", _tableName);
+
+        private bool GeneratorExists(string generatorName) => DatabaseMemberExists("RDB$GENERATORS", "RDB$GENERATOR_NAME", generatorName);
+
+        private bool DatabaseMemberExists(string tableName, string tableMemberFieldName, string memberName)
         {
-            var sqlCheckTableExistString = $@"SELECT 1 FROM RDB$RELATIONS r WHERE r.RDB$RELATION_NAME = '{_tableName}'";
+            var sqlCheckTableExistString = $@"SELECT 1 FROM {tableName} tn WHERE tn.{tableMemberFieldName} = '{memberName}'";
             object result;
             using (_command = new FbCommand(sqlCheckTableExistString, _connection))
             {
                 result = _command.ExecuteScalar();
             }
-            if (result == null) return false;
-            return true;
+            return result != null;
         }
 
         public ICollection<T> GetAllItemsFromTable()
@@ -264,18 +267,18 @@ namespace GetInfoFromWordToFireBirdTable
         private void CreateFieldAutoincrement(string tableFieldName, string generatorName)
         {
             FbCommand command;
-            using (command = new FbCommand($@"CREATE GENERATOR {generatorName};", _connection))
+            if (!GeneratorExists(generatorName))
             {
-                command.ExecuteNonQuery();
+                using (command = new FbCommand($@"CREATE GENERATOR {generatorName};", _connection))
+                    command.ExecuteNonQuery();
             }
+
             var triggerName = $"TRG_{Math.Abs(tableFieldName.GetHashCode())}";
             var builder = new StringBuilder($@"CREATE TRIGGER {triggerName} FOR {_tableName} ACTIVE BEFORE INSERT AS BEGIN ");
             builder.Append($@"IF (NEW.{tableFieldName} IS NULL) THEN NEW.{tableFieldName} = GEN_ID({generatorName}, 1); END;");
 
             using (command = new FbCommand(builder.ToString(), _connection))
-            {
                 command.ExecuteNonQuery();
-            }
         }
 
         private long GetGeneratorNextValue(string generatorName)
@@ -294,18 +297,15 @@ namespace GetInfoFromWordToFireBirdTable
         private string GetSqlTypeStringValue(object value)
         {
             var propType = value.GetType();
-            string stringValue;
-            if (propType.Name == typeof(bool).Name)
-                stringValue = ((bool)value).ToFireBirdDBBoolInt().ToString();
-            else
-                if (propType.Name == typeof(string).Name)
-                stringValue = $@"'{value}'";
-            else
-                if (propType.Name == typeof(double).Name)
-                stringValue = ((double)value).ToFBSqlString();
-            else
-                stringValue = value.ToString();
-            return stringValue;
+
+            switch (propType.Name)
+            {
+                case "String": return $@"'{value}'";
+                case "Boolean": return ((bool)value).ToFireBirdDBBoolInt().ToString();
+                case "Double": return ((double)value).ToFBSqlString();
+                case "Decimal": return ((decimal)value).ToFBSqlString();
+                default: return value.ToString();
+            }
         }
     }
 }
