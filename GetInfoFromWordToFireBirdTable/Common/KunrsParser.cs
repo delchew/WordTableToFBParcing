@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using WordObj = Microsoft.Office.Interop.Word;
+using FirebirdDatabaseProvider;
 
 namespace GetInfoFromWordToFireBirdTable.Common
 {
@@ -10,16 +11,19 @@ namespace GetInfoFromWordToFireBirdTable.Common
     {
         private WordTableParser _wordTableParser;
         private FileInfo _mSWordFile;
+        private string _dbConnectionString;
         private FirebirdDBTableProvider<Kunrs> _kunrsTableProvider;
-        public KunrsParser(FileInfo mSWordFile)
+        public KunrsParser(string dbConnectionString, FileInfo mSWordFile)
         {
             _mSWordFile = mSWordFile;
-            _kunrsTableProvider = new FirebirdDBTableProvider<Kunrs>();
+            _dbConnectionString = dbConnectionString;
         }
 
         public event Action<int, int> ParseReport;
         public int ParseDataToDatabase()
         {
+            _kunrsTableProvider = new FirebirdDBTableProvider<Kunrs>(_dbConnectionString);
+
             _kunrsTableProvider.OpenConnection();
             if(!_kunrsTableProvider.TableExists())
             {

@@ -1,4 +1,5 @@
 ﻿using GetInfoFromWordToFireBirdTable.Common;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,13 +13,24 @@ namespace GetInfoFromWordToFireBirdTable
         private readonly IView _view;
         private readonly IMessageService _messageService;
         private readonly Dictionary<string, Func<ICableDataParcer>> _cableTypesDict;
+        private readonly string[] _dbConnectionsNames;
         private string _cableName;
+        private string _connectionString;
+        private IConfigurationRoot _connectionStringConfig;
         public MainPresenter(IView view, IMessageService messageService)
         {
             _cableTypesDict = new Dictionary<string, Func<ICableDataParcer>>
             {
-                {"КУНРС", () => new KunrsParser(_view.MSWordFile) },
-                {"СКАБ", () => new SkabParser(_view.MSWordFile) }
+                {"КУНРС", () => new KunrsParser(_connectionString, _view.MSWordFile) },
+                {"СКАБ", () => new SkabParser(_connectionString, _view.MSWordFile) }
+            };
+
+            _dbConnectionsNames = new string[]
+            {
+                "TestHomeMacConnection",
+                "HomeMacConnection",
+                "JobConnection",
+                "TestJobConnection"
             };
 
             _view = view;
@@ -27,8 +39,27 @@ namespace GetInfoFromWordToFireBirdTable
             var cablesNames = _cableTypesDict.Keys.ToArray();
             _view.SetCablesNames(cablesNames);
 
+            _view.SetDBConnectionsNames(_dbConnectionsNames);
+
+            var builder = new ConfigurationBuilder();
+            var jsonDir = Directory.GetCurrentDirectory();
+            // установка пути к текущему каталогу
+            builder.SetBasePath(jsonDir);
+            // получаем конфигурацию из файла appsettings.json
+            builder.AddJsonFile("appsettings.json");
+            // создаем конфигурацию
+            _connectionStringConfig = builder.Build();
+            // возвращаем из метода строку подключения
+            _connectionString = _connectionStringConfig.GetConnectionString(_view.DBConnectionName);
+
             _view.CableNameChanged += View_CableNameChanged;
             _view.TableParseStarted += View_TableParseStarted;
+            _view.DBConnectionNameChanged += View_DBConnectionNameChanged;
+        }
+
+        private void View_DBConnectionNameChanged(string obj)
+        {
+            _connectionString = _connectionStringConfig.GetConnectionString(_view.DBConnectionName);
         }
 
         private void View_CableNameChanged(string cableName)
@@ -40,11 +71,11 @@ namespace GetInfoFromWordToFireBirdTable
         {
             try
             {
-                if (/*!FileExists(_view.FBDatabaseFile) || */!FileExists(_view.MSWordFile))
+                if (!FileExists(_view.MSWordFile))
                     return;
-                if(string.IsNullOrEmpty(_cableName))
+                if(string.IsNullOrEmpty(_cableName) || string.IsNullOrEmpty(_connectionString))
                 {
-                    _messageService.ShowExclamation($"Марка кабеля не выбрана!");
+                    _messageService.ShowExclamation($"Не выбрано соединение или марка кабеля!");
                     return;
                 }
                 var parser = _cableTypesDict[_cableName]?.Invoke();

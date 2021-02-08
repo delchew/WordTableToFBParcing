@@ -1,4 +1,4 @@
-﻿using GetInfoFromWordToFireBirdTable;
+﻿using FirebirdDatabaseProvider;
 using GetInfoFromWordToFireBirdTable.CableEntityes;
 using GetInfoFromWordToFireBirdTable.Common;
 using System;
@@ -8,25 +8,15 @@ namespace ConsoleParsingToFBDatabase
 {
     class Program
     {
+        static readonly string _connectionString = "character set=utf8;user id=SYSDBA;password=masterkey;dialect=3;data source=localhost;port number=3050;initial catalog=E:\\databases\\TEST.fdb";
         static void Main()
         {
-            SkabConductorsParse();
-        }
-
-        static void CreateTableAndParsingsSkabData()
-        {
-            //var parser = new SkabParser(null);
-            //parser.ParseReport += (num1, num2) => { Console.Write($"{num2}.."); };
-            //var result = await Task<int>.Factory.StartNew(parser.ParseDataToDatabase);
-            //var result = parser.ParseDataToDatabase();
-            //Console.WriteLine(Environment.NewLine);
-            //Console.WriteLine("Добавлено {0} записей.", result);
-            Console.ReadKey();
+            ParseKunrsCable();
         }
 
         static void CreateConductorTable()
         {
-            var provider = new FirebirdDBTableProvider<Conductor>();
+            var provider = new FirebirdDBTableProvider<Conductor>(_connectionString);
             provider.OpenConnection();
             provider.CreateTableIfNotExists();
             provider.CloseConnection();
@@ -34,7 +24,7 @@ namespace ConsoleParsingToFBDatabase
 
         static void MakeSelect()
         {
-            var provider = new FirebirdDBTableProvider<CableBillet>();
+            var provider = new FirebirdDBTableProvider<CableBillet>(_connectionString);
             try
             {
                 provider.OpenConnection();
@@ -56,7 +46,7 @@ namespace ConsoleParsingToFBDatabase
 
         static void SkabConductorsParse()
         {
-            var parser = new SkabConductorsParcer();
+            var parser = new SkabConductorsParcer(_connectionString);
             Console.WriteLine("Нажмите любую клавишу для начала парсинга...");
             Console.ReadKey();
             int recordsCount = 0;
@@ -85,11 +75,11 @@ namespace ConsoleParsingToFBDatabase
             int recordsCount = 0;
             try
             {
-                //var provider = new FirebirdDBTableProvider<CableBillet>();
+                //var provider = new FirebirdDBTableProvider<CableBillet>(connectionString);
                 //provider.OpenConnection();
                 //provider.CreateTableIfNotExists();
                 //provider.CloseConnection();
-                var parser = new SkabInsulatedBilletParser();
+                var parser = new SkabInsulatedBilletParser(_connectionString);
                 recordsCount = parser.ParseDataToDatabase();
             }
             catch (Exception ex)
@@ -106,13 +96,12 @@ namespace ConsoleParsingToFBDatabase
         private static void ParseKunrsCable()
         {
             var fileInfo = new FileInfo(@"C:\Users\a.bondarenko\Desktop\kunrs.docx");
-            var parser = new KunrsParser(fileInfo);
+            var parser = new KunrsParser(_connectionString, fileInfo);
             int recordsCount = 0;
             Console.WriteLine("Нажмите любую клавишу для начала парсинга...");
             Console.ReadKey();
             try
             {
-                //Console.WriteLine("Тест");
                 recordsCount = parser.ParseDataToDatabase();
             }
             catch (Exception ex)
@@ -127,7 +116,7 @@ namespace ConsoleParsingToFBDatabase
         }
         private static void ParseSkabBillet()
         {
-            var parser = new SkabInsulatedBilletParser();
+            var parser = new SkabInsulatedBilletParser(_connectionString);
             int recordsCount = 0;
             //Console.WriteLine("Нажмите любую клавишу для начала парсинга...");
             //Console.ReadKey();
@@ -147,17 +136,9 @@ namespace ConsoleParsingToFBDatabase
             }
         }
 
-        private static void Select()
-        {
-            var parser = new SkabParser(null);
-            //var billetId1 = parser.GetInsBilletId(4, 660, 0.5);
-            //var billetId2 = parser.GetInsBilletId(4, 660, 1.5);
-            EndOfProgram();
-        }
-
         private static void CreateKunrsTable()
         {
-            var dbProvider = new FirebirdDBTableProvider<Kunrs>();
+            var dbProvider = new FirebirdDBTableProvider<Kunrs>(_connectionString);
             dbProvider.OpenConnection();
             try
             {

@@ -1,10 +1,17 @@
 ﻿using System;
 using GetInfoFromWordToFireBirdTable.CableEntityes;
+using FirebirdDatabaseProvider;
 
 namespace GetInfoFromWordToFireBirdTable.Common
 {
     public class SkabConductorsParcer : ICableDataParcer
     {
+        private string _connectionString;
+        public SkabConductorsParcer(string connectionString)
+        {
+            _connectionString = connectionString;
+        }
+
         private Conductor[] _skabConductors = new Conductor[]
         {
             new Conductor { ConductorId = 21, Title = "7х0.30 ММЛ", Class = 2, MetalId = 2, WiresCount = 7, WiresDiameter = 0.3m, ConductorDiameter = 0.9m, AreaInSqrMm = 0.5m },
@@ -18,7 +25,7 @@ namespace GetInfoFromWordToFireBirdTable.Common
 
         public int ParseDataToDatabase()
         {
-            var conductorTableProvider = new FirebirdDBTableProvider<Conductor>();
+            var conductorTableProvider = new FirebirdDBTableProvider<Conductor>(_connectionString);
             conductorTableProvider.OpenConnection();
 
             int recordsCount = 0;

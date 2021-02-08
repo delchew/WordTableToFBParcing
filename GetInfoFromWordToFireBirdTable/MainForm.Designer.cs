@@ -30,13 +30,12 @@ namespace GetInfoFromWordToFireBirdTable
         private void InitializeComponent()
         {
             this.tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
-            this.dbFilePathTextBox = new System.Windows.Forms.TextBox();
-            this.openDBButton = new System.Windows.Forms.Button();
             this.msWordFilePathTextBox = new System.Windows.Forms.TextBox();
             this.openDocButton = new System.Windows.Forms.Button();
             this.wordTableParseStartButton = new System.Windows.Forms.Button();
             this.cableBrandCheckComboBox = new System.Windows.Forms.ComboBox();
             this.progressBar = new System.Windows.Forms.ProgressBar();
+            this.dbConnectionCheckComboBox = new System.Windows.Forms.ComboBox();
             this.tableLayoutPanel.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -45,10 +44,9 @@ namespace GetInfoFromWordToFireBirdTable
             this.tableLayoutPanel.ColumnCount = 2;
             this.tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 120F));
-            this.tableLayoutPanel.Controls.Add(this.dbFilePathTextBox, 0, 0);
-            this.tableLayoutPanel.Controls.Add(this.openDBButton, 1, 0);
-            this.tableLayoutPanel.Controls.Add(this.msWordFilePathTextBox, 0, 1);
-            this.tableLayoutPanel.Controls.Add(this.openDocButton, 1, 1);
+            this.tableLayoutPanel.Controls.Add(this.msWordFilePathTextBox, 0, 0);
+            this.tableLayoutPanel.Controls.Add(this.openDocButton, 1, 0);
+            this.tableLayoutPanel.Controls.Add(this.dbConnectionCheckComboBox, 0, 1);
             this.tableLayoutPanel.Location = new System.Drawing.Point(12, 12);
             this.tableLayoutPanel.Name = "tableLayoutPanel";
             this.tableLayoutPanel.RowCount = 2;
@@ -57,32 +55,16 @@ namespace GetInfoFromWordToFireBirdTable
             this.tableLayoutPanel.Size = new System.Drawing.Size(776, 100);
             this.tableLayoutPanel.TabIndex = 0;
             // 
-            // dbFilePathTextBox
-            // 
-            this.dbFilePathTextBox.Location = new System.Drawing.Point(3, 3);
-            this.dbFilePathTextBox.Name = "dbFilePathTextBox";
-            this.dbFilePathTextBox.Size = new System.Drawing.Size(650, 20);
-            this.dbFilePathTextBox.TabIndex = 0;
-            // 
-            // openDBButton
-            // 
-            this.openDBButton.Location = new System.Drawing.Point(659, 3);
-            this.openDBButton.Name = "openDBButton";
-            this.openDBButton.Size = new System.Drawing.Size(114, 23);
-            this.openDBButton.TabIndex = 1;
-            this.openDBButton.Text = "Open DB";
-            this.openDBButton.UseVisualStyleBackColor = true;
-            // 
             // msWordFilePathTextBox
             // 
-            this.msWordFilePathTextBox.Location = new System.Drawing.Point(3, 53);
+            this.msWordFilePathTextBox.Location = new System.Drawing.Point(3, 3);
             this.msWordFilePathTextBox.Name = "msWordFilePathTextBox";
             this.msWordFilePathTextBox.Size = new System.Drawing.Size(650, 20);
             this.msWordFilePathTextBox.TabIndex = 2;
             // 
             // openDocButton
             // 
-            this.openDocButton.Location = new System.Drawing.Point(659, 53);
+            this.openDocButton.Location = new System.Drawing.Point(659, 3);
             this.openDocButton.Name = "openDocButton";
             this.openDocButton.Size = new System.Drawing.Size(114, 23);
             this.openDocButton.TabIndex = 3;
@@ -113,6 +95,14 @@ namespace GetInfoFromWordToFireBirdTable
             this.progressBar.Size = new System.Drawing.Size(450, 23);
             this.progressBar.TabIndex = 3;
             // 
+            // dbConnectionCheckComboBox
+            // 
+            this.dbConnectionCheckComboBox.FormattingEnabled = true;
+            this.dbConnectionCheckComboBox.Location = new System.Drawing.Point(3, 53);
+            this.dbConnectionCheckComboBox.Name = "dbConnectionCheckComboBox";
+            this.dbConnectionCheckComboBox.Size = new System.Drawing.Size(650, 21);
+            this.dbConnectionCheckComboBox.TabIndex = 4;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -135,13 +125,12 @@ namespace GetInfoFromWordToFireBirdTable
         #endregion
 
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel;
-        private System.Windows.Forms.TextBox dbFilePathTextBox;
-        private System.Windows.Forms.Button openDBButton;
         private System.Windows.Forms.TextBox msWordFilePathTextBox;
         private System.Windows.Forms.Button openDocButton;
         private System.Windows.Forms.Button wordTableParseStartButton;
         private System.Windows.Forms.ComboBox cableBrandCheckComboBox;
         private System.Windows.Forms.ProgressBar progressBar;
+        private System.Windows.Forms.ComboBox dbConnectionCheckComboBox;
     }
 }
 

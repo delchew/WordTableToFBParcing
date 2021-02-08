@@ -6,39 +6,35 @@ namespace GetInfoFromWordToFireBirdTable
 {
     public partial class MainForm : Form, IView
     {
-        private readonly OpenFileDialog _openDBDialog;
         private readonly OpenFileDialog _openDocDialog;
 
         public event Action TableParseStarted;
         public event Action<string> CableNameChanged;
-        public FileInfo FBDatabaseFile
-        {
-            get { return new FileInfo(dbFilePathTextBox.Text); }
-        }
+        public event Action<string> DBConnectionNameChanged;
 
         public FileInfo MSWordFile
         {
             get { return new FileInfo(msWordFilePathTextBox.Text); }
         }
 
+        public string DBConnectionName
+        {
+            get { return dbConnectionCheckComboBox.Text; }
+        }
+
         public MainForm()
         {
             InitializeComponent();
 
-            _openDBDialog = new OpenFileDialog()
-            {
-                Filter = "Firebird Database (*.fdb)|*.fdb",
-                Title = "Выберите файл базы данных Firebird"
-            };
             _openDocDialog = new OpenFileDialog()
             {
                 Filter = "MS Word 2007 (*.docx)|*.docx|MS Word 2003 (*.doc)|*.doc",
                 Title = "Выберите документ Microsoft Word"
             };
 
-            openDBButton.Click += OpenDBButton_Click;
             openDocButton.Click += OpenDocButton_Click;
             cableBrandCheckComboBox.SelectedValueChanged += CableBrandCheckComboBox_SelectedValueChanged;
+            dbConnectionCheckComboBox.SelectedValueChanged += DbConnectionCheckComboBox_SelectedValueChanged;
             wordTableParseStartButton.Click += WordTableParseStartButton_Click;
 
             progressBar.Step = 1;
@@ -47,6 +43,11 @@ namespace GetInfoFromWordToFireBirdTable
         public void SetCablesNames(string[] cablesNames)
         {
             cableBrandCheckComboBox.Items.AddRange(cablesNames);
+        }
+
+        public void SetDBConnectionsNames(string[] connectionsNames)
+        {
+            dbConnectionCheckComboBox.Items.AddRange(connectionsNames);
         }
 
         public void UpdateProgress(int parseOperationsCount, int completedOperationsCount)
@@ -66,7 +67,7 @@ namespace GetInfoFromWordToFireBirdTable
         public void ParseFinishReport()
         {
             wordTableParseStartButton.Enabled = true;
-            openDBButton.Enabled = true;
+            dbConnectionCheckComboBox.Enabled = true;
             openDocButton.Enabled = true;
             cableBrandCheckComboBox.Enabled = true;
         }
@@ -77,12 +78,18 @@ namespace GetInfoFromWordToFireBirdTable
             CableNameChanged?.Invoke(cableName);
         }
 
+        private void DbConnectionCheckComboBox_SelectedValueChanged(object sender, EventArgs e)
+        {
+            var dbConnectionName = dbConnectionCheckComboBox.SelectedItem.ToString();
+            DBConnectionNameChanged?.Invoke(dbConnectionName);
+        }
+
         private void WordTableParseStartButton_Click(object sender, EventArgs e)
         {
             wordTableParseStartButton.Enabled = false;
-            openDBButton.Enabled = false;
             openDocButton.Enabled = false;
             cableBrandCheckComboBox.Enabled = false;
+            dbConnectionCheckComboBox.Enabled = false;
             TableParseStarted?.Invoke();
         }
 
@@ -91,12 +98,5 @@ namespace GetInfoFromWordToFireBirdTable
             if (_openDocDialog.ShowDialog() == DialogResult.OK)
                 msWordFilePathTextBox.Text = _openDocDialog.FileName;
         }
-
-        private void OpenDBButton_Click(object sender, EventArgs e)
-        {
-            if (_openDBDialog.ShowDialog() == DialogResult.OK)
-                dbFilePathTextBox.Text = _openDBDialog.FileName;
-        }
-
     }
 }

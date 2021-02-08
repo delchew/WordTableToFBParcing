@@ -12,4 +12,10 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="FirebirdDatabaseProvider">
+      <HintPath>..\..\FirebirdDatabaseProvider\FirebirdDatabaseProvider\bin\Release\netstandard2.0\FirebirdDatabaseProvider.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

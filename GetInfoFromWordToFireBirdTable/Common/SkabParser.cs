@@ -4,7 +4,7 @@ using System.IO;
 using System;
 using Cables;
 using System.Text;
-using GetInfoFromWordToFireBirdTable.Database.Extensions;
+using FirebirdDatabaseProvider;
 using GetInfoFromWordToFireBirdTable.CableEntityes;
 using System.Linq;
 
@@ -14,17 +14,19 @@ namespace GetInfoFromWordToFireBirdTable.Common
     {
         private WordTableParser _wordTableParser;
         private FileInfo _mSWordFile;
+        private string _dbConnectionString;
         private FirebirdDBTableProvider<Skab> _skabTableProvider;
         private StringBuilder _stringBuilder = new StringBuilder();
 
         public event Action<int, int> ParseReport;
-        public SkabParser(FileInfo mSWordFile)
+        public SkabParser(string dbConnectionString, FileInfo mSWordFile)
         {
             _mSWordFile = mSWordFile;
+            _dbConnectionString = dbConnectionString;
         }
         public int ParseDataToDatabase()
         {
-            _skabTableProvider = new FirebirdDBTableProvider<Skab>();
+            _skabTableProvider = new FirebirdDBTableProvider<Skab>(_dbConnectionString);
             _skabTableProvider.OpenConnection();
             if (!_skabTableProvider.TableExists())
             {
@@ -191,28 +193,9 @@ namespace GetInfoFromWordToFireBirdTable.Common
             return recordsCount;
         }
 
-        private int GetInsBilletId(int insPolymerGroupId, int skabVoltageType, double conductorAreaInSqrMm)
-        {
-            _stringBuilder.Append(@"SELECT INS_BILLET_ID FROM INSULATED_BILLET WHERE ");
-            _stringBuilder.Append($@"POLYMER_GROUP_ID = {insPolymerGroupId} AND ");
-            int shortNameId = skabVoltageType == 250 ? 1 : 4;
-            _stringBuilder.Append($@"SHRT_N_ID = {shortNameId} AND ");
-            _stringBuilder.Append(@"COND_ID = (SELECT COND_ID FROM CONDUCTOR WHERE METAL_ID = 2 AND WIRES_COUNT > 1 AND ");
-            _stringBuilder.Append($@"AREA_IN_SQR_MM = {conductorAreaInSqrMm.ToFBSqlString()});");
-            var sqlRequest = _stringBuilder.ToString();
-            _stringBuilder.Clear();
-            var result = _skabTableProvider.GetSingleObjBySQL(sqlRequest);
-            if (result != null)
-            {
-                var billetId = (int)result;
-                return billetId;
-            }
-            throw new NullReferenceException("SQL запрос вернул null!");
-        }
-
         private ICollection<CableBillet> GetInsulatedBillets()
         {
-            var billetProvider = new FirebirdDBTableProvider<CableBillet>();
+            var billetProvider = new FirebirdDBTableProvider<CableBillet>(_dbConnectionString);
             billetProvider.OpenConnection();
             var result = billetProvider.GetAllItemsFromTable();
             billetProvider.CloseConnection();
@@ -221,7 +204,7 @@ namespace GetInfoFromWordToFireBirdTable.Common
 
         private ICollection<Conductor> GetConductors()
         {
-            var conductorProvider = new FirebirdDBTableProvider<Conductor>();
+            var conductorProvider = new FirebirdDBTableProvider<Conductor>(_dbConnectionString);
             conductorProvider.OpenConnection();
             var result = conductorProvider.GetAllItemsFromTable();
             conductorProvider.CloseConnection();

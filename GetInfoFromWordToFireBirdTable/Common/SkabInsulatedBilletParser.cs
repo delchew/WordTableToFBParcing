@@ -1,14 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using GetInfoFromWordToFireBirdTable.CableEntityes;
+using FirebirdDatabaseProvider;
 
 namespace GetInfoFromWordToFireBirdTable.Common
 {
     public class SkabInsulatedBilletParser : ICableDataParcer
     {
+        private string _connectionString;
+        public SkabInsulatedBilletParser(string connectionString)
+        {
+            _connectionString = connectionString;
+        }
+
         public int ParseDataToDatabase()
         {
-            var billetTableProvider = new FirebirdDBTableProvider<CableBillet>();
+            var billetTableProvider = new FirebirdDBTableProvider<CableBillet>(_connectionString);
             billetTableProvider.OpenConnection();
 
             if (!billetTableProvider.TableExists())

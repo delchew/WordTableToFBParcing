@@ -36,6 +36,9 @@
     <Reference Include="Cables">
       <HintPath>E:\VS Progects\SPCABLE\SPCable\Cables\bin\Debug\netstandard2.0\Cables.dll</HintPath>
     </Reference>
+    <Reference Include="FirebirdDatabaseProvider">
+      <HintPath>..\..\FirebirdDatabaseProvider\FirebirdDatabaseProvider\bin\Release\netstandard2.0\FirebirdDatabaseProvider.dll</HintPath>
+    </Reference>
     <Reference Include="FirebirdSql.Data.FirebirdClient, Version=7.10.1.0, Culture=neutral, PublicKeyToken=3750abcc3150b00c, processorArchitecture=MSIL">
       <HintPath>..\packages\FirebirdSql.Data.FirebirdClient.7.10.1\lib\net452\FirebirdSql.Data.FirebirdClient.dll</HintPath>
     </Reference>
@@ -132,20 +135,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CableEntityes\Conductor.cs" />
+    <Compile Include="Common\CableNameBuilders\ICableNameBuilder.cs" />
+    <Compile Include="Common\CableNameBuilders\SkabNameBuilder.cs" />
     <Compile Include="Common\SkabConductorsParcer.cs" />
     <Compile Include="Common\SkabParser.cs" />
-    <Compile Include="Database\Attributes\FBFieldAutoincrementAttribute.cs" />
-    <Compile Include="Database\Attributes\FBTableFieldAttribute.cs" />
-    <Compile Include="Database\Attributes\FBTableNameAttribute.cs" />
     <Compile Include="CableEntityes\Cable.cs" />
     <Compile Include="CableEntityes\Kunrs.cs" />
     <Compile Include="CableEntityes\Skab.cs" />
-    <Compile Include="Common\CableDataParcer.cs" />
-    <Compile Include="Database\Extensions\BoolExtensions.cs" />
-    <Compile Include="Database\Extensions\DecimalExtensions.cs" />
-    <Compile Include="Database\Extensions\DoubleExtensions.cs" />
-    <Compile Include="Database\Extensions\IntExtensions.cs" />
-    <Compile Include="Database\FirebirdDBTableProvider.cs" />
+    <Compile Include="Common\ICableDataParcer.cs" />
     <Compile Include="IMessageService.cs" />
     <Compile Include="IView.cs" />
     <Compile Include="Common\IWordTableParser.cs" />
@@ -190,7 +187,6 @@
     <None Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Compile Include="Database\Extensions\StringExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

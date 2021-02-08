@@ -1,4 +1,4 @@
-﻿using GetInfoFromWordToFireBirdTable.Attributes;
+﻿using FirebirdDatabaseProvider.Attributes;
 
 namespace GetInfoFromWordToFireBirdTable.CableEntityes
 {
