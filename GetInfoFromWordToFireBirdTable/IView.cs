@@ -3,7 +3,7 @@ using System.IO;
 
 namespace GetInfoFromWordToFireBirdTable
 {
-    public interface IView
+    internal interface IView
     {
         string DBConnectionName { get; } 
         FileInfo MSWordFile { get; }

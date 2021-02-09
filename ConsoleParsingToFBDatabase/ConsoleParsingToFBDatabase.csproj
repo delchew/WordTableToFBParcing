@@ -17,5 +17,8 @@
     <Reference Include="FirebirdDatabaseProvider">
       <HintPath>..\..\FirebirdDatabaseProvider\FirebirdDatabaseProvider\bin\Release\netstandard2.0\FirebirdDatabaseProvider.dll</HintPath>
     </Reference>
+    <Reference Include="FirebirdDatabaseProvider">
+      <HintPath>..\..\FirebirdDatabaseProvider\FirebirdDatabaseProvider\bin\Debug\netstandard2.0\FirebirdDatabaseProvider.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

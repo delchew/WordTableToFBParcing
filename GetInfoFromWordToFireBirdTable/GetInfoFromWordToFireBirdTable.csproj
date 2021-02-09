@@ -132,6 +132,9 @@
     <Reference Include="Microsoft.Extensions.Configuration.FileExtensions">
       <HintPath>..\packages\Microsoft.Extensions.Configuration.FileExtensions.5.0.0\lib\net461\Microsoft.Extensions.Configuration.FileExtensions.dll</HintPath>
     </Reference>
+    <Reference Include="FirebirdDatabaseProvider">
+      <HintPath>..\..\FirebirdDatabaseProvider\FirebirdDatabaseProvider\bin\Debug\netstandard2.0\FirebirdDatabaseProvider.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CableEntityes\Conductor.cs" />
