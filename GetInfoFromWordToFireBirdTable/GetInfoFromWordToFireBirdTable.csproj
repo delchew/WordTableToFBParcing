@@ -138,8 +138,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CableEntityes\Conductor.cs" />
-    <Compile Include="Common\CableNameBuilders\ICableNameBuilder.cs" />
-    <Compile Include="Common\CableNameBuilders\SkabNameBuilder.cs" />
     <Compile Include="Common\SkabConductorsParcer.cs" />
     <Compile Include="Common\SkabParser.cs" />
     <Compile Include="CableEntityes\Cable.cs" />
