@@ -3,17 +3,20 @@ using WordObj = Microsoft.Office.Interop.Word;
 using System.IO;
 using System;
 using Cables;
- using FirebirdDatabaseProvider;
-using GetInfoFromWordToFireBirdTable.TableEntityes;
+using FirebirdDatabaseProvider;
 using System.Linq;
+using CableDataParsing.MSWordTableParsers;
+using CableDataParsing.TableEntityes;
 
-namespace GetInfoFromWordToFireBirdTable.Common
+namespace CableDataParsing
 {
     public class SkabParser : ICableDataParcer
     {
         private WordTableParser _wordTableParser;
         private FileInfo _mSWordFile;
+
         private string _dbConnectionString;
+        private FirebirdDBProvider _dBProvider;
         private FirebirdDBTableProvider<SkabPresenter> _skabTableProvider;
 
         public event Action<int, int> ParseReport;
@@ -21,14 +24,15 @@ namespace GetInfoFromWordToFireBirdTable.Common
         {
             _mSWordFile = mSWordFile;
             _dbConnectionString = dbConnectionString;
+            _dBProvider = new FirebirdDBProvider(_dbConnectionString);
+            _skabTableProvider = new FirebirdDBTableProvider<SkabPresenter>(_dBProvider);
         }
         public int ParseDataToDatabase()
         {
-            _skabTableProvider = new FirebirdDBTableProvider<SkabPresenter>(_dbConnectionString);
-            _skabTableProvider.OpenConnection();
+            _dBProvider.OpenConnection();
             if (!_skabTableProvider.TableExists())
             {
-                _skabTableProvider.CloseConnection();
+                _dBProvider.CloseConnection();
                 throw new Exception($"Table \"{_skabTableProvider.TableName}\",associated with {typeof(SkabPresenter)}, is not exists!");
             }
 
@@ -185,7 +189,7 @@ namespace GetInfoFromWordToFireBirdTable.Common
             }
             finally
             {
-                _skabTableProvider.CloseConnection();
+                _dBProvider.CloseConnection();
                 app.Quit();
             }
             return recordsCount;
@@ -193,19 +197,15 @@ namespace GetInfoFromWordToFireBirdTable.Common
 
         private ICollection<CableBilletPresenter> GetInsulatedBillets()
         {
-            var billetProvider = new FirebirdDBTableProvider<CableBilletPresenter>(_dbConnectionString);
-            billetProvider.OpenConnection();
+            var billetProvider = new FirebirdDBTableProvider<CableBilletPresenter>(_dBProvider);
             var result = billetProvider.GetAllItemsFromTable();
-            billetProvider.CloseConnection();
             return result;
         }
 
         private ICollection<ConductorPresenter> GetConductors()
         {
-            var conductorProvider = new FirebirdDBTableProvider<ConductorPresenter>(_dbConnectionString);
-            conductorProvider.OpenConnection();
+            var conductorProvider = new FirebirdDBTableProvider<ConductorPresenter>(_dBProvider);
             var result = conductorProvider.GetAllItemsFromTable();
-            conductorProvider.CloseConnection();
             return result;
         }
 

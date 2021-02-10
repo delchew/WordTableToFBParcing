@@ -33,15 +33,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Cables">
-      <HintPath>E:\VS Progects\SPCABLE\SPCable\Cables\bin\Debug\netstandard2.0\Cables.dll</HintPath>
-    </Reference>
-    <Reference Include="FirebirdDatabaseProvider">
-      <HintPath>..\..\FirebirdDatabaseProvider\FirebirdDatabaseProvider\bin\Release\netstandard2.0\FirebirdDatabaseProvider.dll</HintPath>
-    </Reference>
-    <Reference Include="FirebirdSql.Data.FirebirdClient, Version=7.10.1.0, Culture=neutral, PublicKeyToken=3750abcc3150b00c, processorArchitecture=MSIL">
-      <HintPath>..\packages\FirebirdSql.Data.FirebirdClient.7.10.1\lib\net452\FirebirdSql.Data.FirebirdClient.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Extensions.Configuration.Json, Version=5.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Extensions.Configuration.Json.5.0.0\lib\net461\Microsoft.Extensions.Configuration.Json.dll</HintPath>
     </Reference>
@@ -135,21 +126,10 @@
     <Reference Include="Cables">
       <HintPath>..\..\Cables\Cables\bin\Release\netstandard2.1\Cables.dll</HintPath>
     </Reference>
-    <Reference Include="Cables.Brands">
-      <HintPath>..\..\Cables\Cables.Brands\bin\Release\netstandard2.1\Cables.Brands.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Common\SkabConductorsParcer.cs" />
-    <Compile Include="Common\SkabParser.cs" />
-    <Compile Include="Common\ICableDataParcer.cs" />
     <Compile Include="IMessageService.cs" />
     <Compile Include="IView.cs" />
-    <Compile Include="Common\IWordTableParser.cs" />
-    <Compile Include="Common\KunrsParser.cs" />
-    <Compile Include="Common\PowerWiresColorScheme.cs" />
-    <Compile Include="Common\TableCellData.cs" />
-    <Compile Include="Common\WordTableParser.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -182,19 +162,18 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="Common\SkabInsulatedBilletParser.cs" />
     <None Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Compile Include="TableEntityes\CablePresenter.cs" />
-    <Compile Include="TableEntityes\CableBilletPresenter.cs" />
-    <Compile Include="TableEntityes\ConductorPresenter.cs" />
-    <Compile Include="TableEntityes\KunrsPresenter.cs" />
-    <Compile Include="TableEntityes\SkabPresenter.cs" />
-    <Compile Include="TableEntityes\CableIdUnionPowerColorSchemeIdPresenter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CableDataParsing\CableDataParsing.csproj">
+      <Project>{787d1842-ee87-4f51-aac3-fe4989b7e522}</Project>
+      <Name>CableDataParsing</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

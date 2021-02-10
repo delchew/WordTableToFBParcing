@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GetInfoFromWordToFireBirdTable.Common
+namespace CableDataParsing
 {
     public interface ICableDataParcer
     {

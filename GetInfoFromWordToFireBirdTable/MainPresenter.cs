@@ -1,4 +1,4 @@
-﻿using GetInfoFromWordToFireBirdTable.Common;
+﻿using CableDataParsing;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -27,8 +27,6 @@ namespace GetInfoFromWordToFireBirdTable
 
             _dbConnectionsNames = new string[]
             {
-                "TestHomeMacConnection",
-                "HomeMacConnection",
                 "JobConnection",
                 "TestJobConnection"
             };

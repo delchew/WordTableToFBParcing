@@ -1,15 +1,20 @@
 ﻿using System;
-using GetInfoFromWordToFireBirdTable.TableEntityes;
+using CableDataParsing.TableEntityes;
 using FirebirdDatabaseProvider;
 
-namespace GetInfoFromWordToFireBirdTable.Common
+namespace CableDataParsing
 {
     public class SkabConductorsParcer : ICableDataParcer
     {
         private string _connectionString;
+        private FirebirdDBProvider _dBProvider;
+        private FirebirdDBTableProvider<ConductorPresenter> _condTableProvider;
+
         public SkabConductorsParcer(string connectionString)
         {
             _connectionString = connectionString;
+            _dBProvider = new FirebirdDBProvider(_connectionString);
+            _condTableProvider = new FirebirdDBTableProvider<ConductorPresenter>(_dBProvider);
         }
 
         private ConductorPresenter[] _skabConductors = new ConductorPresenter[]
@@ -25,18 +30,17 @@ namespace GetInfoFromWordToFireBirdTable.Common
 
         public int ParseDataToDatabase()
         {
-            var conductorTableProvider = new FirebirdDBTableProvider<ConductorPresenter>(_connectionString);
-            conductorTableProvider.OpenConnection();
+            _dBProvider.OpenConnection();
 
             int recordsCount = 0;
             foreach(var conductor in _skabConductors)
             {
-                conductorTableProvider.AddItem(conductor);
+                _condTableProvider.AddItem(conductor);
                 recordsCount++;
                 ParseReport?.Invoke(_skabConductors.Length, recordsCount);
             }
-           
-            conductorTableProvider.CloseConnection();
+
+            _dBProvider.CloseConnection();
             return recordsCount;
         }
     }

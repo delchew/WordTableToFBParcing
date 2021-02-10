@@ -1,26 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
-using GetInfoFromWordToFireBirdTable.TableEntityes;
 using FirebirdDatabaseProvider;
+using CableDataParsing.TableEntityes;
 
-namespace GetInfoFromWordToFireBirdTable.Common
+namespace CableDataParsing
 {
     public class SkabInsulatedBilletParser : ICableDataParcer
     {
         private string _connectionString;
+        private FirebirdDBProvider _dBProvider;
+        private FirebirdDBTableProvider<CableBilletPresenter> _billetTableProvider;
+
         public SkabInsulatedBilletParser(string connectionString)
         {
             _connectionString = connectionString;
+            _dBProvider = new FirebirdDBProvider(_connectionString);
+            _billetTableProvider = new FirebirdDBTableProvider<CableBilletPresenter>(_dBProvider);
         }
 
         public int ParseDataToDatabase()
         {
-            var billetTableProvider = new FirebirdDBTableProvider<CableBilletPresenter>(_connectionString);
-            billetTableProvider.OpenConnection();
+            _dBProvider.OpenConnection();
 
-            if (!billetTableProvider.TableExists())
+            if (!_billetTableProvider.TableExists())
             {
-                billetTableProvider.CloseConnection();
+                _dBProvider.CloseConnection();
                 throw new Exception("Таблицы соответствующей размеченному классу не существует в текущей базе данных!");
             }
 
@@ -45,12 +49,12 @@ namespace GetInfoFromWordToFireBirdTable.Common
                         cableBillet.MinThickness = minThickness;
                         cableBillet.NominalThickness = minThickness + 0.1m;
 
-                        billetTableProvider.AddItem(cableBillet);
+                        _billetTableProvider.AddItem(cableBillet);
                         recordsCount++;
                     }
                 }
             }
-            billetTableProvider.CloseConnection();
+            _dBProvider.CloseConnection();
             return recordsCount;
         }
 

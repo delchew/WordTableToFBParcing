@@ -1,9 +1,9 @@
 ﻿using FirebirdDatabaseProvider.Attributes;
 
-namespace GetInfoFromWordToFireBirdTable.TableEntityes
+namespace CableDataParsing.TableEntityes
 {
     [FBTableName("LIST_CABLE_POWER_COLOR")]
-    public class CableIdUnionPowerColorSchemeIdPresenter
+    public class ListCablePowerColor
     {
         [FBTableField(TableFieldName = "LIST_ID", TypeName = "INTEGER", IsNotNull = true, IsPrymaryKey = true)]
         [FBFieldAutoincrement(GeneratorName = "LIST_PWR_CLR_ID_GEN")]

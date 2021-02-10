@@ -1,4 +1,4 @@
-﻿namespace GetInfoFromWordToFireBirdTable.Common
+﻿namespace CableDataParsing.MSWordTableParsers
 {
     public class TableCellData
     {

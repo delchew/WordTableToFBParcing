@@ -1,7 +1,7 @@
 ﻿using WordObj = Microsoft.Office.Interop.Word;
 using System.Collections.Generic;
 
-namespace GetInfoFromWordToFireBirdTable.Common
+namespace CableDataParsing.MSWordTableParsers
 {
     public class WordTableParser : IWordTableParser<TableCellData>
     {

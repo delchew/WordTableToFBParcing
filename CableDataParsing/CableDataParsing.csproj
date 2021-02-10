@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Office.Interop.Word" Version="15.0.4797.1003" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Cables">
+      <HintPath>..\..\Cables\Cables.Brands\bin\Release\netstandard2.0\Cables.dll</HintPath>
+    </Reference>
+    <Reference Include="Cables.Brands">
+      <HintPath>..\..\Cables\Cables.Brands\bin\Release\netstandard2.0\Cables.Brands.dll</HintPath>
+    </Reference>
+    <Reference Include="FirebirdDatabaseProvider">
+      <HintPath>..\..\FirebirdDatabaseProvider\FirebirdDatabaseProvider\bin\Release\netstandard2.0\FirebirdDatabaseProvider.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

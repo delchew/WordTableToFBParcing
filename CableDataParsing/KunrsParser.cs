@@ -1,11 +1,13 @@
-﻿using GetInfoFromWordToFireBirdTable.TableEntityes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using WordObj = Microsoft.Office.Interop.Word;
 using FirebirdDatabaseProvider;
+using CableDataParsing.MSWordTableParsers;
+using Cables.Common;
+using CableDataParsing.TableEntityes;
 
-namespace GetInfoFromWordToFireBirdTable.Common
+namespace CableDataParsing
 {
     public class KunrsParser : ICableDataParcer
     {
@@ -13,7 +15,8 @@ namespace GetInfoFromWordToFireBirdTable.Common
         private FileInfo _mSWordFile;
         private string _dbConnectionString;
         private FirebirdDBTableProvider<KunrsPresenter> _kunrsTableProvider;
-        private FirebirdDBTableProvider<CableIdUnionPowerColorSchemeIdPresenter> _kunrsPowerSchemeUnionProvider;
+        private FirebirdDBTableProvider<ListCablePowerColor> _ListCablePowerColorProvider;
+        private FirebirdDBTableProvider<ListCableProperties> _ListCablePropertiesProvider;
         private FirebirdDBProvider _dBProvider;
 
         public KunrsParser(string dbConnectionString, FileInfo mSWordFile)
@@ -22,13 +25,13 @@ namespace GetInfoFromWordToFireBirdTable.Common
             _dbConnectionString = dbConnectionString;
             _dBProvider = new FirebirdDBProvider(_dbConnectionString);
             _kunrsTableProvider = new FirebirdDBTableProvider<KunrsPresenter>(_dBProvider);
-            _kunrsPowerSchemeUnionProvider = new FirebirdDBTableProvider<CableIdUnionPowerColorSchemeIdPresenter>(_dBProvider);
+            _ListCablePowerColorProvider = new FirebirdDBTableProvider<ListCablePowerColor>(_dBProvider);
+            _ListCablePropertiesProvider = new FirebirdDBTableProvider<ListCableProperties>(_dBProvider);
         }
 
         public event Action<int, int> ParseReport;
         public int ParseDataToDatabase()
         {
-
             _dBProvider.OpenConnection();
             if(!_kunrsTableProvider.TableExists())
             {
@@ -83,6 +86,15 @@ namespace GetInfoFromWordToFireBirdTable.Common
                         { 5, new [] { PowerWiresColorScheme.PEN, PowerWiresColorScheme.none } }
                     };
 
+                    var kunrs = new KunrsPresenter
+                    {
+                        TwistedElementTypeId = 1,
+                        TechCondId = 26,
+                        HasFilling = true
+                    };
+                    var listCablePowerColor = new ListCablePowerColor();
+                    var listCableProperties = new ListCableProperties();
+                    long recordId;
                     for (int i = 0; i < hasFoilShieldDictionary.Count; i++)
                     {
                         var tableData = _wordTableParser.GetCableCellsCollection(table);
@@ -97,31 +109,44 @@ namespace GetInfoFromWordToFireBirdTable.Common
                                     var powerColorSchemeArray = powerColorsDict[elementsCount];
                                     for (int k = 0; k < powerColorSchemeArray.Length; k++)
                                     {
-                                        var kunrs = new KunrsPresenter
-                                        {
-                                            BilletId = insBilletKunrsIdDictionary[conductorAreaInSqrMm],
-                                            ElementsCount = elementsCount,
-                                            TwistedElementTypeId = 1,
-                                            TechCondId = 26,
-                                            MaxCoverDiameter = maxCoverDiameter,
-                                            FireProtectionId = polimerGroupIdDictionary[j] == 1 ? 17 : 22,
-                                            CoverPolimerGroupId = polimerGroupIdDictionary[j],
-                                            HasFoilShield = hasFoilShieldDictionary[i],
-                                            HasFilling = true,
-                                            HasArmourBraid = hasArmourDictionary[i],
-                                            HasArmourTube = hasArmourDictionary[i],
-                                            PowerColorSchemeId = (int)powerColorSchemeArray[k],
-                                            CoverColorId = polimerGroupIdDictionary[j] == 5 ? 8 : 2
-                                        };
+                                        kunrs.BilletId = insBilletKunrsIdDictionary[conductorAreaInSqrMm];
+                                        kunrs.ElementsCount = elementsCount;
+                                        kunrs.MaxCoverDiameter = maxCoverDiameter;
+                                        kunrs.FireProtectionId = polimerGroupIdDictionary[j] == 1 ? 17 : 22;
+                                        kunrs.CoverPolimerGroupId = polimerGroupIdDictionary[j];
+                                        kunrs.HasFoilShield = hasFoilShieldDictionary[i];
+                                        kunrs.HasArmourBraid = hasArmourDictionary[i];
+                                        kunrs.HasArmourTube = hasArmourDictionary[i];
+                                        kunrs.PowerColorSchemeId = (int)powerColorSchemeArray[k];
+                                        kunrs.CoverColorId = polimerGroupIdDictionary[j] == 5 ? 8 : 2;
 
-                                        var cableUnionPowerColorScheme = new CableIdUnionPowerColorSchemeIdPresenter
-                                        {
-                                            CableId = 1,
-                                            PowerColorSchemeId = (int)powerColorSchemeArray[k]
-                                        };
+                                        recordId = _kunrsTableProvider.AddItem(kunrs);
 
-                                        _kunrsTableProvider.AddItem(kunrs);
-                                        _kunrsPowerSchemeUnionProvider.AddItem(cableUnionPowerColorScheme);
+                                        listCablePowerColor.CableId = recordId;
+                                        listCablePowerColor.PowerColorSchemeId = kunrs.PowerColorSchemeId;
+                                        _ListCablePowerColorProvider.AddItem(listCablePowerColor);
+
+                                        listCableProperties.CableId = recordId;
+                                        listCableProperties.PropertyId = (long)CableProperty.HasFilling;
+                                        _ListCablePropertiesProvider.AddItem(listCableProperties);
+
+                                        if (kunrs.HasFoilShield)
+                                        {
+                                            listCableProperties.PropertyId = (long)CableProperty.HasFoilShield;
+                                            _ListCablePropertiesProvider.AddItem(listCableProperties);
+                                        }                                        
+
+                                        if (kunrs.HasArmourBraid)
+                                        {
+                                            listCableProperties.PropertyId = (long)CableProperty.HasArmourBraid;
+                                            _ListCablePropertiesProvider.AddItem(listCableProperties);
+                                        }
+
+                                        if (kunrs.HasArmourTube)
+                                        {
+                                            listCableProperties.PropertyId = (long)CableProperty.HasArmourTube;
+                                            _ListCablePropertiesProvider.AddItem(listCableProperties);
+                                        }
                                         recordsCount++;
                                     }
                                 }
