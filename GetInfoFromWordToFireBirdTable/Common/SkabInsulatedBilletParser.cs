@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using GetInfoFromWordToFireBirdTable.CableEntityes;
+using GetInfoFromWordToFireBirdTable.TableEntityes;
 using FirebirdDatabaseProvider;
 
 namespace GetInfoFromWordToFireBirdTable.Common
@@ -15,7 +15,7 @@ namespace GetInfoFromWordToFireBirdTable.Common
 
         public int ParseDataToDatabase()
         {
-            var billetTableProvider = new FirebirdDBTableProvider<CableBillet>(_connectionString);
+            var billetTableProvider = new FirebirdDBTableProvider<CableBilletPresenter>(_connectionString);
             billetTableProvider.OpenConnection();
 
             if (!billetTableProvider.TableExists())
@@ -29,7 +29,7 @@ namespace GetInfoFromWordToFireBirdTable.Common
             var polymerGroupsId = new List<int> { 6, 4, 3 }; //6 - PVC-LS, 4 - HF, 3 - Rubber
             var cableShortNamesList = new List<int> { 1, 4 }; //1 - СКАБ250, 4 - СКАБ660
 
-            var cableBillet = new CableBillet();
+            var cableBillet = new CableBilletPresenter();
 
             foreach (var nameId in cableShortNamesList)
             {

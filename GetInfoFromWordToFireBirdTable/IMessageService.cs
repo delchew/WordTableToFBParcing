@@ -1,6 +1,6 @@
 ﻿namespace GetInfoFromWordToFireBirdTable
 {
-    internal interface IMessageService
+    public interface IMessageService
     {
         void ShowMessage(string message);
         void ShowExclamation(string exclamation);

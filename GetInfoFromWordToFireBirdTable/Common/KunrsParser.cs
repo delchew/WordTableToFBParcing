@@ -1,4 +1,4 @@
-﻿using GetInfoFromWordToFireBirdTable.CableEntityes;
+﻿using GetInfoFromWordToFireBirdTable.TableEntityes;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,23 +12,28 @@ namespace GetInfoFromWordToFireBirdTable.Common
         private WordTableParser _wordTableParser;
         private FileInfo _mSWordFile;
         private string _dbConnectionString;
-        private FirebirdDBTableProvider<Kunrs> _kunrsTableProvider;
+        private FirebirdDBTableProvider<KunrsPresenter> _kunrsTableProvider;
+        private FirebirdDBTableProvider<CableIdUnionPowerColorSchemeIdPresenter> _kunrsPowerSchemeUnionProvider;
+        private FirebirdDBProvider _dBProvider;
+
         public KunrsParser(string dbConnectionString, FileInfo mSWordFile)
         {
             _mSWordFile = mSWordFile;
             _dbConnectionString = dbConnectionString;
+            _dBProvider = new FirebirdDBProvider(_dbConnectionString);
+            _kunrsTableProvider = new FirebirdDBTableProvider<KunrsPresenter>(_dBProvider);
+            _kunrsPowerSchemeUnionProvider = new FirebirdDBTableProvider<CableIdUnionPowerColorSchemeIdPresenter>(_dBProvider);
         }
 
         public event Action<int, int> ParseReport;
         public int ParseDataToDatabase()
         {
-            _kunrsTableProvider = new FirebirdDBTableProvider<Kunrs>(_dbConnectionString);
 
-            _kunrsTableProvider.OpenConnection();
+            _dBProvider.OpenConnection();
             if(!_kunrsTableProvider.TableExists())
             {
-                _kunrsTableProvider.CloseConnection();
-                throw new Exception($"Table \"{_kunrsTableProvider.TableName}\",associated with {typeof(Kunrs)}, is not exists!");
+                _dBProvider.CloseConnection();
+                throw new Exception($"Table \"{_kunrsTableProvider.TableName}\",associated with {typeof(KunrsPresenter)}, is not exists!");
             }
 
             int recordsCount = 0;
@@ -92,7 +97,7 @@ namespace GetInfoFromWordToFireBirdTable.Common
                                     var powerColorSchemeArray = powerColorsDict[elementsCount];
                                     for (int k = 0; k < powerColorSchemeArray.Length; k++)
                                     {
-                                        var kunrs = new Kunrs
+                                        var kunrs = new KunrsPresenter
                                         {
                                             BilletId = insBilletKunrsIdDictionary[conductorAreaInSqrMm],
                                             ElementsCount = elementsCount,
@@ -108,7 +113,15 @@ namespace GetInfoFromWordToFireBirdTable.Common
                                             PowerColorSchemeId = (int)powerColorSchemeArray[k],
                                             CoverColorId = polimerGroupIdDictionary[j] == 5 ? 8 : 2
                                         };
+
+                                        var cableUnionPowerColorScheme = new CableIdUnionPowerColorSchemeIdPresenter
+                                        {
+                                            CableId = 1,
+                                            PowerColorSchemeId = (int)powerColorSchemeArray[k]
+                                        };
+
                                         _kunrsTableProvider.AddItem(kunrs);
+                                        _kunrsPowerSchemeUnionProvider.AddItem(cableUnionPowerColorScheme);
                                         recordsCount++;
                                     }
                                 }
@@ -118,12 +131,12 @@ namespace GetInfoFromWordToFireBirdTable.Common
                         _wordTableParser.DataStartRowIndex += _wordTableParser.DataRowsCount;
                         tableData.Clear();
                     }
-                    _kunrsTableProvider.CloseConnection();
                 }
             }
             finally
             {
                 app.Quit();
+                _dBProvider.CloseConnection();
             }
             return recordsCount;
         }

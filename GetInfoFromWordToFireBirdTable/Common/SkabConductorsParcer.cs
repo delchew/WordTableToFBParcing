@@ -1,5 +1,5 @@
 ﻿using System;
-using GetInfoFromWordToFireBirdTable.CableEntityes;
+using GetInfoFromWordToFireBirdTable.TableEntityes;
 using FirebirdDatabaseProvider;
 
 namespace GetInfoFromWordToFireBirdTable.Common
@@ -12,20 +12,20 @@ namespace GetInfoFromWordToFireBirdTable.Common
             _connectionString = connectionString;
         }
 
-        private Conductor[] _skabConductors = new Conductor[]
+        private ConductorPresenter[] _skabConductors = new ConductorPresenter[]
         {
-            new Conductor { ConductorId = 21, Title = "7х0.30 ММЛ", Class = 2, MetalId = 2, WiresCount = 7, WiresDiameter = 0.3m, ConductorDiameter = 0.9m, AreaInSqrMm = 0.5m },
-            new Conductor { ConductorId = 2, Title = "7х0.37 ММЛ", Class = 2, MetalId = 2, WiresCount = 7, WiresDiameter = 0.37m, ConductorDiameter = 1.11m, AreaInSqrMm = 0.75m },
-            new Conductor { ConductorId = 4, Title = "7х0.43 ММЛ", Class = 2, MetalId = 2, WiresCount = 7, WiresDiameter = 0.43m, ConductorDiameter = 1.29m, AreaInSqrMm = 1.0m },
-            new Conductor { ConductorId = 6, Title = "7х0.53 ММЛ", Class = 2, MetalId = 2, WiresCount = 7, WiresDiameter = 0.53m, ConductorDiameter = 1.59m, AreaInSqrMm = 1.5m },
-            new Conductor { ConductorId = 8, Title = "7х0.67 ММЛ", Class = 2, MetalId = 2, WiresCount = 7, WiresDiameter = 0.67m, ConductorDiameter = 2.01m, AreaInSqrMm = 2.5m },
+            new ConductorPresenter { ConductorId = 21, Title = "7х0.30 ММЛ", Class = 2, MetalId = 2, WiresCount = 7, WiresDiameter = 0.3m, ConductorDiameter = 0.9m, AreaInSqrMm = 0.5m },
+            new ConductorPresenter { ConductorId = 2, Title = "7х0.37 ММЛ", Class = 2, MetalId = 2, WiresCount = 7, WiresDiameter = 0.37m, ConductorDiameter = 1.11m, AreaInSqrMm = 0.75m },
+            new ConductorPresenter { ConductorId = 4, Title = "7х0.43 ММЛ", Class = 2, MetalId = 2, WiresCount = 7, WiresDiameter = 0.43m, ConductorDiameter = 1.29m, AreaInSqrMm = 1.0m },
+            new ConductorPresenter { ConductorId = 6, Title = "7х0.53 ММЛ", Class = 2, MetalId = 2, WiresCount = 7, WiresDiameter = 0.53m, ConductorDiameter = 1.59m, AreaInSqrMm = 1.5m },
+            new ConductorPresenter { ConductorId = 8, Title = "7х0.67 ММЛ", Class = 2, MetalId = 2, WiresCount = 7, WiresDiameter = 0.67m, ConductorDiameter = 2.01m, AreaInSqrMm = 2.5m },
         };
         
         public event Action<int, int> ParseReport;
 
         public int ParseDataToDatabase()
         {
-            var conductorTableProvider = new FirebirdDBTableProvider<Conductor>(_connectionString);
+            var conductorTableProvider = new FirebirdDBTableProvider<ConductorPresenter>(_connectionString);
             conductorTableProvider.OpenConnection();
 
             int recordsCount = 0;

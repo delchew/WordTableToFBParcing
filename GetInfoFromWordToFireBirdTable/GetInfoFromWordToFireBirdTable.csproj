@@ -92,9 +92,6 @@
     <Reference Include="Microsoft.Extensions.Configuration.Abstractions">
       <HintPath>..\packages\Microsoft.Extensions.Configuration.Abstractions.5.0.0\lib\net461\Microsoft.Extensions.Configuration.Abstractions.dll</HintPath>
     </Reference>
-    <Reference Include="Cables">
-      <HintPath>..\..\Cables\Cables\bin\Debug\netstandard2.0\Cables.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Extensions.FileSystemGlobbing">
       <HintPath>..\packages\Microsoft.Extensions.FileSystemGlobbing.5.0.0\lib\net461\Microsoft.Extensions.FileSystemGlobbing.dll</HintPath>
     </Reference>
@@ -135,14 +132,16 @@
     <Reference Include="FirebirdDatabaseProvider">
       <HintPath>..\..\FirebirdDatabaseProvider\FirebirdDatabaseProvider\bin\Debug\netstandard2.0\FirebirdDatabaseProvider.dll</HintPath>
     </Reference>
+    <Reference Include="Cables">
+      <HintPath>..\..\Cables\Cables\bin\Release\netstandard2.1\Cables.dll</HintPath>
+    </Reference>
+    <Reference Include="Cables.Brands">
+      <HintPath>..\..\Cables\Cables.Brands\bin\Release\netstandard2.1\Cables.Brands.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CableEntityes\Conductor.cs" />
     <Compile Include="Common\SkabConductorsParcer.cs" />
     <Compile Include="Common\SkabParser.cs" />
-    <Compile Include="CableEntityes\Cable.cs" />
-    <Compile Include="CableEntityes\Kunrs.cs" />
-    <Compile Include="CableEntityes\Skab.cs" />
     <Compile Include="Common\ICableDataParcer.cs" />
     <Compile Include="IMessageService.cs" />
     <Compile Include="IView.cs" />
@@ -183,11 +182,16 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="CableEntityes\CableBillet.cs" />
     <Compile Include="Common\SkabInsulatedBilletParser.cs" />
     <None Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Compile Include="TableEntityes\CablePresenter.cs" />
+    <Compile Include="TableEntityes\CableBilletPresenter.cs" />
+    <Compile Include="TableEntityes\ConductorPresenter.cs" />
+    <Compile Include="TableEntityes\KunrsPresenter.cs" />
+    <Compile Include="TableEntityes\SkabPresenter.cs" />
+    <Compile Include="TableEntityes\CableIdUnionPowerColorSchemeIdPresenter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -3,9 +3,8 @@ using WordObj = Microsoft.Office.Interop.Word;
 using System.IO;
 using System;
 using Cables;
-using System.Text;
-using FirebirdDatabaseProvider;
-using GetInfoFromWordToFireBirdTable.CableEntityes;
+ using FirebirdDatabaseProvider;
+using GetInfoFromWordToFireBirdTable.TableEntityes;
 using System.Linq;
 
 namespace GetInfoFromWordToFireBirdTable.Common
@@ -15,8 +14,7 @@ namespace GetInfoFromWordToFireBirdTable.Common
         private WordTableParser _wordTableParser;
         private FileInfo _mSWordFile;
         private string _dbConnectionString;
-        private FirebirdDBTableProvider<Skab> _skabTableProvider;
-        private StringBuilder _stringBuilder = new StringBuilder();
+        private FirebirdDBTableProvider<SkabPresenter> _skabTableProvider;
 
         public event Action<int, int> ParseReport;
         public SkabParser(string dbConnectionString, FileInfo mSWordFile)
@@ -26,12 +24,12 @@ namespace GetInfoFromWordToFireBirdTable.Common
         }
         public int ParseDataToDatabase()
         {
-            _skabTableProvider = new FirebirdDBTableProvider<Skab>(_dbConnectionString);
+            _skabTableProvider = new FirebirdDBTableProvider<SkabPresenter>(_dbConnectionString);
             _skabTableProvider.OpenConnection();
             if (!_skabTableProvider.TableExists())
             {
                 _skabTableProvider.CloseConnection();
-                throw new Exception($"Table \"{_skabTableProvider.TableName}\",associated with {typeof(Skab)}, is not exists!");
+                throw new Exception($"Table \"{_skabTableProvider.TableName}\",associated with {typeof(SkabPresenter)}, is not exists!");
             }
 
             int recordsCount = 0;
@@ -99,7 +97,7 @@ namespace GetInfoFromWordToFireBirdTable.Common
 
                     var exiParams = new List<bool> { false, true };
 
-                    var skab = new Skab { TechCondId = 17, HasFoilShield = true };
+                    var skab = new SkabPresenter { TechCondId = 17, HasFoilShield = true };
 
                     var billets = GetInsulatedBillets();
                     var conductors = GetConductors();
@@ -135,7 +133,7 @@ namespace GetInfoFromWordToFireBirdTable.Common
                                                         materialParams = insType == 0 ? plasticInsMaterialParams : rubberInsMaterialParams;
                                                         foreach (var matParam in materialParams)
                                                         {
-                                                            Conductor conductor;
+                                                            ConductorPresenter conductor;
                                                             foreach (var exiParam in exiParams)
                                                             {
                                                                 conductor = conductors.Where(c => c.MetalId == 2 &&
@@ -193,18 +191,18 @@ namespace GetInfoFromWordToFireBirdTable.Common
             return recordsCount;
         }
 
-        private ICollection<CableBillet> GetInsulatedBillets()
+        private ICollection<CableBilletPresenter> GetInsulatedBillets()
         {
-            var billetProvider = new FirebirdDBTableProvider<CableBillet>(_dbConnectionString);
+            var billetProvider = new FirebirdDBTableProvider<CableBilletPresenter>(_dbConnectionString);
             billetProvider.OpenConnection();
             var result = billetProvider.GetAllItemsFromTable();
             billetProvider.CloseConnection();
             return result;
         }
 
-        private ICollection<Conductor> GetConductors()
+        private ICollection<ConductorPresenter> GetConductors()
         {
-            var conductorProvider = new FirebirdDBTableProvider<Conductor>(_dbConnectionString);
+            var conductorProvider = new FirebirdDBTableProvider<ConductorPresenter>(_dbConnectionString);
             conductorProvider.OpenConnection();
             var result = conductorProvider.GetAllItemsFromTable();
             conductorProvider.CloseConnection();

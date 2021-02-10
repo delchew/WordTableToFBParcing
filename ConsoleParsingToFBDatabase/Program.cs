@@ -1,5 +1,5 @@
 ﻿using FirebirdDatabaseProvider;
-using GetInfoFromWordToFireBirdTable.CableEntityes;
+using GetInfoFromWordToFireBirdTable.TableEntityes;
 using GetInfoFromWordToFireBirdTable.Common;
 using System;
 using System.IO;
@@ -9,14 +9,18 @@ namespace ConsoleParsingToFBDatabase
     class Program
     {
         static readonly string _connectionString = "character set=utf8;user id=SYSDBA;password=masterkey;dialect=3;data source=localhost;port number=3050;initial catalog=E:\\databases\\TEST.fdb";
+
         static void Main()
         {
-            ParseKunrsCable();
+            var kunrs = new KunrsPresenter
+            {
+                
+            };
         }
 
         static void CreateConductorTable()
         {
-            var provider = new FirebirdDBTableProvider<Conductor>(_connectionString);
+            var provider = new FirebirdDBTableProvider<ConductorPresenter>(_connectionString);
             provider.OpenConnection();
             provider.CreateTableIfNotExists();
             provider.CloseConnection();
@@ -24,7 +28,7 @@ namespace ConsoleParsingToFBDatabase
 
         static void MakeSelect()
         {
-            var provider = new FirebirdDBTableProvider<CableBillet>(_connectionString);
+            var provider = new FirebirdDBTableProvider<CableBilletPresenter>(_connectionString);
             try
             {
                 provider.OpenConnection();
@@ -138,7 +142,7 @@ namespace ConsoleParsingToFBDatabase
 
         private static void CreateKunrsTable()
         {
-            var dbProvider = new FirebirdDBTableProvider<Kunrs>(_connectionString);
+            var dbProvider = new FirebirdDBTableProvider<KunrsPresenter>(_connectionString);
             dbProvider.OpenConnection();
             try
             {
