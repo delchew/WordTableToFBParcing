@@ -18,6 +18,7 @@ namespace CableDataParsing
         private string _dbConnectionString;
         private FirebirdDBProvider _dBProvider;
         private FirebirdDBTableProvider<SkabPresenter> _skabTableProvider;
+        private FirebirdDBTableProvider<ListCableProperties> _ListCablePropertiesProvider;
 
         public event Action<int, int> ParseReport;
         public SkabParser(string dbConnectionString, FileInfo mSWordFile)
@@ -26,6 +27,7 @@ namespace CableDataParsing
             _dbConnectionString = dbConnectionString;
             _dBProvider = new FirebirdDBProvider(_dbConnectionString);
             _skabTableProvider = new FirebirdDBTableProvider<SkabPresenter>(_dBProvider);
+            _ListCablePropertiesProvider = new FirebirdDBTableProvider<ListCableProperties>(_dBProvider);
         }
         public int ParseDataToDatabase()
         {
@@ -106,6 +108,9 @@ namespace CableDataParsing
                     var billets = GetInsulatedBillets();
                     var conductors = GetConductors();
 
+                    var listCableProperties = new ListCableProperties();
+                    long recordId;
+                    var skabBoolPropertyesList = new List<(bool hasProp, CableProperty propType)>()
                     while (tableNumber < maxDiamTableCount)
                     {
                         foreach(var mod in skabModifycationsList)
@@ -154,16 +159,36 @@ namespace CableDataParsing
                                                                 skab.MaxCoverDiameter = maxCoverDiameter;
                                                                 skab.FireProtectionId = matParam.fireProtectID;
                                                                 skab.CoverPolimerGroupId = matParam.coverPolymerGroupId;
-                                                                skab.SparkSafety = exiParam;
-                                                                skab.CoverColorId = (exiParam && armourType.hasArmourTube == false) ? 3 : 2;
                                                                 skab.HasIndividualFoilShields = twistTypeParams.hasIndividualFoilSHields;
+                                                                skabBoolPropertyesList.Add((skab.HasIndividualFoilShields, CableProperty.HasIndividualFoilShields));
                                                                 skab.HasBraidShield = mod.HasBraidShield;
+                                                                skabBoolPropertyesList.Add((skab.HasBraidShield, CableProperty.HasBraidShield));
                                                                 skab.HasFilling = mod.HasFilling;
+                                                                skabBoolPropertyesList.Add((skab.HasFilling, CableProperty.HasFilling));
                                                                 skab.HasArmourBraid = armourType.hasArmourBraid;
+                                                                skabBoolPropertyesList.Add((skab.HasArmourBraid, CableProperty.HasArmourBraid));
                                                                 skab.HasArmourTube = armourType.hasArmourTube;
+                                                                skabBoolPropertyesList.Add((skab.HasArmourTube, CableProperty.HasArmourTube));
                                                                 skab.HasWaterBlockStripe = mod.HasWaterblockStripe;
+                                                                skabBoolPropertyesList.Add((skab.HasWaterBlockStripe, CableProperty.HasWaterBlockStripe));
+                                                                skab.SparkSafety = exiParam;
+                                                                skabBoolPropertyesList.Add((skab.SparkSafety, CableProperty.SparkSafety));
+                                                                skab.CoverColorId = (exiParam && armourType.hasArmourTube == false) ? 3 : 2;
 
-                                                                _skabTableProvider.AddItem(skab);
+                                                                recordId = _skabTableProvider.AddItem(skab);
+
+                                                                listCableProperties.CableId = recordId;
+
+                                                                foreach(var boolPropPair in skabBoolPropertyesList)
+                                                                {
+                                                                    if (boolPropPair.hasProp)
+                                                                    {
+                                                                        listCableProperties.PropertyId = (long)boolPropPair.propType;
+                                                                        _ListCablePropertiesProvider.AddItem(listCableProperties);
+                                                                    }
+                                                                }
+
+                                                                skabBoolPropertyesList.Clear();
                                                                 recordsCount++;
                                                             }
                                                         }
