@@ -6,6 +6,10 @@ using FirebirdDatabaseProvider;
 using CableDataParsing.MSWordTableParsers;
 using Cables.Common;
 using CableDataParsing.TableEntityes;
+using System.Linq;
+using CableDataParsing.NameBuilders;
+using System.Text;
+using Cables;
 
 namespace CableDataParsing
 {
@@ -90,11 +94,25 @@ namespace CableDataParsing
                     {
                         TwistedElementTypeId = 1,
                         TechCondId = 26,
-                        HasFilling = true
-                    };
+                        HasFilling = true,
+                        OperatingVoltageId =  //Записать
+
+                };
+
+                    //var billets = GetInsulatedBillets();
+                    var conductors = GetConductors();
+
                     var listCablePowerColor = new ListCablePowerColor();
                     var listCableProperties = new ListCableProperties();
                     long recordId;
+                    ConductorPresenter conductor;
+                    PowerWiresColorScheme[] powerColorSchemeArray;
+
+                    var stringBuilder = new StringBuilder();
+                    var nameBuilder = new KunrsNameBuider(stringBuilder);
+
+                    var kunrsBoolPropertyesList = new List<(bool hasProp, CableProperty propType)>();
+
                     for (int i = 0; i < hasFoilShieldDictionary.Count; i++)
                     {
                         var tableData = _wordTableParser.GetCableCellsCollection(table);
@@ -106,7 +124,7 @@ namespace CableDataParsing
                             {
                                 for (int j = 0; j < polimerGroupIdDictionary.Count; j++)
                                 {
-                                    var powerColorSchemeArray = powerColorsDict[elementsCount];
+                                    powerColorSchemeArray = powerColorsDict[elementsCount];
                                     for (int k = 0; k < powerColorSchemeArray.Length; k++)
                                     {
                                         kunrs.BilletId = insBilletKunrsIdDictionary[conductorAreaInSqrMm];
@@ -114,11 +132,21 @@ namespace CableDataParsing
                                         kunrs.MaxCoverDiameter = maxCoverDiameter;
                                         kunrs.FireProtectionId = polimerGroupIdDictionary[j] == 1 ? 17 : 22;
                                         kunrs.CoverPolimerGroupId = polimerGroupIdDictionary[j];
+                                        kunrsBoolPropertyesList.Add((kunrs.HasFilling, CableProperty.HasFilling));
                                         kunrs.HasFoilShield = hasFoilShieldDictionary[i];
+                                        kunrsBoolPropertyesList.Add((kunrs.HasFoilShield, CableProperty.HasFoilShield));
                                         kunrs.HasArmourBraid = hasArmourDictionary[i];
+                                        kunrsBoolPropertyesList.Add((kunrs.HasArmourBraid, CableProperty.HasArmourBraid));
                                         kunrs.HasArmourTube = hasArmourDictionary[i];
+                                        kunrsBoolPropertyesList.Add((kunrs.HasArmourTube, CableProperty.HasArmourTube));
                                         kunrs.PowerColorSchemeId = (int)powerColorSchemeArray[k];
                                         kunrs.CoverColorId = polimerGroupIdDictionary[j] == 5 ? 8 : 2;
+                                        kunrs.ClimaticModId = ;  //Записать
+
+                                        conductor = conductors.Where(c => c.MetalId == 3 &&
+                                                                          c.Class == 2 &&
+                                                                          c.AreaInSqrMm == conductorAreaInSqrMm).First();
+                                        kunrs.Title = nameBuilder.GetCableName(kunrs, conductor: conductor, parameter: powerColorSchemeArray[k].GetDescription());
 
                                         recordId = _kunrsTableProvider.AddItem(kunrs);
 
@@ -127,26 +155,17 @@ namespace CableDataParsing
                                         _ListCablePowerColorProvider.AddItem(listCablePowerColor);
 
                                         listCableProperties.CableId = recordId;
-                                        listCableProperties.PropertyId = (long)CableProperty.HasFilling;
-                                        _ListCablePropertiesProvider.AddItem(listCableProperties);
 
-                                        if (kunrs.HasFoilShield)
+                                        foreach (var boolPropPair in kunrsBoolPropertyesList)
                                         {
-                                            listCableProperties.PropertyId = (long)CableProperty.HasFoilShield;
-                                            _ListCablePropertiesProvider.AddItem(listCableProperties);
-                                        }                                        
-
-                                        if (kunrs.HasArmourBraid)
-                                        {
-                                            listCableProperties.PropertyId = (long)CableProperty.HasArmourBraid;
-                                            _ListCablePropertiesProvider.AddItem(listCableProperties);
+                                            if (boolPropPair.hasProp)
+                                            {
+                                                listCableProperties.PropertyId = (long)boolPropPair.propType;
+                                                _ListCablePropertiesProvider.AddItem(listCableProperties);
+                                            }
                                         }
 
-                                        if (kunrs.HasArmourTube)
-                                        {
-                                            listCableProperties.PropertyId = (long)CableProperty.HasArmourTube;
-                                            _ListCablePropertiesProvider.AddItem(listCableProperties);
-                                        }
+                                        kunrsBoolPropertyesList.Clear();
                                         recordsCount++;
                                     }
                                 }
@@ -164,6 +183,13 @@ namespace CableDataParsing
                 _dBProvider.CloseConnection();
             }
             return recordsCount;
+        }
+
+        private ICollection<ConductorPresenter> GetConductors()
+        {
+            var conductorProvider = new FirebirdDBTableProvider<ConductorPresenter>(_dBProvider);
+            var result = conductorProvider.GetAllItemsFromTable();
+            return result;
         }
     }
 }

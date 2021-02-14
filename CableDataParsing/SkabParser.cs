@@ -7,6 +7,8 @@ using FirebirdDatabaseProvider;
 using System.Linq;
 using CableDataParsing.MSWordTableParsers;
 using CableDataParsing.TableEntityes;
+using System.Text;
+using CableDataParsing.NameBuilders;
 
 namespace CableDataParsing
 {
@@ -103,14 +105,23 @@ namespace CableDataParsing
 
                     var exiParams = new List<bool> { false, true };
 
-                    var skab = new SkabPresenter { TechCondId = 17, HasFoilShield = true };
+                    var skab = new SkabPresenter
+                    {
+                        TechCondId = 17,
+                        HasFoilShield = true,
+                        OperatingVoltageId =  //Записать
+                    };
 
                     var billets = GetInsulatedBillets();
                     var conductors = GetConductors();
 
                     var listCableProperties = new ListCableProperties();
                     long recordId;
-                    var skabBoolPropertyesList = new List<(bool hasProp, CableProperty propType)>()
+
+                    var stringBuilder = new StringBuilder();
+                    var nameBuilder = new SkabNameBuilder(stringBuilder);
+
+                    var skabBoolPropertyesList = new List<(bool hasProp, CableProperty propType)>();
                     while (tableNumber < maxDiamTableCount)
                     {
                         foreach(var mod in skabModifycationsList)
@@ -161,6 +172,7 @@ namespace CableDataParsing
                                                                 skab.CoverPolimerGroupId = matParam.coverPolymerGroupId;
                                                                 skab.HasIndividualFoilShields = twistTypeParams.hasIndividualFoilSHields;
                                                                 skabBoolPropertyesList.Add((skab.HasIndividualFoilShields, CableProperty.HasIndividualFoilShields));
+                                                                skabBoolPropertyesList.Add((skab.HasFoilShield, CableProperty.HasFoilShield));
                                                                 skab.HasBraidShield = mod.HasBraidShield;
                                                                 skabBoolPropertyesList.Add((skab.HasBraidShield, CableProperty.HasBraidShield));
                                                                 skab.HasFilling = mod.HasFilling;
@@ -174,6 +186,10 @@ namespace CableDataParsing
                                                                 skab.SparkSafety = exiParam;
                                                                 skabBoolPropertyesList.Add((skab.SparkSafety, CableProperty.SparkSafety));
                                                                 skab.CoverColorId = (exiParam && armourType.hasArmourTube == false) ? 3 : 2;
+                                                                skab.ClimaticModId = ;  //Записать
+
+
+                                                                skab.Title = nameBuilder.GetCableName(skab, conductor: conductor);
 
                                                                 recordId = _skabTableProvider.AddItem(skab);
 
