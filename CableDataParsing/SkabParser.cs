@@ -109,7 +109,7 @@ namespace CableDataParsing
                     {
                         TechCondId = 17,
                         HasFoilShield = true,
-                        OperatingVoltageId =  //Записать
+                        OperatingVoltageId = 0  //Записать
                     };
 
                     var billets = GetInsulatedBillets();
@@ -186,7 +186,7 @@ namespace CableDataParsing
                                                                 skab.SparkSafety = exiParam;
                                                                 skabBoolPropertyesList.Add((skab.SparkSafety, CableProperty.SparkSafety));
                                                                 skab.CoverColorId = (exiParam && armourType.hasArmourTube == false) ? 3 : 2;
-                                                                skab.ClimaticModId = ;  //Записать
+                                                                skab.ClimaticModId = 0;  //Записать
 
 
                                                                 skab.Title = nameBuilder.GetCableName(skab, conductor: conductor);

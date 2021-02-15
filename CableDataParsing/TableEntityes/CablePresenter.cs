@@ -4,9 +4,12 @@ namespace CableDataParsing.TableEntityes
 {
     public abstract class CablePresenter
     {
-        [FBTableField(TableFieldName = "CABLE_ID", TypeName = "INTEGER", IsNotNull = true, IsPrymaryKey = true)]
+        [FBTableField(TableFieldName = "ID", TypeName = "INTEGER", IsNotNull = true, IsPrymaryKey = true)]
         [FBFieldAutoincrement(GeneratorName = "CABLE_ID_GEN")]
         public long CableId { get; set; }
+
+        [FBTableField(TableFieldName = "TITLE", TypeName = "VARCHAR(50)", IsNotNull = true)]
+        public string Title { get; set; }
 
         [FBTableField(TableFieldName = "BILLET_ID", TypeName = "INTEGER", IsNotNull = true)]
         public long BilletId { get; set; }
@@ -17,7 +20,7 @@ namespace CableDataParsing.TableEntityes
         [FBTableField(TableFieldName = "TWISTED_ELEMENT_TYPE_ID", TypeName = "INTEGER", IsNotNull = true)]
         public long TwistedElementTypeId { get; set; }
 
-        [FBTableField(TableFieldName = "TECH_COND_ID", TypeName = "INTEGER", IsNotNull = true)]
+        [FBTableField(TableFieldName = "TECHNICAL_CONDITIONS_ID", TypeName = "INTEGER", IsNotNull = true)]
         public long TechCondId { get; set; }
 
         [FBTableField(TableFieldName = "FIRE_PROTECT_ID", TypeName = "INTEGER", IsNotNull = true)]
@@ -38,7 +41,5 @@ namespace CableDataParsing.TableEntityes
         [FBTableField(TableFieldName = "OPERATING_VOLTAGE_ID", TypeName = "INTEGER", IsNotNull = true)]
         public long OperatingVoltageId { get; set; }
 
-        [FBTableField(TableFieldName = "TITLE", TypeName = "VARCHAR(50)", IsNotNull = true)]
-        public string Title { get; set; }
     }
 }

@@ -5,8 +5,8 @@ namespace CableDataParsing.TableEntityes
     [FBTableName("CONDUCTOR")]
     public class ConductorPresenter
     {
-        [FBTableField(TableFieldName = "COND_ID", TypeName = "INTEGER", IsNotNull = true, IsPrymaryKey = true)]
-        [FBFieldAutoincrement(GeneratorName = "COND_ID_GEN")]
+        [FBTableField(TableFieldName = "ID", TypeName = "INTEGER", IsNotNull = true, IsPrymaryKey = true)]
+        [FBFieldAutoincrement(GeneratorName = "CONDUCTOR_ID_GEN")]
         public long ConductorId { get; set; }
 
         [FBTableField(TableFieldName = "TITLE", TypeName = "VARCHAR(20)", IsNotNull = true)]

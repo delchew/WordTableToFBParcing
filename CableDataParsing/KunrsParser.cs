@@ -76,11 +76,11 @@ namespace CableDataParsing
                     };
                     var polimerGroupIdDictionary = new Dictionary<int, int>
                     {
-                        { 0, 1 }, { 1, 4 }, { 2, 5 }
+                        { 0, 6 }, { 1, 4 }, { 2, 5 }
                     };
                     var insBilletKunrsIdDictionary = new Dictionary<decimal, int>
                     {
-                        { 0.75m, 8 }, { 1.0m, 7 }, { 1.5m, 6 }, { 2.5m, 5 }, { 4.0m, 4 }, { 6.0m, 3 }, { 10.0m, 2 }, { 16.0m, 1 }
+                        { 0.75m, 1 }, { 1.0m, 2 }, { 1.5m, 3 }, { 2.5m, 4 }, { 4.0m, 5 }, { 6.0m, 6 }, { 10.0m, 7 }, { 16.0m, 8 }
                     };
                     var powerColorsDict = new Dictionary<int, PowerWiresColorScheme[]>
                     {
@@ -93,11 +93,11 @@ namespace CableDataParsing
                     var kunrs = new KunrsPresenter
                     {
                         TwistedElementTypeId = 1,
-                        TechCondId = 26,
+                        TechCondId = 25,
                         HasFilling = true,
-                        OperatingVoltageId =  //Записать
-
-                };
+                        OperatingVoltageId = 1,
+                        ClimaticModId = 3
+                    };
 
                     //var billets = GetInsulatedBillets();
                     var conductors = GetConductors();
@@ -130,7 +130,7 @@ namespace CableDataParsing
                                         kunrs.BilletId = insBilletKunrsIdDictionary[conductorAreaInSqrMm];
                                         kunrs.ElementsCount = elementsCount;
                                         kunrs.MaxCoverDiameter = maxCoverDiameter;
-                                        kunrs.FireProtectionId = polimerGroupIdDictionary[j] == 1 ? 17 : 22;
+                                        kunrs.FireProtectionId = polimerGroupIdDictionary[j] == 6 ? 18 : 23;
                                         kunrs.CoverPolimerGroupId = polimerGroupIdDictionary[j];
                                         kunrsBoolPropertyesList.Add((kunrs.HasFilling, CableProperty.HasFilling));
                                         kunrs.HasFoilShield = hasFoilShieldDictionary[i];
@@ -141,10 +141,9 @@ namespace CableDataParsing
                                         kunrsBoolPropertyesList.Add((kunrs.HasArmourTube, CableProperty.HasArmourTube));
                                         kunrs.PowerColorSchemeId = (int)powerColorSchemeArray[k];
                                         kunrs.CoverColorId = polimerGroupIdDictionary[j] == 5 ? 8 : 2;
-                                        kunrs.ClimaticModId = ;  //Записать
 
                                         conductor = conductors.Where(c => c.MetalId == 3 &&
-                                                                          c.Class == 2 &&
+                                                                          (c.Class == 2 || c.Class == 3) &&
                                                                           c.AreaInSqrMm == conductorAreaInSqrMm).First();
                                         kunrs.Title = nameBuilder.GetCableName(kunrs, conductor: conductor, parameter: powerColorSchemeArray[k].GetDescription());
 
