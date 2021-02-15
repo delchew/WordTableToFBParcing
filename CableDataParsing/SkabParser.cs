@@ -74,7 +74,7 @@ namespace CableDataParsing
                         (true, false, false)
                     };
 
-                    var cableShortNamesId = new List<int> { 1, 4 }; // 1 - СКАБ 250, 2 - СКАБ 660 
+                    var operatingVoltageId = new List<int> { 2, 3 }; // 1 - СКАБ 250, 2 - СКАБ 660 
 
                     var hasArmourList = new List<(bool hasArmourBraid, bool hasArmourTube)>
                     {
@@ -96,20 +96,19 @@ namespace CableDataParsing
 
                     var plasticInsMaterialParams = new List<(int fireProtectID, int insPolymerGroupId, int coverPolymerGroupId)>
                     {
-                        (7, 6, 6), /*(31, 7, 7), */(12, 4, 4) //закомментировал СКАБ LTx
+                        (7, 6, 6), (12, 4, 4)
                     };
                     var rubberInsMaterialParams = new List<(int fireProtectID, int insPolymerGroupId, int coverPolymerGroupId)>
                     {
-                        (17, 3, 6), /*(41, 8, 7), */(22, 3, 4), (24, 3, 5) //закомментировал СКАБ LTx
+                        (17, 3, 6), (22, 3, 4), (24, 3, 5)
                     };
 
                     var exiParams = new List<bool> { false, true };
 
                     var skab = new SkabPresenter
                     {
-                        TechCondId = 17,
+                        TechCondId = 16,
                         HasFoilShield = true,
-                        OperatingVoltageId = 0  //Записать
                     };
 
                     var billets = GetInsulatedBillets();
@@ -126,7 +125,7 @@ namespace CableDataParsing
                     {
                         foreach(var mod in skabModifycationsList)
                         {
-                            foreach (var cableShortNameId in cableShortNamesId)
+                            foreach (var voltageId in operatingVoltageId)
                             {
                                 foreach (var insType in insulationTypes)
                                 {
@@ -160,12 +159,13 @@ namespace CableDataParsing
                                                                                                c.Class == 2 &&
                                                                                                c.AreaInSqrMm == conductorAreaInSqrMm).First();
 
-                                                                skab.BilletId = billets.Where(b => b.CableShortNameId == cableShortNameId &&
+                                                                skab.BilletId = billets.Where(b => b.OperatingVoltageId == voltageId &&
                                                                                                    b.PolymerGroupId == matParam.insPolymerGroupId &&
                                                                                                    b.ConductorId == conductor.ConductorId)
                                                                                        .First().BilletId;
 
                                                                 skab.ElementsCount = elementsCount;
+                                                                skab.OperatingVoltageId = voltageId;
                                                                 skab.TwistedElementTypeId = (int)twistTypeParams.twistMode;
                                                                 skab.MaxCoverDiameter = maxCoverDiameter;
                                                                 skab.FireProtectionId = matParam.fireProtectID;

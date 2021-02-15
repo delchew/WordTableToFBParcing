@@ -16,7 +16,7 @@ namespace CableDataParsing.TableEntityes
         [FBTableField(TableFieldName = "POLYMER_GROUP_ID", TypeName = "INTEGER", IsNotNull = true)]
         public long PolymerGroupId { get; set; }
 
-        [FBTableField(TableFieldName = "JPERATING_VOLTAGE_ID", TypeName = "INTEGER", IsNotNull = true)]
+        [FBTableField(TableFieldName = "OPERATING_VOLTAGE_ID", TypeName = "INTEGER", IsNotNull = true)]
         public long OperatingVoltageId { get; set; }
 
         [FBTableField(TableFieldName = "DIAMETER", TypeName = "NUMERIC(3, 2)", IsNotNull = true)]

@@ -99,7 +99,6 @@ namespace CableDataParsing
                         ClimaticModId = 3
                     };
 
-                    //var billets = GetInsulatedBillets();
                     var conductors = GetConductors();
 
                     var listCablePowerColor = new ListCablePowerColor();

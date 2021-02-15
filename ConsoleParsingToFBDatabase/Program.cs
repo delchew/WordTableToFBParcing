@@ -1,14 +1,16 @@
 ﻿using System;
 using System.IO;
+using CableDataParsing;
 
 namespace ConsoleParsingToFBDatabase
 {
     class Program
     {
-        static readonly string _connectionString = "character set=utf8;user id=SYSDBA;password=masterkey;dialect=3;data source=localhost;port number=3050;initial catalog=E:\\databases\\TEST.fdb";
+        static readonly string _connectionString = "character set=utf8;user id=SYSDBA;password=masterkey;dialect=3;data source=localhost;port number=3050;initial catalog=/Users/Shared/databases/database_repository/CablesDatabases/CABLES.FDB";
 
         static void Main()
         {
+            ParseSkabBillet();
         }
 
         //static void CreateConductorTable()
@@ -113,14 +115,13 @@ namespace ConsoleParsingToFBDatabase
         }
         private static void ParseSkabBillet()
         {
-            //var parser = new SkabInsulatedBilletParser(_connectionString);
+            var parser = new SkabInsulatedBilletParser(_connectionString);
             int recordsCount = 0;
-            //Console.WriteLine("Нажмите любую клавишу для начала парсинга...");
-            //Console.ReadKey();
+            Console.WriteLine("Нажмите любую клавишу для начала парсинга...");
+            Console.ReadKey();
             try
             {
-                Console.WriteLine("Тест");
-                //recordsCount = parser.ParseDataToDatabase();
+                recordsCount = parser.ParseDataToDatabase();
                 Console.WriteLine("Добавлено {0} записей.", recordsCount);
             }
             catch (Exception ex)
