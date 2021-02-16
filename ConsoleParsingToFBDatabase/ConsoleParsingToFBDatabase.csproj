@@ -8,8 +8,22 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
     <PackageReference Include="FirebirdSql.Data.FirebirdClient" Version="7.10.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CableDataParsing\CableDataParsing.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Cables">
+      <HintPath>..\..\Cables\Cables.Brands\bin\Release\netstandard2.0\Cables.dll</HintPath>
+    </Reference>
+    <Reference Include="FirebirdDatabaseProvider">
+      <HintPath>..\..\FirebirdDatabaseProvider\FirebirdDatabaseProvider\bin\Release\netstandard2.0\FirebirdDatabaseProvider.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="twistInfo.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

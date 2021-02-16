@@ -24,36 +24,53 @@ namespace CableDataParsing.NameBuilders
         {
             _nameBuilder.Clear();
 
-            //var skabVoltageType = cable.OperatingVoltage.ACVoltage == 380 ? 250 : 660;
-            //_nameBuilder.Append($"СКАБ {skabVoltageType}");
+            var skabVoltageType = cable.OperatingVoltageId == 2 ? 250 : 660;
+            _nameBuilder.Append($"СКАБ {skabVoltageType}");
 
-            //if (cable.HasArmourTube)
-            //    _nameBuilder.Append("K");
-            //else
-            //    if (cable.HasArmourBraid)
-            //        _nameBuilder.Append("KГ");
+            if (cable.HasArmourTube)
+                _nameBuilder.Append("K");
+            else
+                if (cable.HasArmourBraid)
+                _nameBuilder.Append("KГ");
 
-            //if (cable.CoverPolimerGroupId == (long)PolymerGroup.PUR)
-            //    _nameBuilder.Append("У");
+            if (cable.CoverPolimerGroupId == (long)PolymerGroup.PUR)
+                _nameBuilder.Append("У");
 
-            //_nameBuilder.Append(cable.FireProtectionClass.Designation);
+            _nameBuilder.Append(GetFireProtectDesignationById(cable.FireProtectionId));
 
-            //if (cable.CoverPolimerGroupId == (long)PolymerGroup.HFCompound ||
-            //    cable.CoverPolimerGroupId == (long)PolymerGroup.PUR)
-            //    _nameBuilder.Append("-ХЛ");
-            //var namePart = cable.HasIndividualFoilShields ? "э" : string.Empty;
-            //_nameBuilder.Append($" {cable.ElementsCount}х{(int)cable.TwistedElementTypeId}{namePart}х");
-            //namePart = CableCalculations.FormatConductorArea((double)conductor.AreaInSqrMm);
-            //_nameBuilder.Append(namePart + "л");
+            string namePart;
 
-            //var braidMod = !cable.HasBraidShield ? "ф" : string.Empty;
-            //var fillMod = !cable.HasFilling ? "о" : string.Empty;
-            //var waterBlockMod = cable.HasWaterBlockStripe ? "в" : string.Empty;
-            //_nameBuilder.Append($" {braidMod}{fillMod}{waterBlockMod}");
+            if (cable.TwistedElementTypeId == 1L)
+                _nameBuilder.Append($" {cable.ElementsCount}х");
+            else
+            {
+                namePart = cable.HasIndividualFoilShields ? "э" : string.Empty;
+                _nameBuilder.Append($" {cable.ElementsCount}х{(int)cable.TwistedElementTypeId}{namePart}х");
+            }
+
+            namePart = CableCalculations.FormatConductorArea((double)conductor.AreaInSqrMm);
+            _nameBuilder.Append(namePart + "л");
+
+            var braidMod = !cable.HasBraidShield ? "ф" : string.Empty;
+            var fillMod = !cable.HasFilling ? "о" : string.Empty;
+            var waterBlockMod = cable.HasWaterBlockStripe ? "в" : string.Empty;
+            _nameBuilder.Append($" {braidMod}{fillMod}{waterBlockMod}");
 
             _nameBuilder.Append(cable.SparkSafety ? " Ex-i" : string.Empty);
 
             return _nameBuilder.ToString();
+        }
+
+        private string GetFireProtectDesignationById(long id)
+        {
+            switch(id)
+            {
+                case 8: return "нг(А)-LS";
+                case 13: return "нг(А)-HF-ХЛ";
+                case 18: return "нг(А)-FRLS";
+                case 23: return "нг(А)-FRHF-ХЛ";
+                default: return "нг(С)-FRHF-ХЛ";
+            }
         }
     }
 }

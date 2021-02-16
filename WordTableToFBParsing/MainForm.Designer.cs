@@ -146,7 +146,7 @@ namespace WordTableToFBParsing
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Parce MS Word table to Firebird database";
+            this.Text = "Parse MS Word table to Firebird database";
             this.tableLayoutPanelTop.ResumeLayout(false);
             this.tableLayoutPanelTop.PerformLayout();
             this.tableLayoutPanelBottom.ResumeLayout(false);

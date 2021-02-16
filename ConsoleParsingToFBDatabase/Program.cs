@@ -1,16 +1,42 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using CableDataParsing;
+using CableDataParsing.TableEntityes;
+using Cables;
+using CablesCraftMobile;
+using FirebirdDatabaseProvider;
 
 namespace ConsoleParsingToFBDatabase
 {
     class Program
     {
         static readonly string _connectionString = "character set=utf8;user id=SYSDBA;password=masterkey;dialect=3;data source=localhost;port number=3050;initial catalog=/Users/Shared/databases/database_repository/CablesDatabases/CABLES.FDB";
-
+        static readonly string _connectionString2 = "character set=utf8;user id=SYSDBA;password=masterkey;dialect=3;data source=localhost;port number=3050;initial catalog=e:\\databases\\CABLES.FDB";
         static void Main()
         {
-            ParseSkabBillet();
+            var twistInfoList = GetTwistInfoList();
+            Console.WriteLine("Число записей: {0}", twistInfoList.Count);
+            var dbProvider = new FirebirdDBProvider(_connectionString2);
+            var provider = new FirebirdDBTableProvider<TwistInfoPresenter>(dbProvider);
+            var presenter = new TwistInfoPresenter();
+            foreach(var twistInfo in twistInfoList)
+            {
+                presenter.ElementsCount = twistInfo.QuantityElements;
+                presenter.TwistKoefficient = (decimal)twistInfo.TwistCoefficient;
+                presenter.LayersElementsCount = twistInfo.LayersElementsCount;
+                provider.AddItem(presenter);
+            }
+            Console.ReadKey();
+        }
+
+        static List<TwistInfo> GetTwistInfoList()
+        {
+            var repository = new JsonRepository();
+            var filePath = Path.Combine(Environment.CurrentDirectory, "twistInfo.json");
+            var list = repository.GetObjects<TwistInfo>(filePath);
+            return list.ToList();
         }
 
         //static void CreateConductorTable()

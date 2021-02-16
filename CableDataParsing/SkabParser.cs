@@ -96,11 +96,11 @@ namespace CableDataParsing
 
                     var plasticInsMaterialParams = new List<(int fireProtectID, int insPolymerGroupId, int coverPolymerGroupId)>
                     {
-                        (7, 6, 6), (12, 4, 4)
+                        (8, 6, 6), (13, 4, 4)
                     };
                     var rubberInsMaterialParams = new List<(int fireProtectID, int insPolymerGroupId, int coverPolymerGroupId)>
                     {
-                        (17, 3, 6), (22, 3, 4), (24, 3, 5)
+                        (18, 3, 6), (23, 3, 4), (25, 3, 5)
                     };
 
                     var exiParams = new List<bool> { false, true };
@@ -121,6 +121,10 @@ namespace CableDataParsing
                     var nameBuilder = new SkabNameBuilder(stringBuilder);
 
                     var skabBoolPropertyesList = new List<(bool hasProp, CableProperty propType)>();
+                    ConductorPresenter conductor;
+                    CableBilletPresenter billet;
+                    List<TableCellData> tableData;
+
                     while (tableNumber < maxDiamTableCount)
                     {
                         foreach(var mod in skabModifycationsList)
@@ -134,7 +138,6 @@ namespace CableDataParsing
                                         var table = tables[tableNumber];
                                         if (table.Rows.Count > 0 && table.Columns.Count > 0)
                                         {
-                                            List<TableCellData> tableData;
                                             foreach (var twistTypeParams in twistTypesParamsList)
                                             {
                                                 _wordTableParser.DataColumnsCount = twistTypeParams.dataColumnsCount;
@@ -152,18 +155,17 @@ namespace CableDataParsing
                                                         materialParams = insType == 0 ? plasticInsMaterialParams : rubberInsMaterialParams;
                                                         foreach (var matParam in materialParams)
                                                         {
-                                                            ConductorPresenter conductor;
                                                             foreach (var exiParam in exiParams)
                                                             {
                                                                 conductor = conductors.Where(c => c.MetalId == 2 &&
                                                                                                c.Class == 2 &&
                                                                                                c.AreaInSqrMm == conductorAreaInSqrMm).First();
 
-                                                                skab.BilletId = billets.Where(b => b.OperatingVoltageId == voltageId &&
+                                                                billet = billets.Where(b => b.OperatingVoltageId == voltageId &&
                                                                                                    b.PolymerGroupId == matParam.insPolymerGroupId &&
                                                                                                    b.ConductorId == conductor.ConductorId)
-                                                                                       .First().BilletId;
-
+                                                                                       .First();
+                                                                skab.BilletId = billet.BilletId;
                                                                 skab.ElementsCount = elementsCount;
                                                                 skab.OperatingVoltageId = voltageId;
                                                                 skab.TwistedElementTypeId = (int)twistTypeParams.twistMode;
@@ -186,10 +188,9 @@ namespace CableDataParsing
                                                                 skab.SparkSafety = exiParam;
                                                                 skabBoolPropertyesList.Add((skab.SparkSafety, CableProperty.SparkSafety));
                                                                 skab.CoverColorId = (exiParam && armourType.hasArmourTube == false) ? 3 : 2;
-                                                                skab.ClimaticModId = 0;  //Записать
-
-
-                                                                skab.Title = nameBuilder.GetCableName(skab, conductor: conductor);
+                                                                skab.ClimaticModId = matParam.coverPolymerGroupId == 6 ? 3 : 7;  //3 - УХЛ, 7 - В
+                                                                
+                                                                skab.Title = nameBuilder.GetCableName(skab, billet, conductor);
 
                                                                 recordId = _skabTableProvider.AddItem(skab);
 
