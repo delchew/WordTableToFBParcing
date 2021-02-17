@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using CableDataParsing;
 using CableDataParsing.TableEntityes;
 using Cables;
@@ -14,21 +15,45 @@ namespace ConsoleParsingToFBDatabase
     {
         static readonly string _connectionString = "character set=utf8;user id=SYSDBA;password=masterkey;dialect=3;data source=localhost;port number=3050;initial catalog=/Users/Shared/databases/database_repository/CablesDatabases/CABLES.FDB";
         static readonly string _connectionString2 = "character set=utf8;user id=SYSDBA;password=masterkey;dialect=3;data source=localhost;port number=3050;initial catalog=e:\\databases\\CABLES.FDB";
+
         static void Main()
         {
             var twistInfoList = GetTwistInfoList();
             Console.WriteLine("Число записей: {0}", twistInfoList.Count);
-            var dbProvider = new FirebirdDBProvider(_connectionString2);
+            var dbProvider = new FirebirdDBProvider(_connectionString);
             var provider = new FirebirdDBTableProvider<TwistInfoPresenter>(dbProvider);
             var presenter = new TwistInfoPresenter();
-            foreach(var twistInfo in twistInfoList)
+
+            try
             {
-                presenter.ElementsCount = twistInfo.QuantityElements;
-                presenter.TwistKoefficient = (decimal)twistInfo.TwistCoefficient;
-                presenter.LayersElementsCount = twistInfo.LayersElementsCount;
-                provider.AddItem(presenter);
+                dbProvider.OpenConnection();
+
+
+                if (provider.TableExists())
+                {
+                    PropertyInfo prop;
+                    foreach (var twistInfo in twistInfoList)
+                    {
+                        presenter.ElementsCount = twistInfo.QuantityElements;
+                        presenter.TwistKoefficient = (decimal)twistInfo.TwistCoefficient;
+                        for (int i = 0; i < twistInfo.LayersElementsCount.Length; i++)
+                        {
+                            prop = presenter.GetType().GetProperty($"Layer{i + 1}ElementsCount");
+                            prop.SetValue(presenter, twistInfo.LayersElementsCount[i]);
+                        }
+                        provider.AddItem(presenter);
+                    }
+                }
             }
-            Console.ReadKey();
+            catch (Exception ex)
+            {
+                Console.WriteLine("Произошла ошибка: {0}", ex.Message);
+            }
+            finally
+            {
+                dbProvider.CloseConnection();
+                EndOfProgram();
+            }
         }
 
         static List<TwistInfo> GetTwistInfoList()

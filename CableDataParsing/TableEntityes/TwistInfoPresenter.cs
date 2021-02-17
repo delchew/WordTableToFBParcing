@@ -15,7 +15,19 @@ namespace CableDataParsing.TableEntityes
         [FBTableField(TableFieldName = "TWIST_KOEFFICIENT", TypeName = "NUMERIC(3, 2)")]
         public decimal TwistKoefficient { get; set; }
 
-        [FBTableField(TableFieldName = "LAYERS_ELEMENTS_COUNT", TypeName = "INTEGER", IsNotNull = true)]
-        public int [] LayersElementsCount { get; set; }
+        [FBTableField(TableFieldName = "LAYER1_ELEMENTS_COUNT", TypeName = "INTEGER")]
+        public int Layer1ElementsCount { get; set; }
+
+        [FBTableField(TableFieldName = "LAYER2_ELEMENTS_COUNT", TypeName = "INTEGER")]
+        public int Layer2ElementsCount { get; set; }
+
+        [FBTableField(TableFieldName = "LAYER3_ELEMENTS_COUNT", TypeName = "INTEGER")]
+        public int Layer3ElementsCount { get; set; }
+
+        [FBTableField(TableFieldName = "LAYER4_ELEMENTS_COUNT", TypeName = "INTEGER")]
+        public int Layer4ElementsCount { get; set; }
+
+        [FBTableField(TableFieldName = "LAYER5_ELEMENTS_COUNT", TypeName = "INTEGER")]
+        public int Layer5ElementsCount { get; set; }
     }
 }
