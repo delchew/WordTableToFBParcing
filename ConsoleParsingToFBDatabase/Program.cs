@@ -8,6 +8,7 @@ using CableDataParsing.TableEntityes;
 using Cables;
 using CablesCraftMobile;
 using FirebirdDatabaseProvider;
+using FirebirdSql.Data.FirebirdClient;
 
 namespace ConsoleParsingToFBDatabase
 {
@@ -15,12 +16,70 @@ namespace ConsoleParsingToFBDatabase
     {
         static readonly string _connectionString = "character set=utf8;user id=SYSDBA;password=masterkey;dialect=3;data source=localhost;port number=3050;initial catalog=/Users/Shared/databases/database_repository/CablesDatabases/CABLES.FDB";
         static readonly string _connectionString2 = "character set=utf8;user id=SYSDBA;password=masterkey;dialect=3;data source=localhost;port number=3050;initial catalog=e:\\databases\\CABLES.FDB";
+        static readonly string _connectionString3 = "character set=utf8;user id=SYSDBA;password=masterkey;dialect=3;data source=localhost;port number=3050;initial catalog=e:\\databases\\CABLESBRANDS.FDB";
 
         static void Main()
         {
+            using(var connection = new FbConnection(_connectionString3))
+            {
+                connection.Open();
+                var sqlSelectQueryString = $"SELECT * FROM TWIST_INFO;";
+                FbDataReader reader;
+                using (var command = new FbCommand(sqlSelectQueryString, connection))
+                {
+                    reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            var values = new object[reader.FieldCount];
+                            reader.GetValues(values);
+                            Console.WriteLine(string.Join("|", values));
+
+                            for (int i = 0; i < reader.FieldCount; i++)
+                            {
+                                var obj = reader.GetValue(i);
+                                var type = obj.GetType();
+                                if (obj is int[] arr)
+                                {
+                                    for (int j = 0; j < arr.Length; j++)
+                                        Console.Write($"{arr[j]}, ");
+                                }
+                                else
+                                    Console.Write($"{obj} ");
+                            }
+                            Console.WriteLine();
+                        }
+                    }
+                }
+                sqlSelectQueryString = "INSERT INTO TWIST_INFO (ELEMENTS_COUNT, TWIST_COEFFICIENT, LAYERS_ELEMENTS_COUNT) VALUES (:V1, :v2, :V3);";
+                using (var command = new FbCommand(sqlSelectQueryString, connection))
+                {
+                    (int cnt, double koef, int[] lyrs)[] paramSet = new (int cnt, double koef, int[] lyrs)[]
+                    {
+                        (49, 8.41, new int []{ 4, 9, 15, 21, 0} ),
+                        (50, 8.41, new int []{ 4, 10, 15, 21, 0} ),
+                        (61, 9.0, new int []{ 1, 6, 12, 18, 24} ),
+                        (20, 5.3, new int []{ 7, 13, 0, 0, 0} ),
+                    };
+                    foreach (var set in paramSet)
+                    {
+                        command.Parameters.Add(new FbParameter("V1", set.cnt));
+                        command.Parameters.Add(new FbParameter("V2", set.koef));
+                        command.Parameters.Add("V3", set.lyrs);
+                        command.ExecuteNonQuery();
+                        command.Parameters.Clear();
+                    }
+                }
+
+            }
+        }
+
+        static void FillTwistInfoTable()
+        {
             var twistInfoList = GetTwistInfoList();
             Console.WriteLine("Число записей: {0}", twistInfoList.Count);
-            var dbProvider = new FirebirdDBProvider(_connectionString);
+            var dbProvider = new FirebirdDBProvider(_connectionString2);
             var provider = new FirebirdDBTableProvider<TwistInfoPresenter>(dbProvider);
             var presenter = new TwistInfoPresenter();
 
