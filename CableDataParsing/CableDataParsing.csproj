@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FirebirdSql.EntityFrameworkCore.Firebird" Version="7.10.1" />
     <PackageReference Include="Microsoft.Office.Interop.Word" Version="15.0.4797.1003" />
   </ItemGroup>
 
@@ -14,6 +15,9 @@
     </Reference>
     <Reference Include="Cables.Brands">
       <HintPath>..\..\Cables\Cables.Brands\bin\Release\netstandard2.0\Cables.Brands.dll</HintPath>
+    </Reference>
+    <Reference Include="CablesDatabaseEFCoreFirebird">
+      <HintPath>..\..\CablesDatabaseEFCoreFirebird\CablesDatabaseEFCoreFirebird\bin\Debug\netstandard2.0\CablesDatabaseEFCoreFirebird.dll</HintPath>
     </Reference>
     <Reference Include="FirebirdDatabaseProvider">
       <HintPath>..\..\FirebirdDatabaseProvider\FirebirdDatabaseProvider\bin\Release\netstandard2.0\FirebirdDatabaseProvider.dll</HintPath>
