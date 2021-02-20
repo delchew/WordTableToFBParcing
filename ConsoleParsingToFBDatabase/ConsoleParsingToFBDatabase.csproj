@@ -22,6 +22,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <None Update="AppSettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="twistInfo.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

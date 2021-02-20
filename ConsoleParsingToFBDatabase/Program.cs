@@ -20,7 +20,13 @@ namespace ConsoleParsingToFBDatabase
 
         static void Main()
         {
-            using(var connection = new FbConnection(_connectionString3))
+            var parser = new Kevv_KerspParser(new FileInfo(@"C:\Users\a.bondarenko\Documents\Документы\1.doc"));
+            parser.ParseDataToDatabase();
+        }
+
+        static void WorkingWithADONetArrays()
+        {
+            using (var connection = new FbConnection(_connectionString3))
             {
                 connection.Open();
                 var sqlSelectQueryString = $"SELECT * FROM TWIST_INFO;";
