@@ -7,7 +7,14 @@ namespace CableDataParsing
 {
     public class Kevv_KerspBilletParser : ICableDataParcer
     {
+        private string _connectionString;
+
         public event Action<int, int> ParseReport;
+
+        public Kevv_KerspBilletParser(string connectionString)
+        {
+            _connectionString = connectionString;
+        }
 
         public void ParseConductors()
         {
@@ -22,7 +29,7 @@ namespace CableDataParsing
                 new Conductor{ Title = "19х0,40 ММЛ", WiresCount = 19, MetalId = 2, Class = 4, WiresDiameter = 0.40m, ConductorDiameter = 2.0m, AreaInSqrMm = 2.5m },
             };
 
-            using (var dbContext = new CablesContext())
+            using (var dbContext = new CablesContext(_connectionString))
             {
                 dbContext.Conductors.AddRange(conductors);
                 var count = dbContext.SaveChanges();
@@ -55,7 +62,7 @@ namespace CableDataParsing
                 new InsulatedBillet{ConductorId = 28, PolymerGroupId = 3, OperatingVoltageId = 4, Diameter = 3.7m, CableShortNameId = 4 }
             };
 
-            using (var dbContext = new CablesContext())
+            using (var dbContext = new CablesContext(_connectionString))
             {
                 dbContext.AddRange(kevvBillets);
                 dbContext.SaveChanges();

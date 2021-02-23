@@ -20,7 +20,7 @@ namespace ConsoleParsingToFBDatabase
 
         static void Main()
         {
-            var parser = new Kevv_KerspParser(new FileInfo(@"C:\Users\a.bondarenko\Documents\Документы\1.doc"));
+            var parser = new Kevv_KerspParser(_connectionString, null);
             parser.ParseDataToDatabase();
         }
 
