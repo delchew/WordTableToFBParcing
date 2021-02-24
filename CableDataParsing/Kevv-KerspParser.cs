@@ -34,10 +34,12 @@ namespace CableDataParsing
             List<InsulatedBillet> pvcBillets, rubberBillets;
             using (var dbContext = new CablesContext(_connectionString))
             {
-                pvcBillets = dbContext.InsulatedBillets.Include(b => b.Conductor)
+                pvcBillets = dbContext.InsulatedBillets.AsNoTracking()
+                                                       .Include(b => b.Conductor)
                                                        .Where(b => b.CableShortName.ShortName.ToLower().StartsWith("кэв"))
                                                        .ToList();
-                rubberBillets = dbContext.InsulatedBillets.Include(b => b.Conductor)
+                rubberBillets = dbContext.InsulatedBillets.AsNoTracking()
+                                                          .Include(b => b.Conductor)
                                                           .Where(b => b.CableShortName.ShortName.ToLower().StartsWith("кэрс"))
                                                           .ToList();
             }
