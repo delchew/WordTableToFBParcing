@@ -22,7 +22,8 @@ namespace WordTableToFBParsing
             _cableTypesDict = new Dictionary<string, Func<ICableDataParcer>>
             {
                 {"КУНРС", () => new KunrsParser(_connectionString, _view.MSWordFile) },
-                {"СКАБ", () => new SkabParser(_connectionString, _view.MSWordFile) }
+                {"СКАБ", () => new SkabParser(_connectionString, _view.MSWordFile) },
+                {"КЭВ(Э)В, КЭРс(Э)", () => new Kevv_KerspParser(_connectionString, _view.MSWordFile) }
             };
 
             _dbConnectionsNames = new string[]

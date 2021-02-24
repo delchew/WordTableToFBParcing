@@ -20,8 +20,10 @@ namespace ConsoleParsingToFBDatabase
 
         static void Main()
         {
-            var parser = new Kevv_KerspParser(_connectionString, null);
-            parser.ParseDataToDatabase();
+            //var confParser = new ConductorsParcer(_connectionString2);
+            //confParser.ParseDataToDatabase();
+            //var parser = new Kevv_KerspBilletParser(_connectionString2);
+            //parser.ParseDataToDatabase();
         }
 
         static void WorkingWithADONetArrays()
