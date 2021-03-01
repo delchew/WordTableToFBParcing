@@ -11,8 +11,8 @@ namespace CableDataParsing.TableEntityes
         [FBTableField(TableFieldName = "TITLE", TypeName = "VARCHAR(50)", IsNotNull = true)]
         public string Title { get; set; }
 
-        [FBTableField(TableFieldName = "BILLET_ID", TypeName = "INTEGER", IsNotNull = true)]
-        public long BilletId { get; set; }
+        //[FBTableField(TableFieldName = "BILLET_ID", TypeName = "INTEGER", IsNotNull = true)]
+        //public long BilletId { get; set; }
 
         [FBTableField(TableFieldName = "ELEMENTS_COUNT", TypeName = "INTEGER", IsNotNull = true)]
         public int ElementsCount { get; set; }

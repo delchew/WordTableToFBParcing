@@ -21,6 +21,8 @@ namespace CableDataParsing
         private FirebirdDBProvider _dBProvider;
         private FirebirdDBTableProvider<SkabPresenter> _skabTableProvider;
         private FirebirdDBTableProvider<ListCableProperties> _ListCablePropertiesProvider;
+        private FirebirdDBTableProvider<ListCableBillets> _ListCableBilletsProvider;
+
 
         public event Action<int, int> ParseReport;
         public SkabParser(string dbConnectionString, FileInfo mSWordFile)
@@ -30,6 +32,8 @@ namespace CableDataParsing
             _dBProvider = new FirebirdDBProvider(_dbConnectionString);
             _skabTableProvider = new FirebirdDBTableProvider<SkabPresenter>(_dBProvider);
             _ListCablePropertiesProvider = new FirebirdDBTableProvider<ListCableProperties>(_dBProvider);
+            _ListCableBilletsProvider = new FirebirdDBTableProvider<ListCableBillets>(_dBProvider);
+
         }
         public int ParseDataToDatabase()
         {
@@ -115,6 +119,8 @@ namespace CableDataParsing
                     var conductors = GetConductors();
 
                     var listCableProperties = new ListCableProperties();
+                    var listCableBillets = new ListCableBillets();
+
                     long recordId;
 
                     var stringBuilder = new StringBuilder();
@@ -165,7 +171,7 @@ namespace CableDataParsing
                                                                                                    b.PolymerGroupId == matParam.insPolymerGroupId &&
                                                                                                    b.ConductorId == conductor.ConductorId)
                                                                                        .First();
-                                                                skab.BilletId = billet.BilletId;
+
                                                                 skab.ElementsCount = elementsCount;
                                                                 skab.OperatingVoltageId = voltageId;
                                                                 skab.TwistedElementTypeId = (int)twistTypeParams.twistMode;
@@ -193,6 +199,10 @@ namespace CableDataParsing
                                                                 skab.Title = nameBuilder.GetCableName(skab, billet, conductor);
 
                                                                 recordId = _skabTableProvider.AddItem(skab);
+
+                                                                listCableBillets.CableId = recordId;
+                                                                listCableBillets.BilletId = billet.BilletId;
+                                                                _ListCableBilletsProvider.AddItem(listCableBillets);
 
                                                                 listCableProperties.CableId = recordId;
 

@@ -125,7 +125,6 @@ namespace CableDataParsing
                               select b).First();
                 var kevvKersp = new Cable
                 {
-                    BilletId = billet.Id,
                     ElementsCount = elementsCount,
                     TwistedElementTypeId = 1, //single
                     TechnicalConditionsId = 22, //ТУ 46
@@ -139,6 +138,9 @@ namespace CableDataParsing
                 kevvKersp.Title = BuildTitle(kevvKersp, billet, index == 11 ? "Э" : string.Empty);
                 var cableRec = dbContext.Cables.Add(kevvKersp);
                 dbContext.SaveChanges();
+
+                dbContext.ListCableBillets.Add(new ListCableBillets { BilletId = billet.Id, CableId = cableRec.Entity.Id });
+
                 if (index == 11) //обрабатывается часть таблицы для кабелей с экраном
                 {
                     dbContext.ListCableProperties.Add(new ListCableProperties { PropertyId = 4, CableId = cableRec.Entity.Id });

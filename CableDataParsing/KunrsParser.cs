@@ -21,6 +21,7 @@ namespace CableDataParsing
         private FirebirdDBTableProvider<KunrsPresenter> _kunrsTableProvider;
         private FirebirdDBTableProvider<ListCablePowerColor> _ListCablePowerColorProvider;
         private FirebirdDBTableProvider<ListCableProperties> _ListCablePropertiesProvider;
+        private FirebirdDBTableProvider<ListCableBillets> _ListCableBilletsProvider;
         private FirebirdDBProvider _dBProvider;
 
         public KunrsParser(string dbConnectionString, FileInfo mSWordFile)
@@ -31,6 +32,7 @@ namespace CableDataParsing
             _kunrsTableProvider = new FirebirdDBTableProvider<KunrsPresenter>(_dBProvider);
             _ListCablePowerColorProvider = new FirebirdDBTableProvider<ListCablePowerColor>(_dBProvider);
             _ListCablePropertiesProvider = new FirebirdDBTableProvider<ListCableProperties>(_dBProvider);
+            _ListCableBilletsProvider = new FirebirdDBTableProvider<ListCableBillets>(_dBProvider);
         }
 
         public event Action<int, int> ParseReport;
@@ -103,6 +105,7 @@ namespace CableDataParsing
 
                     var listCablePowerColor = new ListCablePowerColor();
                     var listCableProperties = new ListCableProperties();
+                    var listCableBillets = new ListCableBillets();
                     long recordId;
                     ConductorPresenter conductor;
                     PowerWiresColorScheme[] powerColorSchemeArray;
@@ -126,7 +129,6 @@ namespace CableDataParsing
                                     powerColorSchemeArray = powerColorsDict[elementsCount];
                                     for (int k = 0; k < powerColorSchemeArray.Length; k++)
                                     {
-                                        kunrs.BilletId = insBilletKunrsIdDictionary[conductorAreaInSqrMm];
                                         kunrs.ElementsCount = elementsCount;
                                         kunrs.MaxCoverDiameter = maxCoverDiameter;
                                         kunrs.FireProtectionId = polimerGroupIdDictionary[j] == 6 ? 18 : 23;
@@ -151,6 +153,10 @@ namespace CableDataParsing
                                         listCablePowerColor.CableId = recordId;
                                         listCablePowerColor.PowerColorSchemeId = kunrs.PowerColorSchemeId;
                                         _ListCablePowerColorProvider.AddItem(listCablePowerColor);
+
+                                        listCableBillets.CableId = recordId;
+                                        listCableBillets.BilletId = insBilletKunrsIdDictionary[conductorAreaInSqrMm];
+                                        _ListCableBilletsProvider.AddItem(listCableBillets);
 
                                         listCableProperties.CableId = recordId;
 
