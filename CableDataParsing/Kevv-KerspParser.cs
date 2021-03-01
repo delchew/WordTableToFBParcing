@@ -142,10 +142,9 @@ namespace CableDataParsing
                 dbContext.ListCableBillets.Add(new ListCableBillets { BilletId = billet.Id, CableId = cableRec.Entity.Id });
 
                 if (index == 11) //обрабатывается часть таблицы для кабелей с экраном
-                {
                     dbContext.ListCableProperties.Add(new ListCableProperties { PropertyId = 4, CableId = cableRec.Entity.Id });
-                    dbContext.SaveChanges();
-                }
+
+                dbContext.SaveChanges();
 
                 recordsCount++;
             }

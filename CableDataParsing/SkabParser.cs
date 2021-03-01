@@ -9,6 +9,7 @@ using CableDataParsing.MSWordTableParsers;
 using CableDataParsing.TableEntityes;
 using System.Text;
 using CableDataParsing.NameBuilders;
+using Cables.Common;
 
 namespace CableDataParsing
 {
