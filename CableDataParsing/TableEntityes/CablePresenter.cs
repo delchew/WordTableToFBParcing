@@ -14,8 +14,8 @@ namespace CableDataParsing.TableEntityes
         //[FBTableField(TableFieldName = "BILLET_ID", TypeName = "INTEGER", IsNotNull = true)]
         //public long BilletId { get; set; }
 
-        [FBTableField(TableFieldName = "ELEMENTS_COUNT", TypeName = "INTEGER", IsNotNull = true)]
-        public int ElementsCount { get; set; }
+        [FBTableField(TableFieldName = "ELEMENTS_COUNT", TypeName = "NUMERIC(3, 1)", IsNotNull = true)]
+        public decimal ElementsCount { get; set; }
 
         [FBTableField(TableFieldName = "TWISTED_ELEMENT_TYPE_ID", TypeName = "INTEGER", IsNotNull = true)]
         public long TwistedElementTypeId { get; set; }

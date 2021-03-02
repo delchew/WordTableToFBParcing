@@ -155,7 +155,7 @@ namespace CableDataParsing
                                                 List<(int fireProtectID, int insPolymerGroupId, int coverPolymerGroupId)> materialParams;
                                                 foreach (var tableCellData in tableData)
                                                 {
-                                                    if (int.TryParse(tableCellData.ColumnHeaderData, out int elementsCount) &&
+                                                    if (decimal.TryParse(tableCellData.ColumnHeaderData, out decimal elementsCount) &&
                                                         decimal.TryParse(tableCellData.CellData, out decimal maxCoverDiameter) &&
                                                         decimal.TryParse(tableCellData.RowHeaderData, out decimal conductorAreaInSqrMm))
                                                     {

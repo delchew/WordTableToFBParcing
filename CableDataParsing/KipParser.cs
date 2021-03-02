@@ -44,7 +44,7 @@ namespace CableDataParsing
                 {
                     _wordTableParser = new WordTableParser
                     {
-                        DataRowsCount = 4,
+                        DataRowsCount = 1,
                         DataColumnsCount = 11,
                         ColumnHeadersRowIndex = 3,
                         DataStartColumnIndex = 2
@@ -52,7 +52,9 @@ namespace CableDataParsing
                     List<TableCellData> tableData;
                     using (var dbContext = new CablesContext(_connectionString))
                     {
-                        var climaticMod = dbContext.ClimaticMods.Where(c => c.Title.ToUpper() == "").Single(); //написать условие
+                        var climaticModV = dbContext.ClimaticMods.Where(c => c.Id == 7).Single();
+                        var climaticModUHL = dbContext.ClimaticMods.Where(c => c.Id == 3).Single();
+
                         var blackColor = dbContext.Colors.Where(c => c.Title.ToLower() == "black").Single();
                         var greyColor = dbContext.Colors.Where(c => c.Title.ToLower() == "grey").Single();
                         var operatingVoltage = dbContext.OperatingVoltages.Where(o => o.ACVoltage == 300 && o.DCVoltage == null).Single();
@@ -97,60 +99,74 @@ namespace CableDataParsing
                             (dbContext.TechnicalConditions.Where(t => t.Title.ToUpper().Contains("042-2010")).Single(), coverPolymerGroupList42TC)
                         };
 
+                        var cableProps = new List<Cables.Common.CableProperty>
+                        {
+                            Cables.Common.CableProperty.HasFoilShield | Cables.Common.CableProperty.HasBraidShield,
+                            Cables.Common.CableProperty.HasFoilShield | Cables.Common.CableProperty.HasBraidShield | Cables.Common.CableProperty.HasArmourBraid,
+                            Cables.Common.CableProperty.HasFoilShield | Cables.Common.CableProperty.HasBraidShield | Cables.Common.CableProperty.HasArmourBraid | Cables.Common.CableProperty.HasArmourTube,
+                            Cables.Common.CableProperty.HasFoilShield | Cables.Common.CableProperty.HasBraidShield | Cables.Common.CableProperty.HasArmourTape | Cables.Common.CableProperty.HasArmourTube
+                        };
+
                         var dataStartRowIndexes = new int[2] { 4, 8 };
                         InsulatedBillet billet;
                         foreach (var techCondPolymerGroup in techCondPolymerGroupsList)
                         {
+                            var tableNumber = techCondPolymerGroup.paramGroups == coverPolymerGroupList42TC ? 2 : 1;
+
                             foreach (var paramGroup in techCondPolymerGroup.paramGroups)
                             {
                                 foreach (var index in dataStartRowIndexes)
                                 {
                                     _wordTableParser.DataStartRowIndex = index;
-                                    tableData = _wordTableParser.GetCableCellsCollection(tables[1]);
-                                    foreach (var tableCellData in tableData)
+
+                                    foreach (var cableProp in cableProps)
                                     {
-                                        if (int.TryParse(tableCellData.ColumnHeaderData, out int elementsCount) &&
-                                            decimal.TryParse(tableCellData.CellData, out decimal maxCoverDiameter))
+                                        tableData = _wordTableParser.GetCableCellsCollection(tables[tableNumber]);
+                                        foreach (var tableCellData in tableData)
                                         {
-                                            if (index == 4)
+                                            if (decimal.TryParse(tableCellData.ColumnHeaderData, out decimal elementsCount) &&
+                                                decimal.TryParse(tableCellData.CellData, out decimal maxCoverDiameter))
                                             {
-                                                if (elementsCount < 4)
-                                                    billet = billet060_150;
+                                                if (index < 8)
+                                                {
+                                                    if (elementsCount < 4)
+                                                        billet = billet060_150;
+                                                    else
+                                                        billet = billet060_142;
+                                                }
                                                 else
-                                                    billet = billet060_142;
+                                                    billet = billet078PE;
+
+                                                var kip = new Cable
+                                                {
+                                                    ClimaticMod = paramGroup.polymerGroup.Title == "PVC LS" ? climaticModUHL : climaticModV,
+                                                    CoverPolymerGroup = paramGroup.polymerGroup,
+                                                    TechnicalConditions = techCondPolymerGroup.techCond,
+                                                    CoverColor = paramGroup.polymerGroup.Title == "PVC" || paramGroup.polymerGroup.Title == "PVC Term" || paramGroup.polymerGroup.Title == "PVC LS" ? greyColor : blackColor,
+                                                    OperatingVoltage = operatingVoltage,
+                                                    ElementsCount = elementsCount,
+                                                    MaxCoverDiameter = maxCoverDiameter,
+                                                    FireProtectionClass = paramGroup.fireClass,
+                                                    Title = GetKipName(elementsCount, paramGroup.polymerGroup, billet)
+                                                };
+                                                var cableRec = dbContext.Cables.Add(kip).Entity;
+                                                dbContext.SaveChanges();
+
+                                                dbContext.ListCableBillets.Add(new ListCableBillets { Billet = billet, Cable = cableRec });
+                                                if (elementsCount == 1.5m)
+                                                    dbContext.ListCableBillets.Add(new ListCableBillets { Billet = billet078PVC, Cable = cableRec });
+
+                                                dbContext.ListCableProperties.Add(new ListCableProperties { PropertyId = 3, Cable = cableRec }); //Экран фольга
+                                                dbContext.ListCableProperties.Add(new ListCableProperties { PropertyId = 4, Cable = cableRec }); //Экран оплётка
+                                                                                                                                                 //Добавить свойства для брони!
+                                                dbContext.SaveChanges();
                                             }
                                             else
-                                                billet = billet078PE;
-
-                                            var kip = new Cable
-                                            {
-                                                ClimaticMod = climaticMod,
-                                                CoverPolymerGroup = paramGroup.polymerGroup,
-                                                TechnicalConditions = techCondPolymerGroup.techCond,
-                                                CoverColor = paramGroup.polymerGroup.Title == "PVC" || paramGroup.polymerGroup.Title == "PVC Term" || paramGroup.polymerGroup.Title == "PVC LS" ? greyColor : blackColor,
-                                                OperatingVoltage = operatingVoltage,
-                                                ElementsCount = elementsCount,
-                                                MaxCoverDiameter = maxCoverDiameter,
-                                                FireProtectionClass = paramGroup.fireClass,
-                                                Title = GetKipName(elementsCount, paramGroup.polymerGroup, billet)
-                                            };
-                                            var cableRec = dbContext.Cables.Add(kip).Entity;
-                                            dbContext.SaveChanges();
-
-                                            dbContext.ListCableBillets.Add(new ListCableBillets { Billet = billet, Cable = cableRec });
-                                            if (elementsCount == 1.5) //Изменить тип!!!
-                                                dbContext.ListCableBillets.Add(new ListCableBillets { Billet = billet078PVC, Cable = cableRec });
-
-                                            dbContext.ListCableProperties.Add(new ListCableProperties { PropertyId = 3, Cable = cableRec }); //Экран фольга
-                                            dbContext.ListCableProperties.Add(new ListCableProperties { PropertyId = 4, Cable = cableRec }); //Экран оплётка
-                                            //Добавить свойства для брони!
-                                            dbContext.SaveChanges();
+                                                continue;
                                         }
-                                        else
-                                            continue;
+                                        tableData.Clear();
+                                        _wordTableParser.DataStartRowIndex++;
                                     }
-                                    tableData.Clear();
-                                    
                                 }
                             }
                         }
@@ -169,7 +185,7 @@ namespace CableDataParsing
             return recordsCount;
         }
 
-        private string GetKipName(int elementsCount, PolymerGroup polymerGroup, InsulatedBillet billet)
+        private string GetKipName(decimal elementsCount, PolymerGroup polymerGroup, InsulatedBillet billet)
         {
             throw new NotImplementedException();
         }

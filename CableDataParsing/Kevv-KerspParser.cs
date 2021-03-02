@@ -116,7 +116,7 @@ namespace CableDataParsing
 
         private void ParseTableCellData(TableCellData tableCellData, List<InsulatedBillet> currentBilletsList, CablesContext dbContext, ref int recordsCount, int index, (int fireId, int polymerId, int colorId) kevvParams)
         {
-            if (int.TryParse(tableCellData.ColumnHeaderData, out int elementsCount) &&
+            if (decimal.TryParse(tableCellData.ColumnHeaderData, out decimal elementsCount) &&
                 decimal.TryParse(tableCellData.CellData, out decimal maxCoverDiameter) &&
                 decimal.TryParse(tableCellData.RowHeaderData, out decimal conductorAreaInSqrMm))
             {

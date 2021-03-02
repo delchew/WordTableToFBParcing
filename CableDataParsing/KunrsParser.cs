@@ -84,12 +84,26 @@ namespace CableDataParsing
                     {
                         { 0.75m, 1 }, { 1.0m, 2 }, { 1.5m, 3 }, { 2.5m, 4 }, { 4.0m, 5 }, { 6.0m, 6 }, { 10.0m, 7 }, { 16.0m, 8 }
                     };
-                    var powerColorsDict = new Dictionary<int, PowerWiresColorScheme[]>
+                    var powerColorsDict = new Dictionary<decimal, PowerWiresColorScheme[]>
                     {
-                        { 2, new [] { PowerWiresColorScheme.N } },
-                        { 3, new [] { PowerWiresColorScheme.PEN, PowerWiresColorScheme.none} },
-                        { 4, new [] { PowerWiresColorScheme.N, PowerWiresColorScheme.PE } },
-                        { 5, new [] { PowerWiresColorScheme.PEN, PowerWiresColorScheme.none } }
+                        { 2m, new [] { PowerWiresColorScheme.N } },
+                        { 3m, new [] { PowerWiresColorScheme.PEN, PowerWiresColorScheme.none} },
+                        { 4m, new [] { PowerWiresColorScheme.N, PowerWiresColorScheme.PE } },
+                        { 5m, new [] { PowerWiresColorScheme.PEN, PowerWiresColorScheme.none } }
+                    };
+
+                    var dictCablePropsToId = new Dictionary<CableProperty, long>
+                    {
+                        { CableProperty.HasIndividualFoilShields, 1L },
+                        { CableProperty.HasIndividualBraidShield, 2L },
+                        { CableProperty.HasFoilShield, 3L },
+                        { CableProperty.HasBraidShield, 4L },
+                        { CableProperty.HasFilling, 5L },
+                        { CableProperty.HasArmourBraid, 6L },
+                        { CableProperty.HasArmourTape, 7L },
+                        { CableProperty.HasArmourTube, 8L },
+                        { CableProperty.HasWaterBlockStripe, 9L },
+                        { CableProperty.SparkSafety, 10L }
                     };
 
                     var kunrs = new KunrsPresenter
@@ -120,7 +134,7 @@ namespace CableDataParsing
                         var tableData = _wordTableParser.GetCableCellsCollection(table);
                         foreach (var tableCellData in tableData)
                         {
-                            if (int.TryParse(tableCellData.ColumnHeaderData, out int elementsCount) &&
+                            if (decimal.TryParse(tableCellData.ColumnHeaderData, out decimal elementsCount) &&
                                 decimal.TryParse(tableCellData.CellData, out decimal maxCoverDiameter) &&
                                 decimal.TryParse(tableCellData.RowHeaderData, out decimal conductorAreaInSqrMm))
                             {
@@ -164,7 +178,7 @@ namespace CableDataParsing
                                         {
                                             if (boolPropPair.hasProp)
                                             {
-                                                listCableProperties.PropertyId = (long)boolPropPair.propType;
+                                                listCableProperties.PropertyId = dictCablePropsToId[boolPropPair.propType];
                                                 _ListCablePropertiesProvider.AddItem(listCableProperties);
                                             }
                                         }
