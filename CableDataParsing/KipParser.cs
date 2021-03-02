@@ -19,6 +19,9 @@ namespace CableDataParsing
         private FileInfo _mSWordFile;
         private string _connectionString;
         private StringBuilder _nameBuilder;
+        private Cables.Common.CableProperty fullPropertySet = (Cables.Common.CableProperty)0b_1111111111;
+        private int cablePropertiesCount = Enum.GetNames(typeof(Cables.Common.CableProperty)).Count();
+
 
         public KipParser(string connectionString, FileInfo mSWordFile)
         {
@@ -52,6 +55,8 @@ namespace CableDataParsing
                     List<TableCellData> tableData;
                     using (var dbContext = new CablesContext(_connectionString))
                     {
+                        var cablePropertiesList = dbContext.CableProperties.ToList();
+
                         var climaticModV = dbContext.ClimaticMods.Where(c => c.Id == 7).Single();
                         var climaticModUHL = dbContext.ClimaticMods.Where(c => c.Id == 3).Single();
 
@@ -156,9 +161,18 @@ namespace CableDataParsing
                                                 if (elementsCount == 1.5m)
                                                     dbContext.ListCableBillets.Add(new ListCableBillets { Billet = billet078PVC, Cable = cableRec });
 
-                                                dbContext.ListCableProperties.Add(new ListCableProperties { PropertyId = 3, Cable = cableRec }); //Экран фольга
-                                                dbContext.ListCableProperties.Add(new ListCableProperties { PropertyId = 4, Cable = cableRec }); //Экран оплётка
-                                                                                                                                                 //Добавить свойства для брони!
+                                                var intProp = 0b_0000000001;
+                                                for (int i = 0; i < cablePropertiesCount; i++)
+                                                {
+                                                    var Prop = (Cables.Common.CableProperty)intProp;
+
+                                                    if ((cableProp & Prop) == Prop)
+                                                    {
+                                                        var propertyObj = cablePropertiesList.Where(p => p.BitNumber == (int)Prop).Single();
+                                                        dbContext.ListCableProperties.Add(new ListCableProperties { Property = propertyObj, Cable = cableRec });
+                                                    }
+                                                    intProp <<= 1;
+                                                }
                                                 dbContext.SaveChanges();
                                             }
                                             else
