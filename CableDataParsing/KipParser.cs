@@ -6,6 +6,7 @@ using System.Text;
 using CableDataParsing.MSWordTableParsers;
 using CablesDatabaseEFCoreFirebird;
 using CablesDatabaseEFCoreFirebird.Entities;
+using Microsoft.EntityFrameworkCore;
 using WordObj = Microsoft.Office.Interop.Word;
 
 
@@ -18,10 +19,9 @@ namespace CableDataParsing
         private WordTableParser _wordTableParser;
         private FileInfo _mSWordFile;
         private string _connectionString;
-        private StringBuilder _nameBuilder;
-        private Cables.Common.CableProperty fullPropertySet = (Cables.Common.CableProperty)0b_1111111111;
+        private StringBuilder _nameBuilder = new StringBuilder();
         private int cablePropertiesCount = Enum.GetNames(typeof(Cables.Common.CableProperty)).Count();
-
+        private const int POLYMER_GROUP_COUNT = 7;
 
         public KipParser(string connectionString, FileInfo mSWordFile)
         {
@@ -32,7 +32,7 @@ namespace CableDataParsing
         public int ParseDataToDatabase()
         {
             int recordsCount = 0;
-            ParseKipBillets();
+            //ParseKipBillets();
 
             var app = new WordObj.Application { Visible = false };
             object fileName = _mSWordFile.FullName;
@@ -70,12 +70,13 @@ namespace CableDataParsing
 
                         var cond078 = dbContext.Conductors.Where(c => c.WiresDiameter == 0.26m && c.WiresCount == 7 && c.MetalId == 2).Single();
                         var cond060 = dbContext.Conductors.Where(c => c.WiresDiameter == 0.20m && c.WiresCount == 7 && c.MetalId == 2).Single();
-                        var cableShortName = dbContext.CableShortNames.Add(new CableShortName { ShortName = "КИП" }).Entity;
+                        var cableShortName = dbContext.CableShortNames.Where(n => n.ShortName == "КИП").Single();
+                        var twistedElementType = dbContext.TwistedElementTypes.Where(t => t.Id == 2).Single();
 
-                        var billet060_150 = dbContext.InsulatedBillets.Where(b => b.ConductorId == cond060.Id && b.Diameter == 1.50m && b.CableShortName.ShortName == cableShortName.ShortName).Single();
-                        var billet060_142 = dbContext.InsulatedBillets.Where(b => b.ConductorId == cond060.Id && b.Diameter == 1.42m && b.CableShortName.ShortName == cableShortName.ShortName).Single();
-                        var billet078PE = dbContext.InsulatedBillets.Where(b => b.ConductorId == cond078.Id && b.Diameter == 1.78m && b.CableShortName.ShortName == cableShortName.ShortName).Single();
-                        var billet078PVC = dbContext.InsulatedBillets.Where(b => b.ConductorId == cond078.Id && b.Diameter == 1.60m && b.CableShortName.ShortName == cableShortName.ShortName).Single();
+                        var billet060_150 = dbContext.InsulatedBillets.Include(b => b.Conductor).Where(b => b.ConductorId == cond060.Id && b.Diameter == 1.50m && b.CableShortName.ShortName == cableShortName.ShortName).Single();
+                        var billet060_142 = dbContext.InsulatedBillets.Include(b => b.Conductor).Where(b => b.ConductorId == cond060.Id && b.Diameter == 1.42m && b.CableShortName.ShortName == cableShortName.ShortName).Single();
+                        var billet078PE = dbContext.InsulatedBillets.Include(b => b.Conductor).Where(b => b.ConductorId == cond078.Id && b.Diameter == 1.78m && b.CableShortName.ShortName == cableShortName.ShortName).Single();
+                        var billet078PVC = dbContext.InsulatedBillets.Include(b => b.Conductor).Where(b => b.ConductorId == cond078.Id && b.Diameter == 1.60m && b.CableShortName.ShortName == cableShortName.ShortName).Single();
 
                         var coverPolymerGroupList8TC = new List<(PolymerGroup polymerGroup, FireProtectionClass fireClass)>
                         {
@@ -114,10 +115,12 @@ namespace CableDataParsing
 
                         var dataStartRowIndexes = new int[2] { 4, 8 };
                         InsulatedBillet billet;
-                        foreach (var techCondPolymerGroup in techCondPolymerGroupsList)
+                        var flagBG = false;
+                        foreach (var techCondPolymerGroup in techCondPolymerGroupsList) //Не оптимально, но для разового метода сойдёт, если отделять БГ кабель от остальных со своей таблицей, придётся больше логики писать, пусть лучше чуть дольше работает метод)))
                         {
                             var tableNumber = techCondPolymerGroup.paramGroups == coverPolymerGroupList42TC ? 2 : 1;
-
+                            if (tableNumber == 2) flagBG = true;
+                            var currentPolymerGroupCount = 1;
                             foreach (var paramGroup in techCondPolymerGroup.paramGroups)
                             {
                                 foreach (var index in dataStartRowIndexes)
@@ -152,7 +155,8 @@ namespace CableDataParsing
                                                     ElementsCount = elementsCount,
                                                     MaxCoverDiameter = maxCoverDiameter,
                                                     FireProtectionClass = paramGroup.fireClass,
-                                                    Title = GetKipName(elementsCount, paramGroup.polymerGroup, billet)
+                                                    TwistedElementType = twistedElementType,
+                                                    Title = GetKipName(elementsCount, paramGroup.polymerGroup, billet, cableProp, flagBG)
                                                 };
                                                 var cableRec = dbContext.Cables.Add(kip).Entity;
                                                 dbContext.SaveChanges();
@@ -174,6 +178,8 @@ namespace CableDataParsing
                                                     intProp <<= 1;
                                                 }
                                                 dbContext.SaveChanges();
+
+                                                recordsCount++;
                                             }
                                             else
                                                 continue;
@@ -182,6 +188,8 @@ namespace CableDataParsing
                                         _wordTableParser.DataStartRowIndex++;
                                     }
                                 }
+                                ParseReport(POLYMER_GROUP_COUNT, currentPolymerGroupCount);
+                                currentPolymerGroupCount++;
                             }
                         }
                     }
@@ -199,9 +207,66 @@ namespace CableDataParsing
             return recordsCount;
         }
 
-        private string GetKipName(decimal elementsCount, PolymerGroup polymerGroup, InsulatedBillet billet)
+        private string GetKipName(decimal elementsCount, PolymerGroup polymerGroup, InsulatedBillet billet, Cables.Common.CableProperty cableProp, bool flagBG)
         {
-            throw new NotImplementedException();
+            _nameBuilder.Clear();
+            _nameBuilder.Append("КИП");
+            string namePart, condDiam;
+            if (billet.Conductor.ConductorDiameter == 0.60m)
+            {
+                namePart = "Э";
+                condDiam = "0,60";
+            }
+            else
+            {
+                namePart = "вЭ";
+                condDiam = "0,78";
+            }
+            _nameBuilder.Append(namePart);
+            switch (polymerGroup.Title)
+            {
+                case "PVC":
+                case "PVC Term":
+                case "PVC LS":
+                case "PVC Cold": namePart = "В";
+                    break;
+                case "PE": namePart = "П";
+                    break;
+                default: namePart = string.Empty;
+                    break;
+            }
+            _nameBuilder.Append(namePart);
+
+            if ((cableProp & Cables.Common.CableProperty.HasArmourBraid) == Cables.Common.CableProperty.HasArmourBraid)
+            {
+                if ((cableProp & Cables.Common.CableProperty.HasArmourTube) == Cables.Common.CableProperty.HasArmourTube)
+                    _nameBuilder.Append($"К{namePart}");
+                else
+                    _nameBuilder.Append("КГ");
+            }    
+            if((cableProp & Cables.Common.CableProperty.HasArmourTape | Cables.Common.CableProperty.HasArmourTube) ==
+                (Cables.Common.CableProperty.HasArmourTape | Cables.Common.CableProperty.HasArmourTube))
+            {
+                _nameBuilder.Append($"Б{namePart}");
+            }
+
+            if (polymerGroup.Title == "PVC Term")
+                _nameBuilder.Append("т");
+            if (polymerGroup.Title == "PVC Cold")
+                _nameBuilder.Append("м");
+            if (polymerGroup.Title == "PVC LS")
+                _nameBuilder.Append("нг(А)-LS");
+            if (polymerGroup.Title.ToUpper() == "HFCOMPOUND")
+            {
+                if (flagBG)
+                    _nameBuilder.Append("нг(А)-БГ");
+                else
+                    _nameBuilder.Append("нг(А)-HF");
+            }
+
+            _nameBuilder.Append($" {elementsCount}х2х{condDiam}");
+
+            return _nameBuilder.ToString();
         }
 
         public void ParseKipBillets()
