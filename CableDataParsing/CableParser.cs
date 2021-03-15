@@ -27,9 +27,9 @@ namespace CableDataParsing
             _dbContext?.Dispose();
         }
 
-        public abstract string ParceDataToDatabase();
+        public abstract int ParseDataToDatabase();
 
-        protected abstract string GetCableTitle(Cable cable, params object[] cableParametres);
+        public abstract string GetCableTitle(Cable cable, params object[] cableParametres);
 
         protected void AddCablePropertiesToDBContext(Cable cable, Cables.Common.CableProperty cableProps)
         {

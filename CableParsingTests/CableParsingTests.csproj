@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NUnit" Version="3.12.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.16.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CableDataParsing\CableDataParsing.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="CablesDatabaseEFCoreFirebird">
+      <HintPath>..\..\CablesDatabaseEFCoreFirebird\CablesDatabaseEFCoreFirebird\bin\Debug\netstandard2.0\CablesDatabaseEFCoreFirebird.dll</HintPath>
+    </Reference>
+    <Reference Include="Cables">
+      <HintPath>..\..\Cables\Cables.Brands\bin\Release\netstandard2.0\Cables.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

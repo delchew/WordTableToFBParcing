@@ -20,8 +20,7 @@ namespace ConsoleParsingToFBDatabase
 
         static void Main()
         {
-            var kipParser = new KipParser(_connectionString2, null);
-            kipParser.ParseKipBillets();
+            
         }
 
         static void WorkingWithADONetArrays()
