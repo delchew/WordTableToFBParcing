@@ -1,28 +1,28 @@
 using System.Collections.Generic;
-using CableDataParsing;
+using CableDataParsing.CableTitleBulders;
 using CablesDatabaseEFCoreFirebird.Entities;
 using NUnit.Framework;
 
 namespace CableParsingTests
 {
-    public class KpsvvParsingTests
+    public class KpsvvTitleBuilderTests
     {
-        CableParser parser;
         string title;
         Conductor conductor;
         InsulatedBillet billet;
         ListCableBillets billetsList;
         Cable cable;
         PolymerGroup coverPolymerGroup;
+        KpsvevTitleBuilder builder;
 
         [SetUp]
         public void Setup()
         {
-            parser = new KpsvevParser(string.Empty, null);
             conductor = new Conductor();
             billet = new InsulatedBillet { Conductor = conductor };
             billetsList = new ListCableBillets { Billet = billet };
             coverPolymerGroup = new PolymerGroup();
+            builder = new KpsvevTitleBuilder();
 
             cable = new Cable
             {
@@ -38,8 +38,7 @@ namespace CableParsingTests
             coverPolymerGroup.Title = "PVC LS";
             cable.ElementsCount = 8;
 
-            using (parser = new KpsvevParser(string.Empty, null))
-                title = parser.GetCableTitle(cable, Cables.Common.CableProperty.HasArmourBraid);
+            title = builder.GetCableTitle(cable, Cables.Common.CableProperty.HasArmourBraid);
             Assert.That(title, Is.EqualTo("КПСВВКГнг(А)-LS 8х2х1,0"));
         }
 
@@ -47,13 +46,12 @@ namespace CableParsingTests
         public void KpsvvTitleTest2()
         {
             conductor.AreaInSqrMm = 2.5m;
-            coverPolymerGroup.Title = "PE";
+            coverPolymerGroup.Title = "PE Self extinguish";
             cable.ElementsCount = 4;
 
-            using (parser = new KpsvevParser(string.Empty, null))
-                title = parser.GetCableTitle(cable, Cables.Common.CableProperty.HasArmourBraid |
-                                                    Cables.Common.CableProperty.HasArmourTube |
-                                                    Cables.Common.CableProperty.HasFoilShield);
+            title = builder.GetCableTitle(cable, Cables.Common.CableProperty.HasArmourBraid |
+                                                 Cables.Common.CableProperty.HasArmourTube |
+                                                 Cables.Common.CableProperty.HasFoilShield);
             Assert.That(title, Is.EqualTo("КПСВЭПсКПс 4х2х2,5"));
         }
 
@@ -64,21 +62,20 @@ namespace CableParsingTests
             coverPolymerGroup.Title = "PVC Cold";
             cable.ElementsCount = 24;
 
-            using (parser = new KpsvevParser(string.Empty, null))
-                title = parser.GetCableTitle(cable, Cables.Common.CableProperty.HasArmourTape |
-                                                    Cables.Common.CableProperty.HasArmourTube |
-                                                    Cables.Common.CableProperty.HasFoilShield);
+            title = builder.GetCableTitle(cable, Cables.Common.CableProperty.HasArmourTape |
+                                                 Cables.Common.CableProperty.HasArmourTube |
+                                                 Cables.Common.CableProperty.HasFoilShield);
             Assert.That(title, Is.EqualTo("КПСВЭВБВм 24х2х0,5"));
         }
 
+        [Test]
         public void KpsvvTitleTest4()
         {
             conductor.AreaInSqrMm = 1.5m;
             coverPolymerGroup.Title = "PVC Term";
             cable.ElementsCount = 12;
 
-            using (parser = new KpsvevParser(string.Empty, null))
-                title = parser.GetCableTitle(cable);
+            title = builder.GetCableTitle(cable, null);
             Assert.That(title, Is.EqualTo("КПСВВт 12х2х1,5"));
         }
     }

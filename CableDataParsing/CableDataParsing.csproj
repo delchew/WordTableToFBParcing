@@ -17,7 +17,7 @@
       <HintPath>..\..\CablesDatabaseEFCoreFirebird\CablesDatabaseEFCoreFirebird\bin\Debug\netstandard2.0\CablesDatabaseEFCoreFirebird.dll</HintPath>
     </Reference>
     <Reference Include="FirebirdDatabaseProvider">
-      <HintPath>..\..\FirebirdDatabaseProvider\FirebirdDatabaseProvider\bin\Release\netstandard2.0\FirebirdDatabaseProvider.dll</HintPath>
+      <HintPath>..\..\FirebirdDatabaseProvider\FirebirdDatabaseProvider\bin\Debug\netstandard2.0\FirebirdDatabaseProvider.dll</HintPath>
     </Reference>
   </ItemGroup>
 

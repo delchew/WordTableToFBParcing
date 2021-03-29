@@ -15,10 +15,10 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Cables">
-      <HintPath>..\..\Cables\Cables.Brands\bin\Release\netstandard2.0\Cables.dll</HintPath>
+      <HintPath>..\..\Cables\Cables\bin\Debug\netstandard2.0\Cables.dll</HintPath>
     </Reference>
     <Reference Include="FirebirdDatabaseProvider">
-      <HintPath>..\..\FirebirdDatabaseProvider\FirebirdDatabaseProvider\bin\Release\netstandard2.0\FirebirdDatabaseProvider.dll</HintPath>
+      <HintPath>..\..\FirebirdDatabaseProvider\FirebirdDatabaseProvider\bin\Debug\netstandard2.0\FirebirdDatabaseProvider.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

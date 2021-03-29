@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using CableDataParsing.CableTitleBulders;
 using CableDataParsing.MSWordTableParsers;
 //using Cables.Common;
 using CablesDatabaseEFCoreFirebird;
@@ -14,9 +15,7 @@ namespace CableDataParsing
 {
     public class KpsvevParser : CableParser
     {
-        private StringBuilder _nameBuilder = new StringBuilder();
-
-        public KpsvevParser(string connectionString, FileInfo mSWordFile) : base(connectionString, mSWordFile)
+        public KpsvevParser(string connectionString, FileInfo mSWordFile) : base(connectionString, mSWordFile, new KpsvevTitleBuilder())
         { }
 
         public override int ParseDataToDatabase()
@@ -44,7 +43,7 @@ namespace CableDataParsing
                     };
 
                     var PVCLSLTxGroup = _dbContext.PolymerGroups.Find(7); //PVC LSLTx
-                    var PESelfExtinguish = _dbContext.PolymerGroups.Find(0); //PE self extinguish - add to DB!!! TODO
+                    var PESelfExtinguish = _dbContext.PolymerGroups.Find(12); //PE self extinguish
 
                     var noFireProtectClass = _dbContext.FireProtectionClasses.Find(1); //О1.8.2.5.4
                     var PolymerGroupFireClassDict = new Dictionary<PolymerGroup, FireProtectionClass>()
@@ -57,7 +56,6 @@ namespace CableDataParsing
                         { PESelfExtinguish, noFireProtectClass }
                     };
 
-                    var cablePropertiesList = _dbContext.CableProperties.ToList();
                     var climaticModUHL = _dbContext.ClimaticMods.Find(3);
                     var redColor = _dbContext.Colors.Find(1);
                     var blackColor = _dbContext.Colors.Find(2);
@@ -69,6 +67,11 @@ namespace CableDataParsing
                     var TU49 = _dbContext.TechnicalConditions.Find(20);
                     var twistedElementType = _dbContext.TwistedElementTypes.Find(2); //pair
 
+                    var cableProps = new List<Cables.Common.CableProperty?>
+                    {
+                        null, Cables.Common.CableProperty.HasFoilShield
+                    };
+
                     _wordTableParser = new WordTableParser
                     {
                         ColumnHeadersRowIndex = 3,
@@ -78,54 +81,56 @@ namespace CableDataParsing
                     };
                     List<TableCellData> tableData1, tableData2;
 
-                    _wordTableParser.DataStartRowIndex = 4;
-                    _wordTableParser.DataColumnsCount = 10;
-                    tableData1 = _wordTableParser.GetCableCellsCollection(tables[1]);
-                    _wordTableParser.DataColumnsCount = 8;
-                    tableData2 = _wordTableParser.GetCableCellsCollection(tables[2]);
-                    var tableDataNoShield = tableData1.Concat(tableData2);
-
-                    foreach (var polymerGroup in polymerGroups)
+                    
+                    decimal maxCoverDiameter;
+                    foreach (var prop in cableProps)
                     {
+                        _wordTableParser.DataStartRowIndex = prop.HasValue ? 9 : 4;
+                        _wordTableParser.DataColumnsCount = 10;
+                        tableData1 = _wordTableParser.GetCableCellsCollection(tables[1]);
+                        _wordTableParser.DataColumnsCount = 8;
+                        tableData2 = _wordTableParser.GetCableCellsCollection(tables[2]);
+                        var tableDataNoShield = tableData1.Concat(tableData2);
+
                         foreach (var tableCellData in tableDataNoShield)
                         {
                             if (decimal.TryParse(tableCellData.ColumnHeaderData, out decimal elementsCount) &&
-                            decimal.TryParse(tableCellData.CellData, out decimal maxCoverDiameter) &&
-                            decimal.TryParse(tableCellData.RowHeaderData, out decimal conductorAreaInSqrMm))
+                                decimal.TryParse(tableCellData.RowHeaderData, out decimal conductorAreaInSqrMm))
                             {
-                                var kpsvv = new Cable
+
+                                if (decimal.TryParse(tableCellData.CellData, out maxCoverDiameter))
                                 {
-                                    ClimaticMod = climaticModUHL,
-                                    CoverPolymerGroup = polymerGroup,
-                                    TechnicalConditions = TU2,
-                                    CoverColor = redColor,
-                                    OperatingVoltage = operatingVoltage,
-                                    ElementsCount = elementsCount,
-                                    MaxCoverDiameter = maxCoverDiameter,
-                                    FireProtectionClass = PolymerGroupFireClassDict[polymerGroup],
-                                    TwistedElementType = twistedElementType,
-                                };
-                                kpsvv.Title = GetCableTitle(kpsvv);
-                                var cableRec = _dbContext.Cables.Add(kpsvv).Entity;
-                                _dbContext.SaveChanges();
+
+                                }
+                                foreach (var polymerGroup in polymerGroups)
+                                {
+                                    var kpsvv = new Cable
+                                    {
+                                        ClimaticMod = climaticModUHL,
+                                        CoverPolymerGroup = polymerGroup,
+                                        TechnicalConditions = TU2,
+                                        CoverColor = polymerGroup == PVCColdGroup ? blackColor : redColor,
+                                        OperatingVoltage = operatingVoltage,
+                                        ElementsCount = elementsCount,
+                                        MaxCoverDiameter = maxCoverDiameter,
+                                        FireProtectionClass = PolymerGroupFireClassDict[polymerGroup],
+                                        TwistedElementType = twistedElementType,
+                                    };
+                                    kpsvv.Title = cableTitleBuilder.GetCableTitle(kpsvv, prop);
+                                    var cableRec = _dbContext.Cables.Add(kpsvv).Entity;
+                                    _dbContext.SaveChanges();
+
+                                    if (prop.HasValue)
+                                        AddCablePropertiesToDBContext(cableRec, prop.Value);
+                                }
                             }
                             else
                             {
-                                throw new NotImplementedException();
+                                throw new InvalidCastException("Can't cast elementsCount or conductorAreaInSqrMm!");
                             }
                         }
                     }
                     
-
-
-                    _wordTableParser.DataStartRowIndex = 9;
-                    _wordTableParser.DataColumnsCount = 10;
-                    tableData1 = _wordTableParser.GetCableCellsCollection(tables[1]);
-                    _wordTableParser.DataColumnsCount = 8;
-                    tableData2 = _wordTableParser.GetCableCellsCollection(tables[2]);
-
-                    var tableDataShield = tableData1.Concat(tableData2);
-
                     
 
                     
@@ -217,56 +222,6 @@ namespace CableDataParsing
                 _dbContext.AddRange(kpsvvBillets);
             }
             return _dbContext.SaveChanges();
-        }
-
-        public override string GetCableTitle(Cable cable, params object[] cableParametres)
-        {
-            var cableProps = cableParametres[0] as Cables.Common.CableProperty;
-
-            _nameBuilder.Clear();
-            _nameBuilder.Append("КПСВ");
-            if ((cableProps & Cables.Common.CableProperty.HasFoilShield) == Cables.Common.CableProperty.HasFoilShield)
-                _nameBuilder.Append("Э");
-            string namePart = string.Empty;
-            switch (cable.CoverPolymerGroup.Title)
-            {
-                case "PVC":
-                case "PVC Term":
-                case "PVC LS":
-                case "PVC Cold":
-                    namePart = "В";
-                    break;
-                case "PE":
-                    namePart = "Пс";
-                    break;
-            }
-            _nameBuilder.Append(namePart);
-
-            if ((cableProps & Cables.Common.CableProperty.HasArmourBraid) == Cables.Common.CableProperty.HasArmourBraid)
-            {
-                if ((cableProps & Cables.Common.CableProperty.HasArmourTube) == Cables.Common.CableProperty.HasArmourTube)
-                    _nameBuilder.Append($"К{namePart}");
-                else
-                    _nameBuilder.Append("КГ");
-            }
-            if ((cableProps & Cables.Common.CableProperty.HasArmourTape | Cables.Common.CableProperty.HasArmourTube) ==
-                (Cables.Common.CableProperty.HasArmourTape | Cables.Common.CableProperty.HasArmourTube))
-            {
-                _nameBuilder.Append($"Б{namePart}");
-            }
-
-            if (cable.CoverPolymerGroup.Title == "PVC Term")
-                _nameBuilder.Append("т");
-            if (cable.CoverPolymerGroup.Title == "PVC Cold")
-                _nameBuilder.Append("м");
-            if (cable.CoverPolymerGroup.Title == "PVC LS")
-                _nameBuilder.Append("нг(А)-LS");
-
-            var cableConductorArea = cable.ListCableBillets.First().Billet.Conductor.AreaInSqrMm;
-            namePart = Cables.Common.CableCalculations.FormatConductorArea((double)cableConductorArea);
-            _nameBuilder.Append($" {cable.ElementsCount}х2х{namePart}");
-
-            return _nameBuilder.ToString();
         }
     }
 }
