@@ -40,7 +40,7 @@ namespace CableParsingTests
 
             using (parser = new KpsvevParser(string.Empty, null))
                 title = parser.GetCableTitle(cable, Cables.Common.CableProperty.HasArmourBraid);
-            Assert.That(title, Is.EqualTo("КПСВВКГнг(А)-LS 8х2х1.0"));
+            Assert.That(title, Is.EqualTo("КПСВВКГнг(А)-LS 8х2х1,0"));
         }
 
         [Test]
@@ -54,7 +54,7 @@ namespace CableParsingTests
                 title = parser.GetCableTitle(cable, Cables.Common.CableProperty.HasArmourBraid |
                                                     Cables.Common.CableProperty.HasArmourTube |
                                                     Cables.Common.CableProperty.HasFoilShield);
-            Assert.That(title, Is.EqualTo("КПСВЭПсКПс 4х2х2.5"));
+            Assert.That(title, Is.EqualTo("КПСВЭПсКПс 4х2х2,5"));
         }
 
         [Test]
@@ -68,7 +68,18 @@ namespace CableParsingTests
                 title = parser.GetCableTitle(cable, Cables.Common.CableProperty.HasArmourTape |
                                                     Cables.Common.CableProperty.HasArmourTube |
                                                     Cables.Common.CableProperty.HasFoilShield);
-            Assert.That(title, Is.EqualTo("КПСВЭВБВм 24х2х0.5"));
+            Assert.That(title, Is.EqualTo("КПСВЭВБВм 24х2х0,5"));
+        }
+
+        public void KpsvvTitleTest4()
+        {
+            conductor.AreaInSqrMm = 1.5m;
+            coverPolymerGroup.Title = "PVC Term";
+            cable.ElementsCount = 12;
+
+            using (parser = new KpsvevParser(string.Empty, null))
+                title = parser.GetCableTitle(cable);
+            Assert.That(title, Is.EqualTo("КПСВВт 12х2х1,5"));
         }
     }
 }

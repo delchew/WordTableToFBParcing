@@ -16,11 +16,11 @@
     <ProjectReference Include="..\CableDataParsing\CableDataParsing.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Cables">
+      <HintPath>..\..\Cables\Cables\bin\Debug\netstandard2.0\Cables.dll</HintPath>
+    </Reference>
     <Reference Include="CablesDatabaseEFCoreFirebird">
       <HintPath>..\..\CablesDatabaseEFCoreFirebird\CablesDatabaseEFCoreFirebird\bin\Debug\netstandard2.0\CablesDatabaseEFCoreFirebird.dll</HintPath>
-    </Reference>
-    <Reference Include="Cables">
-      <HintPath>..\..\Cables\Cables.Brands\bin\Release\netstandard2.0\Cables.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>
