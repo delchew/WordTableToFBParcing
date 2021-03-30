@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using CableDataParsing.CableTitleBulders;
 using CableDataParsing.MSWordTableParsers;
-//using Cables.Common;
 using CablesDatabaseEFCoreFirebird;
 using CablesDatabaseEFCoreFirebird.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -67,7 +65,7 @@ namespace CableDataParsing
                     var TU49 = _dbContext.TechnicalConditions.Find(20);
                     var twistedElementType = _dbContext.TwistedElementTypes.Find(2); //pair
 
-                    var cableProps = new List<Cables.Common.CableProperty?>
+                    var kpsvevCableProps = new List<Cables.Common.CableProperty?>
                     {
                         null, Cables.Common.CableProperty.HasFoilShield
                     };
@@ -82,8 +80,8 @@ namespace CableDataParsing
                     List<TableCellData> tableData1, tableData2;
 
                     
-                    decimal maxCoverDiameter;
-                    foreach (var prop in cableProps)
+                    decimal? maxCoverDiameter;
+                    foreach (var prop in kpsvevCableProps)
                     {
                         _wordTableParser.DataStartRowIndex = prop.HasValue ? 9 : 4;
                         _wordTableParser.DataColumnsCount = 10;
@@ -98,10 +96,23 @@ namespace CableDataParsing
                                 decimal.TryParse(tableCellData.RowHeaderData, out decimal conductorAreaInSqrMm))
                             {
 
-                                if (decimal.TryParse(tableCellData.CellData, out maxCoverDiameter))
+                                if (decimal.TryParse(tableCellData.CellData, out decimal diameterValue))
+                                    maxCoverDiameter = diameterValue;
+                                else
                                 {
+                                    var cableSizes = tableCellData.CellData.Split('\u00D7'); //знак умножения в юникоде
+                                    if (cableSizes.Length < 2) continue;
+                                    if (cableSizes.Length > 2 &&
+                                        decimal.TryParse(cableSizes[0], out decimal heigth) &&
+                                        decimal.TryParse(cableSizes[1], out decimal width))
+                                    {
+                                        maxCoverDiameter = null;
+
+                                    }
+                                    else throw new Exception("Wrong format table cell data!");
 
                                 }
+
                                 foreach (var polymerGroup in polymerGroups)
                                 {
                                     var kpsvv = new Cable
