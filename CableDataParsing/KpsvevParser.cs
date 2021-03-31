@@ -137,10 +137,11 @@ namespace CableDataParsing
                                         FireProtectionClass = PolymerGroupFireClassDict[polymerGroup],
                                         TwistedElementType = twistedElementType,
                                     };
-
-                                    _dbContext.ListCableBillets.Add(new ListCableBillets { Billet = billet, Cable = kpsvv });
-                                    kpsvv.Title = cableTitleBuilder.GetCableTitle(kpsvv, prop);
                                     var cableRec = _dbContext.Cables.Add(kpsvv).Entity;
+                                    _dbContext.SaveChanges();
+
+                                    _dbContext.ListCableBillets.Add(new ListCableBillets { BilletId = billet.Id, CableId = cableRec.Id });
+                                    kpsvv.Title = cableTitleBuilder.GetCableTitle(cableRec, prop);
                                     //_dbContext.SaveChanges();
 
 
