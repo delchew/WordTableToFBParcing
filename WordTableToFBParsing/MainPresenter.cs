@@ -12,19 +12,20 @@ namespace WordTableToFBParsing
     {
         private readonly IView _view;
         private readonly IMessageService _messageService;
-        private readonly Dictionary<string, Func<ICableDataParcer>> _cableTypesDict;
+        private readonly Dictionary<string, Func<CableParser>> _cableTypesDict;
         private readonly string[] _dbConnectionsNames;
         private string _cableName;
         private string _connectionString;
         private IConfigurationRoot _connectionStringConfig;
         public MainPresenter(IView view, IMessageService messageService)
         {
-            _cableTypesDict = new Dictionary<string, Func<ICableDataParcer>>
+            _cableTypesDict = new Dictionary<string, Func<CableParser>>
             {
-                {"КУНРС", () => new KunrsParser(_connectionString, _view.MSWordFile) },
-                {"СКАБ", () => new SkabParser(_connectionString, _view.MSWordFile) },
-                {"КЭВ(Э)В, КЭРс(Э)", () => new Kevv_KerspParser(_connectionString, _view.MSWordFile) },
-                {"КИП", () => new KipParser(_connectionString, _view.MSWordFile) }
+                {"КПСВ(Э)", () => new KpsvevParser(_connectionString, _view.MSWordFile) }
+                //{"КУНРС", () => new KunrsParser(_connectionString, _view.MSWordFile) },
+                //{"СКАБ", () => new SkabParser(_connectionString, _view.MSWordFile) },
+                //{"КЭВ(Э)В, КЭРс(Э)", () => new Kevv_KerspParser(_connectionString, _view.MSWordFile) },
+                //{"КИП", () => new KipParser(_connectionString, _view.MSWordFile) }
             };
 
             _dbConnectionsNames = new string[]

@@ -30,18 +30,18 @@ namespace CableDataParsing
                 var tables = document.Tables;
                 if(tables.Count > 0)
                 {
-                    var PVCGroup = _dbContext.PolymerGroups.Find(1); // PVC
-                    var PVCColdGroup = _dbContext.PolymerGroups.Find(10); // PVC Cold
-                    var PVCTermGroup = _dbContext.PolymerGroups.Find(11); //PVC term
-                    var PVCLSGroup = _dbContext.PolymerGroups.Find(6); //PVC LS
+                    var PVCGroup = _dbContext.PolymerGroups.Where(g => g.Id == 1).AsNoTracking().First(); // PVC
+                    var PVCColdGroup = _dbContext.PolymerGroups.Where(g => g.Id == 10).AsNoTracking().First(); // PVC Cold
+                    var PVCTermGroup = _dbContext.PolymerGroups.Where(g => g.Id == 11).AsNoTracking().First(); //PVC term
+                    var PVCLSGroup = _dbContext.PolymerGroups.Where(g => g.Id == 6).AsNoTracking().First(); //PVC LS
 
                     var polymerGroups = new List<PolymerGroup>
                     {
                         PVCGroup, PVCColdGroup, PVCTermGroup, PVCLSGroup
                     };
 
-                    var PVCLSLTxGroup = _dbContext.PolymerGroups.Find(7); //PVC LSLTx
-                    var PESelfExtinguish = _dbContext.PolymerGroups.Find(12); //PE self extinguish
+                    var PVCLSLTxGroup = _dbContext.PolymerGroups.Where(g => g.Id == 7).AsNoTracking().First(); //PVC LSLTx
+                    var PESelfExtinguish = _dbContext.PolymerGroups.Where(g => g.Id == 12).AsNoTracking().First(); //PE self extinguish
 
                     var noFireProtectClass = _dbContext.FireProtectionClasses.Find(1); //О1.8.2.5.4
                     var PolymerGroupFireClassDict = new Dictionary<PolymerGroup, FireProtectionClass>()
@@ -70,6 +70,12 @@ namespace CableDataParsing
                         null, Cables.Common.CableProperty.HasFoilShield
                     };
 
+                    var billets = _dbContext.InsulatedBillets.Where(b => b.CableShortNameId == 6)
+                                                             .AsNoTracking()
+                                                             .Include(p => p.Conductor)
+                                                             .Include(p => p.PolymerGroup)
+                                                             .ToList();
+
                     _wordTableParser = new WordTableParser
                     {
                         ColumnHeadersRowIndex = 3,
@@ -95,26 +101,30 @@ namespace CableDataParsing
                             if (decimal.TryParse(tableCellData.ColumnHeaderData, out decimal elementsCount) &&
                                 decimal.TryParse(tableCellData.RowHeaderData, out decimal conductorAreaInSqrMm))
                             {
-
+                                decimal height = 0m;
+                                decimal width = 0m;
                                 if (decimal.TryParse(tableCellData.CellData, out decimal diameterValue))
                                     maxCoverDiameter = diameterValue;
                                 else
                                 {
                                     var cableSizes = tableCellData.CellData.Split('\u00D7'); //знак умножения в юникоде
                                     if (cableSizes.Length < 2) continue;
-                                    if (cableSizes.Length > 2 &&
-                                        decimal.TryParse(cableSizes[0], out decimal heigth) &&
-                                        decimal.TryParse(cableSizes[1], out decimal width))
+                                    if (cableSizes.Length == 2 &&
+                                        decimal.TryParse(cableSizes[0], out  height) &&
+                                        decimal.TryParse(cableSizes[1], out  width))
                                     {
                                         maxCoverDiameter = null;
-
                                     }
                                     else throw new Exception("Wrong format table cell data!");
-
                                 }
 
                                 foreach (var polymerGroup in polymerGroups)
                                 {
+                                    var billet = (from b in billets
+                                                  where b.Conductor.AreaInSqrMm == conductorAreaInSqrMm &&
+                                                  b.PolymerGroup.Id == polymerGroup.Id
+                                                  select b).First();
+
                                     var kpsvv = new Cable
                                     {
                                         ClimaticMod = climaticModUHL,
@@ -127,12 +137,23 @@ namespace CableDataParsing
                                         FireProtectionClass = PolymerGroupFireClassDict[polymerGroup],
                                         TwistedElementType = twistedElementType,
                                     };
+
+                                    _dbContext.ListCableBillets.Add(new ListCableBillets { Billet = billet, Cable = kpsvv });
                                     kpsvv.Title = cableTitleBuilder.GetCableTitle(kpsvv, prop);
                                     var cableRec = _dbContext.Cables.Add(kpsvv).Entity;
-                                    _dbContext.SaveChanges();
+                                    //_dbContext.SaveChanges();
+
+
 
                                     if (prop.HasValue)
                                         AddCablePropertiesToDBContext(cableRec, prop.Value);
+                                    if(!maxCoverDiameter.HasValue)
+                                    {
+                                        var flatSize = new FlatCableSize { Height = height, Width = width, Cable = cableRec };
+                                        _dbContext.FlatCableSizes.Add(flatSize);
+                                        _dbContext.SaveChanges();
+                                    }
+                                    recordsCount++;
                                 }
                             }
                             else
@@ -146,11 +167,12 @@ namespace CableDataParsing
 
                     
 
-                    throw new NotImplementedException();
-
+                    //throw new NotImplementedException();
                 }
                 else
                     throw new Exception("Отсутствуют таблицы для парсинга в указанном Word файле!");
+                
+
             }
             catch (Exception)
             {
@@ -160,7 +182,6 @@ namespace CableDataParsing
             {
                 app.Quit();
             }
-
             return recordsCount;
         }
 
