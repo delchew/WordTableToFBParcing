@@ -151,7 +151,7 @@ namespace CableDataParsing
                                                 _wordTableParser.ColumnHeadersRowIndex = twistTypeParams.ColumnHeadersRowIndex;
                                                 _wordTableParser.DataStartRowIndex = twistTypeParams.dataStartRowIndex;
 
-                                                tableData = _wordTableParser.GetCableCellsCollection(table);
+                                                tableData = _wordTableParser.GetCableCellsCollection(tableNumber);
                                                 List<(int fireProtectID, int insPolymerGroupId, int coverPolymerGroupId)> materialParams;
                                                 foreach (var tableCellData in tableData)
                                                 {

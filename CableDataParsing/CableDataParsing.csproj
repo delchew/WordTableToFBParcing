@@ -19,6 +19,9 @@
     <Reference Include="FirebirdDatabaseProvider">
       <HintPath>..\..\FirebirdDatabaseProvider\FirebirdDatabaseProvider\bin\Debug\netstandard2.0\FirebirdDatabaseProvider.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Office.Interop.Word">
+      <HintPath>..\CableParsingTests\bin\Debug\netcoreapp3.1\Microsoft.Office.Interop.Word.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

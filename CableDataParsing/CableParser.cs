@@ -21,6 +21,11 @@ namespace CableDataParsing
 
         public event Action<int, int> ParseReport;
 
+        protected void OnParseReport(int parseStepsCount, int currentStepNumber)
+        {
+            ParseReport?.Invoke(parseStepsCount, currentStepNumber);
+        }
+
         static CableParser()
         {
             cablePropertiesCount = Enum.GetNames(typeof(Cables.Common.CableProperty)).Count();

@@ -84,8 +84,6 @@ namespace CableDataParsing
         private Dictionary<int, decimal> RubberDiamDict660 = new Dictionary<int, decimal>
         { {1, 2.9m}, {3, 3.1m}, {5, 3.3m}, {7, 3.6m}, {9, 4.0m} };
 
-        public event Action<int, int> ParseReport;
-
         private decimal GetDiameter(int voltageId, int condId, int polymerId)
         {
             if (voltageId == 2)

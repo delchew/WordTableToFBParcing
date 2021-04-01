@@ -10,6 +10,6 @@ namespace CableDataParsing
         /// <returns>Возвращает число добавленных записей</returns>
         int ParseDataToDatabase();
 
-        event Action<int, int> ParseReport;
+        //event Action<int, int> ParseReport;
     }
 }

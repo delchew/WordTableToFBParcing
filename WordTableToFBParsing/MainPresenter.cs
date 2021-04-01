@@ -21,17 +21,18 @@ namespace WordTableToFBParsing
         {
             _cableTypesDict = new Dictionary<string, Func<CableParser>>
             {
-                { "КПСВ(Э)", () => new KpsvevParser(_connectionString, _view.MSWordFile) }
+                { "КПСВ(Э)", () => new KpsvevParser(_connectionString, _view.MSWordFile) },
                 //{"КУНРС", () => new KunrsParser(_connectionString, _view.MSWordFile) },
                 //{"СКАБ", () => new SkabParser(_connectionString, _view.MSWordFile) },
-                //{"КЭВ(Э)В, КЭРс(Э)", () => new Kevv_KerspParser(_connectionString, _view.MSWordFile) },
+                {"КЭВ(Э)В, КЭРс(Э)", () => new Kevv_KerspParser(_connectionString, _view.MSWordFile) },
                 //{"КИП", () => new KipParser(_connectionString, _view.MSWordFile) }
             };
 
             _dbConnectionsNames = new string[]
             {
                 "JobConnection",
-                "TestJobConnection"
+                "TestJobConnection",
+                "HomePCTestConnection"
             };
 
             _view = view;

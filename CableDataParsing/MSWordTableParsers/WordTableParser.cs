@@ -9,8 +9,6 @@ namespace CableDataParsing.MSWordTableParsers
     {
         private WordObj.Application _app;
 
-        private FileInfo _mSWordFile;
-
         public int DataStartRowIndex { get; set; }
         public int DataStartColumnIndex { get; set; }
         public int DataColumnsCount { get; set; }
@@ -18,13 +16,10 @@ namespace CableDataParsing.MSWordTableParsers
         public int ColumnHeadersRowIndex { get; set; }
         public int RowHeadersColumnIndex { get; set; }
 
-        public WordTableParser(FileInfo mSWordFile)
+        public WordTableParser()
         {
-            _mSWordFile = mSWordFile;
             _app = new WordObj.Application { Visible = false };
         }
-
-        public WordTableParser(string filePath) : this(new FileInfo(filePath)) { }
 
         public WordTableParser SetDataStartRowIndex(int index)
         {
@@ -67,6 +62,8 @@ namespace CableDataParsing.MSWordTableParsers
         /// <param name="mSWordFile">Файл Microsoft Word для открытия</param>
         public void OpenWordDocument(FileInfo mSWordFile)
         {
+            if (!mSWordFile.Exists)
+                throw new FileNotFoundException("указанный файл отсутствует!");
             object fileName = mSWordFile.FullName;
             _app.Documents.Open(ref fileName);
         }
@@ -97,8 +94,7 @@ namespace CableDataParsing.MSWordTableParsers
         {
             try
             {
-                var document = _app.ActiveDocument;
-                var tables = document.Tables;
+                var tables = _app.ActiveDocument.Tables;
                 if (tables.Count == 0)
                     throw new Exception("Отсутствуют таблицы для парсинга в указанном Word файле!");
                 var table = tables[tableNumber];

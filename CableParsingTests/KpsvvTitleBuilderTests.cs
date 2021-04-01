@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using CableDataParsing.CableTitleBulders;
 using CablesDatabaseEFCoreFirebird.Entities;
 using NUnit.Framework;
@@ -10,7 +9,6 @@ namespace CableParsingTests
         string title;
         Conductor conductor;
         InsulatedBillet billet;
-        ListCableBillets billetsList;
         Cable cable;
         PolymerGroup coverPolymerGroup;
         KpsvevTitleBuilder builder;
@@ -20,14 +18,12 @@ namespace CableParsingTests
         {
             conductor = new Conductor();
             billet = new InsulatedBillet { Conductor = conductor };
-            billetsList = new ListCableBillets { Billet = billet };
             coverPolymerGroup = new PolymerGroup();
             builder = new KpsvevTitleBuilder();
 
             cable = new Cable
             {
                 CoverPolymerGroup = coverPolymerGroup,
-                ListCableBillets = new List<ListCableBillets> { billetsList },
             };
         }
 
@@ -38,7 +34,7 @@ namespace CableParsingTests
             coverPolymerGroup.Title = "PVC LS";
             cable.ElementsCount = 8;
 
-            title = builder.GetCableTitle(cable, Cables.Common.CableProperty.HasArmourBraid);
+            title = builder.GetCableTitle(cable, billet, Cables.Common.CableProperty.HasArmourBraid);
             Assert.That(title, Is.EqualTo("КПСВВКГнг(А)-LS 8х2х1,0"));
         }
 
@@ -49,7 +45,7 @@ namespace CableParsingTests
             coverPolymerGroup.Title = "PE Self extinguish";
             cable.ElementsCount = 4;
 
-            title = builder.GetCableTitle(cable, Cables.Common.CableProperty.HasArmourBraid |
+            title = builder.GetCableTitle(cable, billet, Cables.Common.CableProperty.HasArmourBraid |
                                                  Cables.Common.CableProperty.HasArmourTube |
                                                  Cables.Common.CableProperty.HasFoilShield);
             Assert.That(title, Is.EqualTo("КПСВЭПсКПс 4х2х2,5"));
@@ -62,7 +58,7 @@ namespace CableParsingTests
             coverPolymerGroup.Title = "PVC Cold";
             cable.ElementsCount = 24;
 
-            title = builder.GetCableTitle(cable, Cables.Common.CableProperty.HasArmourTape |
+            title = builder.GetCableTitle(cable, billet, Cables.Common.CableProperty.HasArmourTape |
                                                  Cables.Common.CableProperty.HasArmourTube |
                                                  Cables.Common.CableProperty.HasFoilShield);
             Assert.That(title, Is.EqualTo("КПСВЭВБВм 24х2х0,5"));
@@ -75,7 +71,7 @@ namespace CableParsingTests
             coverPolymerGroup.Title = "PVC Term";
             cable.ElementsCount = 12;
 
-            title = builder.GetCableTitle(cable, null);
+            title = builder.GetCableTitle(cable, billet, null);
             Assert.That(title, Is.EqualTo("КПСВВт 12х2х1,5"));
         }
     }
