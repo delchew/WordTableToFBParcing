@@ -8,7 +8,7 @@ namespace CableDataParsing.CableTitleBulders
     {
         private StringBuilder _nameBuilder = new StringBuilder();
 
-        public string GetCableTitle(Cable cable, Cables.Common.CableProperty? cableProperty)
+        public string GetCableTitle(Cable cable, InsulatedBillet mainBillet, Cables.Common.CableProperty? cableProperty, object parameter = null)
         {
             _nameBuilder.Clear();
             _nameBuilder.Append("КПСВ");
@@ -49,7 +49,7 @@ namespace CableDataParsing.CableTitleBulders
             if (cable.CoverPolymerGroup.Title == "PVC LS")
                 _nameBuilder.Append("нг(А)-LS");
 
-            var cableConductorArea = cable.ListCableBillets.First().Billet.Conductor.AreaInSqrMm;
+            var cableConductorArea = mainBillet.Conductor.AreaInSqrMm;
             namePart = Cables.Common.CableCalculations.FormatConductorArea((double)cableConductorArea);
             _nameBuilder.Append($" {cable.ElementsCount}х2х{namePart}");
 

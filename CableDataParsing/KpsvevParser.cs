@@ -30,21 +30,21 @@ namespace CableDataParsing
                 var tables = document.Tables;
                 if(tables.Count > 0)
                 {
-                    var PVCGroup = _dbContext.PolymerGroups.Where(g => g.Id == 1).AsNoTracking().First(); // PVC
-                    var PVCColdGroup = _dbContext.PolymerGroups.Where(g => g.Id == 10).AsNoTracking().First(); // PVC Cold
-                    var PVCTermGroup = _dbContext.PolymerGroups.Where(g => g.Id == 11).AsNoTracking().First(); //PVC term
-                    var PVCLSGroup = _dbContext.PolymerGroups.Where(g => g.Id == 6).AsNoTracking().First(); //PVC LS
+                    var PVCGroup = _dbContext.PolymerGroups.Where(g => g.Id == 1).AsNoTracking().First().Id; // PVC
+                    var PVCColdGroup = _dbContext.PolymerGroups.Where(g => g.Id == 10).AsNoTracking().First().Id; // PVC Cold
+                    var PVCTermGroup = _dbContext.PolymerGroups.Where(g => g.Id == 11).AsNoTracking().First().Id; //PVC term
+                    var PVCLSGroup = _dbContext.PolymerGroups.Where(g => g.Id == 6).AsNoTracking().First().Id; //PVC LS
 
-                    var polymerGroups = new List<PolymerGroup>
+                    var polymerGroups = new List<int>
                     {
                         PVCGroup, PVCColdGroup, PVCTermGroup, PVCLSGroup
                     };
 
-                    var PVCLSLTxGroup = _dbContext.PolymerGroups.Where(g => g.Id == 7).AsNoTracking().First(); //PVC LSLTx
-                    var PESelfExtinguish = _dbContext.PolymerGroups.Where(g => g.Id == 12).AsNoTracking().First(); //PE self extinguish
+                    var PVCLSLTxGroup = _dbContext.PolymerGroups.Where(g => g.Id == 7).AsNoTracking().First().Id; //PVC LSLTx
+                    var PESelfExtinguish = _dbContext.PolymerGroups.Where(g => g.Id == 12).AsNoTracking().First().Id; //PE self extinguish
 
                     var noFireProtectClass = _dbContext.FireProtectionClasses.Find(1); //О1.8.2.5.4
-                    var PolymerGroupFireClassDict = new Dictionary<PolymerGroup, FireProtectionClass>()
+                    var PolymerGroupFireClassDict = new Dictionary<int, FireProtectionClass>()
                     {
                         { PVCGroup, noFireProtectClass },
                         { PVCColdGroup, noFireProtectClass },
@@ -118,33 +118,31 @@ namespace CableDataParsing
                                     else throw new Exception("Wrong format table cell data!");
                                 }
 
-                                foreach (var polymerGroup in polymerGroups)
+                                foreach (var polymerGroupId in polymerGroups)
                                 {
                                     var billet = (from b in billets
                                                   where b.Conductor.AreaInSqrMm == conductorAreaInSqrMm &&
-                                                  b.PolymerGroup.Id == polymerGroup.Id
+                                                  b.PolymerGroup.Id == polymerGroupId
                                                   select b).First();
 
                                     var kpsvv = new Cable
                                     {
-                                        ClimaticMod = climaticModUHL,
-                                        CoverPolymerGroup = polymerGroup,
-                                        TechnicalConditions = TU2,
-                                        CoverColor = polymerGroup == PVCColdGroup ? blackColor : redColor,
-                                        OperatingVoltage = operatingVoltage,
+                                        ClimaticModId = climaticModUHL.Id,
+                                        CoverPolymerGroupId = polymerGroupId,
+                                        TechnicalConditionsId = TU2.Id,
+                                        CoverColorId = polymerGroupId == PVCColdGroup ? blackColor.Id : redColor.Id,
+                                        OperatingVoltageId = operatingVoltage.Id,
                                         ElementsCount = elementsCount,
                                         MaxCoverDiameter = maxCoverDiameter,
-                                        FireProtectionClass = PolymerGroupFireClassDict[polymerGroup],
-                                        TwistedElementType = twistedElementType,
+                                        FireProtectionClassId = PolymerGroupFireClassDict[polymerGroupId].Id,
+                                        TwistedElementTypeId = twistedElementType.Id,
                                     };
                                     var cableRec = _dbContext.Cables.Add(kpsvv).Entity;
-                                    _dbContext.SaveChanges();
-
-                                    _dbContext.ListCableBillets.Add(new ListCableBillets { BilletId = billet.Id, CableId = cableRec.Id });
-                                    kpsvv.Title = cableTitleBuilder.GetCableTitle(cableRec, prop);
                                     //_dbContext.SaveChanges();
 
-
+                                    _dbContext.ListCableBillets.Add(new ListCableBillets { Billet = billet, Cable = cableRec });
+                                    cableRec.Title = cableTitleBuilder.GetCableTitle(cableRec, prop);
+                                    //_dbContext.SaveChanges();
 
                                     if (prop.HasValue)
                                         AddCablePropertiesToDBContext(cableRec, prop.Value);
@@ -152,8 +150,10 @@ namespace CableDataParsing
                                     {
                                         var flatSize = new FlatCableSize { Height = height, Width = width, Cable = cableRec };
                                         _dbContext.FlatCableSizes.Add(flatSize);
-                                        _dbContext.SaveChanges();
                                     }
+
+                                    _dbContext.SaveChanges();
+
                                     recordsCount++;
                                 }
                             }

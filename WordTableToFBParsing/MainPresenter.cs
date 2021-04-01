@@ -21,7 +21,7 @@ namespace WordTableToFBParsing
         {
             _cableTypesDict = new Dictionary<string, Func<CableParser>>
             {
-                {"КПСВ(Э)", () => new KpsvevParser(_connectionString, _view.MSWordFile) }
+                { "КПСВ(Э)", () => new KpsvevParser(_connectionString, _view.MSWordFile) }
                 //{"КУНРС", () => new KunrsParser(_connectionString, _view.MSWordFile) },
                 //{"СКАБ", () => new SkabParser(_connectionString, _view.MSWordFile) },
                 //{"КЭВ(Э)В, КЭРс(Э)", () => new Kevv_KerspParser(_connectionString, _view.MSWordFile) },
@@ -79,7 +79,7 @@ namespace WordTableToFBParsing
                     _messageService.ShowExclamation($"Не выбрано соединение или марка кабеля!");
                     return;
                 }
-                var parser = _cableTypesDict[_cableName]?.Invoke();
+                using (var parser = _cableTypesDict[_cableName]?.Invoke())
                 if (parser != null)
                 {
                     parser.ParseReport += Parser_ParseReport;

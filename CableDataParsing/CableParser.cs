@@ -41,17 +41,7 @@ namespace CableDataParsing
 
         public abstract int ParseDataToDatabase();
 
-        protected void AddCablePropertiesToDBContext(Cable cable, Cables.Common.CableProperty cableProps)
-        {
-            if (_dbContext == null)
-                throw new NullReferenceException("Объект для работы с базой даных не инициализирован!");
-
-            var propList = GetPropertiesList(cable, cableProps);
-            _dbContext.AddRange(propList);
-            _dbContext.SaveChanges();
-        }
-
-        private IEnumerable<ListCableProperties> GetPropertiesList(Cable cable, Cables.Common.CableProperty cableProps)
+        protected IEnumerable<ListCableProperties> GetCableAssociatedPropertiesList(Cable cable, Cables.Common.CableProperty cableProps)
         {
             var propList = new List<ListCableProperties>();
 

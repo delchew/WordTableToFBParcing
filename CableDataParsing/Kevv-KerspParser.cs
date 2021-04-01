@@ -2,119 +2,79 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using WordObj = Microsoft.Office.Interop.Word;
 using CablesDatabaseEFCoreFirebird;
 using CablesDatabaseEFCoreFirebird.Entities;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using System.Text;
-using Cables.Common;
+using CableDataParsing.CableTitleBulders;
 
 namespace CableDataParsing
 {
-    public class Kevv_KerspParser : ICableDataParcer
+    public class Kevv_KerspParser : CableParser
     {
-        public event Action<int, int> ParseReport;
-
-        private WordTableParser _wordTableParser;
-        private FileInfo _mSWordFile;
-        private string _connectionString;
-        private StringBuilder _nameBuilder;
-
+        private const int tablesCount = 4;
 
         public Kevv_KerspParser(string connectionString, FileInfo mSWordFile)
-        {
-            _mSWordFile = mSWordFile;
-            _connectionString = connectionString;
-        }
+            : base(connectionString, mSWordFile, new Kevv_KerspTitleBuilder()) { }
 
-        public int ParseDataToDatabase()
+        public override int ParseDataToDatabase()
         {
             int recordsCount = 0;
             List<InsulatedBillet> pvcBillets, rubberBillets;
-            using (var dbContext = new CablesContext(_connectionString))
+            pvcBillets = _dbContext.InsulatedBillets.AsNoTracking()
+                                                   .Include(b => b.Conductor)
+                                                   .Where(b => b.CableShortName.ShortName.ToLower().StartsWith("кэв"))
+                                                   .ToList();
+            rubberBillets = _dbContext.InsulatedBillets.AsNoTracking()
+                                                  .Include(b => b.Conductor)
+                                                  .Where(b => b.CableShortName.ShortName.ToLower().StartsWith("кэрс"))
+                                                  .ToList();
+
+            _wordTableParser = new WordTableParser(_mSWordFile).SetDataRowsCount(7)
+                                                               .SetColumnHeadersRowIndex(3)
+                                                               .SetRowHeadersColumnIndex(3)
+                                                               .SetDataStartColumnIndex(4);
+
+            var kersParams = new List<(int fireId, int polymerId, int colorId)>
             {
-                pvcBillets = dbContext.InsulatedBillets.AsNoTracking()
-                                                       .Include(b => b.Conductor)
-                                                       .Where(b => b.CableShortName.ShortName.ToLower().StartsWith("кэв"))
-                                                       .ToList();
-                rubberBillets = dbContext.InsulatedBillets.AsNoTracking()
-                                                          .Include(b => b.Conductor)
-                                                          .Where(b => b.CableShortName.ShortName.ToLower().StartsWith("кэрс"))
-                                                          .ToList();
-            }
+                (23, 4, 3), (26, 5, 8)
+            };
 
-            var app = new WordObj.Application { Visible = false };
-            object fileName = _mSWordFile.FullName;
+            var dataStartRowIndexes = new int[2] { 4, 11 };
 
-            try
+            List<TableCellData> tableData;
+
+            for (int i = 0; i < tablesCount; i++)
             {
-                app.Documents.Open(ref fileName);
-                var document = app.ActiveDocument;
-                var tables = document.Tables;
+                _wordTableParser.DataColumnsCount = i % 2 == 0 ? 7 : 9;
 
-                if (tables.Count > 0)
+                foreach (var index in dataStartRowIndexes)
                 {
-                    _wordTableParser = new WordTableParser
+                    _wordTableParser.DataStartRowIndex = index;
+                    tableData = _wordTableParser.GetCableCellsCollection(i + 1); //добавляем 1, потому что таблицы в MSWord нумеруются с 1, а не с 0.
+                    foreach (var tableCellData in tableData)
                     {
-                        DataRowsCount = 7,
-                        ColumnHeadersRowIndex = 3,
-                        RowHeadersColumnIndex = 3,
-                        DataStartColumnIndex = 4,
-                    };
-
-                    var kersParams = new List<(int fireId, int polymerId, int colorId)>
-                    {
-                        (23, 4, 3), (26, 5, 8)
-                    };
-
-                    var dataStartRowIndexes = new int[2] { 4, 11 };
-
-                    List<TableCellData> tableData;
-
-                    using (var dbContext = new CablesContext(_connectionString))
-                    {
-                        for (int i = 1; i <= tables.Count; i++)
+                        if (i < 3)
                         {
-                            _wordTableParser.DataColumnsCount = i % 2 == 0 ? 7 : 9;
-
-                            foreach (var index in dataStartRowIndexes)
+                            ParseTableCellData(tableCellData, pvcBillets, _dbContext, ref recordsCount, index, (8, 6, 9));
+                        }
+                        else
+                        {
+                            foreach (var param in kersParams)
                             {
-                                _wordTableParser.DataStartRowIndex = index;
-                                tableData = _wordTableParser.GetCableCellsCollection(tables[i]);
-                                foreach (var tableCellData in tableData)
-                                {
-                                    if (i < 3)
-                                    {
-                                        ParseTableCellData(tableCellData, pvcBillets, dbContext, ref recordsCount, index, (8, 6, 9));
-                                    }
-                                    else
-                                    {
-                                        foreach (var param in kersParams)
-                                        {
-                                            ParseTableCellData(tableCellData, rubberBillets, dbContext, ref recordsCount, index, param);
-                                        }
-                                    }
-                                }
-                                tableData.Clear();
-                                ParseReport(672, recordsCount); //672 марки в таблицах
+                                ParseTableCellData(tableCellData, rubberBillets, _dbContext, ref recordsCount, index, param);
                             }
                         }
                     }
+                    tableData.Clear();
+                    //ParseReport(672, recordsCount); //672 марки в таблицах
                 }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            finally
-            {
-                app.Quit();
             }
             return recordsCount;
         }
 
-        private void ParseTableCellData(TableCellData tableCellData, List<InsulatedBillet> currentBilletsList, CablesContext dbContext, ref int recordsCount, int index, (int fireId, int polymerId, int colorId) kevvParams)
+        private void ParseTableCellData(TableCellData tableCellData, List<InsulatedBillet> currentBilletsList, CablesContext dbContext,
+                                            ref int recordsCount, int index, (int fireId, int polymerId, int colorId) kevvParams)
         {
             if (decimal.TryParse(tableCellData.ColumnHeaderData, out decimal elementsCount) &&
                 decimal.TryParse(tableCellData.CellData, out decimal maxCoverDiameter) &&
@@ -135,7 +95,13 @@ namespace CableDataParsing
                     ClimaticModId = 3, //УХЛ
                     OperatingVoltageId = 4
                 };
-                kevvKersp.Title = BuildTitle(kevvKersp, billet, index == 11 ? "Э" : string.Empty);
+                
+                Cables.Common.CableProperty? cableProp;
+                if (index == 11)
+                    cableProp = Cables.Common.CableProperty.HasBraidShield;
+                else cableProp = null;
+
+                kevvKersp.Title = cableTitleBuilder.GetCableTitle(kevvKersp, billet, cableProp); 
                 var cableRec = dbContext.Cables.Add(kevvKersp);
                 dbContext.SaveChanges();
 
@@ -150,25 +116,6 @@ namespace CableDataParsing
             }
             else
                 throw new Exception($"Не удалось распарсить ячейку таблицы!");
-        }
-
-        private string BuildTitle(Cable cable, InsulatedBillet billet, string shield)
-        {
-            string namePart;
-            if (billet.PolymerGroupId == 6)
-                namePart = $"КЭВ{shield}Внг(А)-LS ";
-            else
-                namePart = $"КЭРс{shield}";
-            _nameBuilder = new StringBuilder(namePart);
-
-            if (cable.CoverPolymerGroupId == 4)
-                _nameBuilder.Append("Пнг(А)-FRHF ");
-            if (cable.CoverPolymerGroupId == 5)
-                _nameBuilder.Append("Унг(D)-FRHF ");
-            namePart = CableCalculations.FormatConductorArea((double)billet.Conductor.AreaInSqrMm);
-
-            _nameBuilder.Append($"{cable.ElementsCount}х{namePart}");
-            return _nameBuilder.ToString();
         }
     }
 }
