@@ -15,7 +15,7 @@ namespace CableDataParsing
 {
     public class SkabParser : ICableDataParcer
     {
-        private WordTableParser _wordTableParser;
+        private MSWordTableParser _wordTableParser;
         private FileInfo _mSWordFile;
 
         private string _dbConnectionString;
@@ -60,7 +60,7 @@ namespace CableDataParsing
                 {
                     var maxDiamTableCount = tables.Count / 2;
                     int tableNumber = 1;
-                    _wordTableParser = new WordTableParser
+                    _wordTableParser = new MSWordTableParser
                     {
                         DataRowsCount = 5,
                         RowHeadersColumnIndex = 2,

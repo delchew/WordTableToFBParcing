@@ -14,7 +14,7 @@ namespace CableDataParsing
         private readonly List<CableProperty> cablePropertiesList;
 
         protected static int cablePropertiesCount;
-        protected WordTableParser _wordTableParser;
+        protected WordTableParser<TableCellData> _wordTableParser;
         protected FileInfo _mSWordFile;
         protected CablesContext _dbContext;
         protected ICableTitleBuilder cableTitleBuilder;

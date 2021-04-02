@@ -16,15 +16,15 @@ namespace CableDataParsing.CableTitleBulders
                 shield = "Э";
             }
             string namePart;
-            if (mainBillet.PolymerGroupId == 6)
+            if (mainBillet.PolymerGroup.Title == "PVC LS")
                 namePart = $"КЭВ{shield}Внг(А)-LS ";
             else
                 namePart = $"КЭРс{shield}";
             _nameBuilder = new StringBuilder(namePart);
 
-            if (cable.CoverPolymerGroupId == 4)
+            if (cable.CoverPolymerGroup.Title == "HFCompound")
                 _nameBuilder.Append("Пнг(А)-FRHF ");
-            if (cable.CoverPolymerGroupId == 5)
+            if (cable.CoverPolymerGroup.Title == "PUR")
                 _nameBuilder.Append("Унг(D)-FRHF ");
             namePart = CableCalculations.FormatConductorArea((double)mainBillet.Conductor.AreaInSqrMm);
 

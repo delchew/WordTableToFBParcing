@@ -19,7 +19,7 @@ namespace CableDataParsing
         {
             int recordsCount = 0;
 
-            _wordTableParser = new WordTableParser().SetDataRowsCount(1)
+            _wordTableParser = new MSWordTableParser().SetDataRowsCount(1)
                                                                .SetDataColumnsCount(11)
                                                                .SetColumnHeadersRowIndex(3)
                                                                .SetDataStartColumnIndex(2);
@@ -89,11 +89,13 @@ namespace CableDataParsing
 
 
             _wordTableParser.OpenWordDocument(_mSWordFile);
+            var currentPolymerGroupCount = 1;
             foreach (var techCondPolymerGroup in techCondPolymerGroupsList) //Не оптимально, но для разового метода сойдёт, если отделять БГ кабель от остальных со своей таблицей, придётся больше логики писать, пусть лучше чуть дольше работает метод)))
             {
                 var tableIndex = techCondPolymerGroup.paramGroups == coverPolymerGroupList42TC ? 2 : 1;
+                
                 if (tableIndex == 2) flagBG = true;
-                var currentPolymerGroupCount = 1;
+                
                 foreach (var paramGroup in techCondPolymerGroup.paramGroups)
                 {
                     foreach (var index in dataStartRowIndexes)
@@ -133,7 +135,6 @@ namespace CableDataParsing
 
                                     kip.Title = cableTitleBuilder.GetCableTitle(kip, billet, cableProp, flagBG);
                                     var cableRec = _dbContext.Cables.Add(kip).Entity;
-                                    _dbContext.SaveChanges();
 
                                     _dbContext.ListCableBillets.Add(new ListCableBillets { Billet = billet, Cable = cableRec });
                                     if (elementsCount == 1.5m)
@@ -154,7 +155,7 @@ namespace CableDataParsing
                             _wordTableParser.DataStartRowIndex++;
                         }
                     }
-                    //(CableParser)this.ParseReport(POLYMER_GROUP_COUNT, currentPolymerGroupCount);
+                    OnParseReport(POLYMER_GROUP_COUNT, currentPolymerGroupCount);
                     currentPolymerGroupCount++;
                 }
             }

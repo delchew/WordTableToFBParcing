@@ -20,7 +20,7 @@ namespace CableDataParsing
         {
             int recordsCount = 0;
 
-            _wordTableParser = new WordTableParser().SetDataColumnsCount(4)
+            _wordTableParser = new MSWordTableParser().SetDataColumnsCount(4)
                                                     .SetDataRowsCount(8)
                                                     .SetColumnHeadersRowIndex(3)
                                                     .SetRowHeadersColumnIndex(2)

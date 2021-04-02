@@ -21,23 +21,39 @@ namespace CableDataParsing
         public override int ParseDataToDatabase()
         {
             _recordsCount = 0;
+
+            var twistedElementType = _dbContext.TwistedElementTypes.Where(t => t.ElementType.ToLower() =="single").First();
+            var techCond = _dbContext.TechnicalConditions.Where(c => c.Title == "ТУ 16.К99-046-2011").First();
+            var climaticMod = _dbContext.ClimaticMods.Where(m => m.Title == "УХЛ").First();
+            var operatingVoltage = _dbContext.OperatingVoltages.Find(4);
+
+            var fireClassPVCLS = _dbContext.FireProtectionClasses.Find(8);
+            var fireClassHF = _dbContext.FireProtectionClasses.Find(23);
+            var fireClassPURHF = _dbContext.FireProtectionClasses.Find(26);
+
+            var polymerPVCLS = _dbContext.PolymerGroups.Find(6);
+            var polymerHF = _dbContext.PolymerGroups.Find(4);
+            var polymerPUR = _dbContext.PolymerGroups.Find(5);
+
+            var colorGrey = _dbContext.Colors.Find(9);
+            var colorBlack = _dbContext.Colors.Find(2);
+            var colorOrange = _dbContext.Colors.Find(8);
+
             var pvcBillets = _dbContext.InsulatedBillets.Where(b => b.CableShortName.ShortName.ToLower().StartsWith("кэв"))
                                                    .Include(b => b.Conductor)
-                                                   .AsNoTracking()
                                                    .ToList();
             var rubberBillets = _dbContext.InsulatedBillets.Where(b => b.CableShortName.ShortName.ToLower().StartsWith("кэрс"))
                                                   .Include(b => b.Conductor)
-                                                  .AsNoTracking()
                                                   .ToList();
 
-            _wordTableParser = new WordTableParser().SetDataRowsCount(7)
+            _wordTableParser = new XceedWordTableParser().SetDataRowsCount(7)
                                                     .SetColumnHeadersRowIndex(3)
                                                     .SetRowHeadersColumnIndex(3)
                                                     .SetDataStartColumnIndex(4);
 
-            var kersParams = new List<(int fireId, int polymerId, int colorId)>
+            var kersParams = new List<(FireProtectionClass fireClass, PolymerGroup polymer, Color color)>
             {
-                (23, 4, 3), (26, 5, 8)
+                (fireClassPVCLS, polymerPVCLS, colorGrey), (fireClassHF, polymerHF, colorBlack), (fireClassPURHF, polymerPUR, colorOrange)
             };
 
             var cableProps = new List<Cables.Common.CableProperty?>
@@ -51,7 +67,7 @@ namespace CableDataParsing
 
             for (int i = 0; i < tablesCount; i++)
             {
-                _wordTableParser.DataColumnsCount = i % 2 == 0 ? 7 : 9;
+                _wordTableParser.DataColumnsCount = (i + 1) % 2 == 0 ? 7 : 9; //выбираем число столбцов в зависимости от чётности номера таблицы
 
                 foreach (var prop in cableProps)
                 {
@@ -61,14 +77,29 @@ namespace CableDataParsing
 
                     foreach (var tableCellData in tableData)
                     {
-                        if (i < 3)
+                        var cable = new Cable
                         {
-                            ParseTableCellData(tableCellData, pvcBillets, prop, (8, 6, 9));
+                            TwistedElementType = twistedElementType,
+                            TechnicalConditions = techCond,
+                            ClimaticMod = climaticMod, 
+                            OperatingVoltage = operatingVoltage
+                        };
+                        if (i < 2) //первые 2 таблицы для КЭВВ, остальные - КЭРс
+                        {
+                            cable.FireProtectionClass = fireClassPVCLS;
+                            cable.CoverPolymerGroup = polymerPVCLS;
+                            cable.CoverColor = colorGrey;
+                            ParseTableCellData(cable, tableCellData, pvcBillets, prop);
                         }
                         else
                         {
                             foreach (var param in kersParams)
-                                ParseTableCellData(tableCellData, rubberBillets, prop, param);
+                            {
+                                cable.FireProtectionClass = param.fireClass;
+                                cable.CoverPolymerGroup = param.polymer;
+                                cable.CoverColor = param.color;
+                                ParseTableCellData(cable, tableCellData, rubberBillets, prop);
+                            }
                         }
                     }
                     tableData.Clear();
@@ -79,22 +110,24 @@ namespace CableDataParsing
             return _recordsCount;
         }
 
-        private void ParseTableCellData(TableCellData tableCellData, List<InsulatedBillet> currentBilletsList,
-                                            Cables.Common.CableProperty? prop, (int fireId, int polymerId, int colorId) kevvParams)
+        private void ParseTableCellData(Cable cable, TableCellData tableCellData, List<InsulatedBillet> currentBilletsList,
+                                            Cables.Common.CableProperty? cableProps, char splitter = ' ')
         {
             if (decimal.TryParse(tableCellData.ColumnHeaderData, out decimal elementsCount) &&
                 decimal.TryParse(tableCellData.RowHeaderData, out decimal conductorAreaInSqrMm))
             {
+                decimal height = 0m;
+                decimal width = 0m;
                 decimal? maxCoverDiameter;
                 if (decimal.TryParse(tableCellData.CellData, out decimal diameterValue))
                     maxCoverDiameter = diameterValue;
                 else
                 {
-                    var cableSizes = tableCellData.CellData.Split('\u00D7'); //знак умножения в юникоде
+                    var cableSizes = tableCellData.CellData.Split(splitter);
                     if (cableSizes.Length < 2) return;
                     if (cableSizes.Length == 2 &&
-                        decimal.TryParse(cableSizes[0], out decimal height) &&
-                        decimal.TryParse(cableSizes[1], out decimal width))
+                        decimal.TryParse(cableSizes[0], out height) &&
+                        decimal.TryParse(cableSizes[1], out width))
                     {
                         maxCoverDiameter = null;
                     }
@@ -103,31 +136,24 @@ namespace CableDataParsing
                 var billet = (from b in currentBilletsList
                               where b.Conductor.AreaInSqrMm == conductorAreaInSqrMm
                               select b).First();
-                var cable = new Cable
-                {
-                    ElementsCount = elementsCount,
-                    TwistedElementTypeId = 1, //single
-                    TechnicalConditionsId = 22, //ТУ 46
-                    FireProtectionClassId = kevvParams.fireId,
-                    CoverPolymerGroupId = kevvParams.polymerId,
-                    CoverColorId = kevvParams.colorId,
-                    MaxCoverDiameter = maxCoverDiameter,
-                    ClimaticModId = 3, //УХЛ
-                    OperatingVoltageId = 4
-                };
-                
-                cable.Title = cableTitleBuilder.GetCableTitle(cable, billet, prop); 
+                cable.ElementsCount = elementsCount;
+                cable.MaxCoverDiameter = maxCoverDiameter;
+                cable.Title = cableTitleBuilder.GetCableTitle(cable, billet, cableProps);
+
                 var cableRec = _dbContext.Cables.Add(cable).Entity;
-                _dbContext.SaveChanges();
 
-                _dbContext.ListCableBillets.Add(new ListCableBillets { BilletId = billet.Id, CableId = cableRec.Id });
+                _dbContext.ListCableBillets.Add(new ListCableBillets { Billet = billet, Cable = cableRec });
 
-                if (prop.HasValue)
+                if (cableProps.HasValue)
                 {
-                    var listOfCableProperties = GetCableAssociatedPropertiesList(cableRec, prop.Value);
+                    var listOfCableProperties = GetCableAssociatedPropertiesList(cableRec, cableProps.Value);
                     _dbContext.ListCableProperties.AddRange(listOfCableProperties);
                 }
-
+                if (!maxCoverDiameter.HasValue)
+                {
+                    var flatSize = new FlatCableSize { Height = height, Width = width, Cable = cableRec };
+                    _dbContext.FlatCableSizes.Add(flatSize);
+                }
                 _dbContext.SaveChanges();
 
                 _recordsCount++;

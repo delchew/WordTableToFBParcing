@@ -11,6 +11,7 @@ namespace CableDataParsing
 {
     public class KpsvevParser : CableParser
     {
+        private const char _splitter = '\u00D7'; //знак умножения в юникоде
         public KpsvevParser(string connectionString, FileInfo mSWordFile) : base(connectionString, mSWordFile, new KpsvevTitleBuilder())
         { }
 
@@ -65,7 +66,7 @@ namespace CableDataParsing
                                                      .Include(p => p.PolymerGroup)
                                                      .ToList();
 
-            _wordTableParser = new WordTableParser().SetColumnHeadersRowIndex(3)
+            _wordTableParser = new MSWordTableParser().SetColumnHeadersRowIndex(3)
                                                     .SetRowHeadersColumnIndex(2)
                                                     .SetDataRowsCount(5)
                                                     .SetDataStartColumnIndex(3);
@@ -93,7 +94,7 @@ namespace CableDataParsing
                             maxCoverDiameter = diameterValue;
                         else
                         {
-                            var cableSizes = tableCellData.CellData.Split('\u00D7'); //знак умножения в юникоде
+                            var cableSizes = tableCellData.CellData.Split(_splitter);
                             if (cableSizes.Length < 2) continue;
                             if (cableSizes.Length == 2 &&
                                 decimal.TryParse(cableSizes[0], out height) &&
