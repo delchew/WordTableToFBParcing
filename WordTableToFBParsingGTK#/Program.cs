@@ -14,12 +14,12 @@ namespace WordTableToFBParsingGTK
             var app = new Application("org.WordTableToFBParsingGTK_.WordTableToFBParsingGTK_", GLib.ApplicationFlags.None);
             app.Register(GLib.Cancellable.Current);
 
-            var win = new MainParseWindow();
-            //var messageService = new MessageService();
-            var presenter = new MainPresenter(win, null);
-            app.AddWindow(win);
+            var window = new MainParseWindow();
+            var messageDialog = new MessageService(window);
+            new MainPresenter(window, messageDialog);
+            app.AddWindow(window);
 
-            win.Show();
+            window.Show();
             Application.Run();
         }
     }

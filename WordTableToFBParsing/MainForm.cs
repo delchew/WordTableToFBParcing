@@ -91,6 +91,7 @@ namespace WordTableToFBParsing
             openDocButton.Enabled = false;
             cableBrandCheckComboBox.Enabled = false;
             dbConnectionCheckComboBox.Enabled = false;
+
             TableParseStarted?.Invoke();
         }
 

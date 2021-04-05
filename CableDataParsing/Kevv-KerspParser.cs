@@ -47,9 +47,9 @@ namespace CableDataParsing
                                                   .ToList();
 
             _wordTableParser = new XceedWordTableParser().SetDataRowsCount(7)
-                                                    .SetColumnHeadersRowIndex(3)
-                                                    .SetRowHeadersColumnIndex(3)
-                                                    .SetDataStartColumnIndex(4);
+                                                    .SetColumnHeadersRowIndex(2)
+                                                    .SetRowHeadersColumnIndex(2)
+                                                    .SetDataStartColumnIndex(3);
 
             var kersParams = new List<(FireProtectionClass fireClass, PolymerGroup polymer, Color color)>
             {
@@ -71,9 +71,9 @@ namespace CableDataParsing
 
                 foreach (var prop in cableProps)
                 {
-                    _wordTableParser.DataStartRowIndex = prop.HasValue ? 11 : 4;
+                    _wordTableParser.DataStartRowIndex = prop.HasValue ? 10 : 3;
 
-                    tableData = _wordTableParser.GetCableCellsCollection(i + 1); //добавляем 1, потому что таблицы в MSWord нумеруются с 1, а не с 0.
+                    tableData = _wordTableParser.GetCableCellsCollection(i);
 
                     foreach (var tableCellData in tableData)
                     {

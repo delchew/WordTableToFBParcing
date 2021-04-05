@@ -10,10 +10,11 @@ namespace WordTableToFBParsingGTK
     {
         [UI] private Entry filePathEntry = null;
         [UI] private Button openDocButton = null;
+        [UI] private Button parseButton = null;
         [UI] private ComboBoxText connectionCombobox = null;
         [UI] private ComboBoxText cableTypeCombobox = null;
-        [UI] private Button parseButton = null;
         [UI] private ProgressBar progressBar = null;
+        private FileChooserDialog chooserDialog;
 
         public event System.Action TableParseStarted;
         public event Action<string> CableNameChanged;
@@ -44,33 +45,48 @@ namespace WordTableToFBParsingGTK
 
         public void UpdateProgress(int parseOperationsCount, int completedOperationsCount)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         public void ParseFinishReport()
         {
-            throw new NotImplementedException();
+            filePathEntry.Sensitive = true;
+            parseButton.Sensitive = true;
+            openDocButton.Sensitive = true;
+            connectionCombobox.Sensitive = true;
+            cableTypeCombobox.Sensitive = true;
         }
 
         private MainParseWindow(Builder builder) : base(builder.GetObject("MainParseWindow").Handle)
         {
             builder.Autoconnect(this);
 
-            DeleteEvent += Window_DeleteEvent;
+            Initialize();
 
+            this.DeleteEvent += Window_DeleteEvent;
             openDocButton.Clicked += OpenDocButton_Clicked;
             parseButton.Clicked += ParseButton_Clicked;
             connectionCombobox.Changed += ConnectionCombobox_Changed;
             cableTypeCombobox.Changed += CableTypeCombobox_Changed;
+        }
 
-            progressBar.PulseStep = 0.1;
+        private void Initialize()
+        {
+            chooserDialog = new FileChooserDialog("Выберите docx файл для разбора", this, FileChooserAction.Open);
+            chooserDialog.AddButton("Открыть", ResponseType.Ok);
+            chooserDialog.AddButton("Отмена", ResponseType.Cancel);
+            var filterDocx = new FileFilter() { Name = "Файлы Microsoft Word *.docx" };
+            filterDocx.AddPattern("*.docx");
+            var filterAll = new FileFilter() { Name = "Все файлы" };
+            filterAll.AddPattern("*");
+            chooserDialog.AddFilter(filterDocx);
+            chooserDialog.AddFilter(filterAll);
         }
 
         private void CableTypeCombobox_Changed(object sender, EventArgs e)
         {
             var cableName = cableTypeCombobox.ActiveText;
             CableNameChanged?.Invoke(cableName);
-
         }
 
         private void ConnectionCombobox_Changed(object sender, EventArgs e)
@@ -81,21 +97,28 @@ namespace WordTableToFBParsingGTK
 
         private void ParseButton_Clicked(object sender, EventArgs e)
         {
+            filePathEntry.Sensitive = false;
+            parseButton.Sensitive = false;
+            openDocButton.Sensitive = false;
+            connectionCombobox.Sensitive = false;
+            cableTypeCombobox.Sensitive = false;
+
             TableParseStarted?.Invoke();
         }
 
         private void OpenDocButton_Clicked(object sender, EventArgs e)
         {
-            var openButton = new FileChooserButton("Открыть", FileChooserAction.Open);
-            var chooserDialog = new FileChooserDialog("Выберите docx файл для разбора", this, FileChooserAction.Open, openButton);
-            //chooserDialog.Show();
-            chooserDialog.Run(); //TODO
+            var response = chooserDialog.Run();
 
-            filePathEntry.Text = chooserDialog.File.Path;
+            if ((ResponseType)response == ResponseType.Ok)
+                filePathEntry.Text = chooserDialog.File.Path;
+
+            chooserDialog.Hide();
         }
 
-        private void Window_DeleteEvent(object sender, DeleteEventArgs a)
+        private void Window_DeleteEvent(object sender, DeleteEventArgs e)
         {
+            chooserDialog.Dispose();
             Application.Quit();
         }
     }

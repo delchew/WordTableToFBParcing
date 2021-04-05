@@ -12,12 +12,31 @@ namespace GuiPresenter
     {
         private readonly IView _view;
         private readonly IMessageService _messageService;
-        private readonly Dictionary<string, Func<CableParser>> _cableTypesDict;
-        private readonly string[] _dbConnectionsNames;
+        private Dictionary<string, Func<CableParser>> _cableTypesDict;
+        private string[] _dbConnectionsNames;
         private string _cableName;
         private string _connectionString;
         private IConfigurationRoot _connectionStringConfig;
+
         public MainPresenter(IView view, IMessageService messageService)
+        {
+            Initialize();
+
+            _view = view;
+            _messageService = messageService;
+
+            var cablesNames = _cableTypesDict.Keys.ToArray();
+            _view.SetCablesNames(cablesNames);
+            _view.SetDBConnectionsNames(_dbConnectionsNames);
+
+            GetConnectionString();
+
+            _view.CableNameChanged += View_CableNameChanged;
+            _view.TableParseStarted += View_TableParseStarted;
+            _view.DBConnectionNameChanged += View_DBConnectionNameChanged;
+        }
+
+        private void Initialize()
         {
             _cableTypesDict = new Dictionary<string, Func<CableParser>>
             {
@@ -34,15 +53,10 @@ namespace GuiPresenter
                 "TestJobConnection",
                 "HomePCTestConnection"
             };
+        }
 
-            _view = view;
-            _messageService = messageService;
-
-            var cablesNames = _cableTypesDict.Keys.ToArray();
-            _view.SetCablesNames(cablesNames);
-
-            _view.SetDBConnectionsNames(_dbConnectionsNames);
-
+        private void GetConnectionString()
+        {
             var builder = new ConfigurationBuilder();
             var jsonDir = Directory.GetCurrentDirectory();
             // установка пути к текущему каталогу
@@ -53,10 +67,6 @@ namespace GuiPresenter
             _connectionStringConfig = builder.Build();
             // возвращаем из метода строку подключения
             _connectionString = _connectionStringConfig.GetConnectionString(_view.DBConnectionName);
-
-            _view.CableNameChanged += View_CableNameChanged;
-            _view.TableParseStarted += View_TableParseStarted;
-            _view.DBConnectionNameChanged += View_DBConnectionNameChanged;
         }
 
         private void View_DBConnectionNameChanged(string obj)
