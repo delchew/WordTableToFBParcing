@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace WordTableToFBParsing
+namespace GuiPresenter
 {
     public interface IView
     {

@@ -177,15 +177,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IMessageService.cs" />
-    <Compile Include="IView.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainPresenter.cs" />
     <Compile Include="MessageService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -201,9 +198,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <None Include="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -219,9 +213,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CableDataParsing\CableDataParsing.csproj">
-      <Project>{787d1842-ee87-4f51-aac3-fe4989b7e522}</Project>
-      <Name>CableDataParsing</Name>
+    <ProjectReference Include="..\GuiPresenter\GuiPresenter.csproj">
+      <Project>{7F7B253B-B472-43C3-9855-7E0A31959651}</Project>
+      <Name>GuiPresenter</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,4 +1,4 @@
-﻿namespace WordTableToFBParsing
+﻿namespace GuiPresenter
 {
     public interface IMessageService
     {
