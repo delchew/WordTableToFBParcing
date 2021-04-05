@@ -41,9 +41,11 @@ namespace CableDataParsing
 
             var pvcBillets = _dbContext.InsulatedBillets.Where(b => b.CableShortName.ShortName.ToLower().StartsWith("кэв"))
                                                    .Include(b => b.Conductor)
+                                                   .Include(b => b.PolymerGroup)
                                                    .ToList();
             var rubberBillets = _dbContext.InsulatedBillets.Where(b => b.CableShortName.ShortName.ToLower().StartsWith("кэрс"))
                                                   .Include(b => b.Conductor)
+                                                  .Include(b => b.PolymerGroup)
                                                   .ToList();
 
             _wordTableParser = new XceedWordTableParser().SetDataRowsCount(7)
@@ -53,7 +55,7 @@ namespace CableDataParsing
 
             var kersParams = new List<(FireProtectionClass fireClass, PolymerGroup polymer, Color color)>
             {
-                (fireClassPVCLS, polymerPVCLS, colorGrey), (fireClassHF, polymerHF, colorBlack), (fireClassPURHF, polymerPUR, colorOrange)
+                (fireClassHF, polymerHF, colorBlack), (fireClassPURHF, polymerPUR, colorOrange)
             };
 
             var cableProps = new List<Cables.Common.CableProperty?>
@@ -77,27 +79,35 @@ namespace CableDataParsing
 
                     foreach (var tableCellData in tableData)
                     {
-                        var cable = new Cable
-                        {
-                            TwistedElementType = twistedElementType,
-                            TechnicalConditions = techCond,
-                            ClimaticMod = climaticMod, 
-                            OperatingVoltage = operatingVoltage
-                        };
+                        
                         if (i < 2) //первые 2 таблицы для КЭВВ, остальные - КЭРс
                         {
-                            cable.FireProtectionClass = fireClassPVCLS;
-                            cable.CoverPolymerGroup = polymerPVCLS;
-                            cable.CoverColor = colorGrey;
+                            var cable = new Cable
+                            {
+                                TwistedElementType = twistedElementType,
+                                TechnicalConditions = techCond,
+                                ClimaticMod = climaticMod,
+                                OperatingVoltage = operatingVoltage,
+                                FireProtectionClass = fireClassPVCLS,
+                                CoverPolymerGroup = polymerPVCLS,
+                                CoverColor = colorGrey
+                            };
                             ParseTableCellData(cable, tableCellData, pvcBillets, prop);
                         }
                         else
                         {
                             foreach (var param in kersParams)
                             {
-                                cable.FireProtectionClass = param.fireClass;
-                                cable.CoverPolymerGroup = param.polymer;
-                                cable.CoverColor = param.color;
+                                var cable = new Cable
+                                {
+                                    TwistedElementType = twistedElementType,
+                                    TechnicalConditions = techCond,
+                                    ClimaticMod = climaticMod,
+                                    OperatingVoltage = operatingVoltage,
+                                    FireProtectionClass = param.fireClass,
+                                    CoverPolymerGroup = param.polymer,
+                                    CoverColor = param.color
+                                };
                                 ParseTableCellData(cable, tableCellData, rubberBillets, prop);
                             }
                         }

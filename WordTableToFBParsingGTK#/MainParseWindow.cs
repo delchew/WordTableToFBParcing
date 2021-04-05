@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using Gtk;
 using GuiPresenter;
 using UI = Gtk.Builder.ObjectAttribute;
@@ -68,6 +69,8 @@ namespace WordTableToFBParsingGTK
             parseButton.Clicked += ParseButton_Clicked;
             connectionCombobox.Changed += ConnectionCombobox_Changed;
             cableTypeCombobox.Changed += CableTypeCombobox_Changed;
+
+            var context = SynchronizationContext.Current;
         }
 
         private void Initialize()
