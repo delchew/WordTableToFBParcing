@@ -12,7 +12,7 @@ namespace CableDataParsing
     public class Kevv_KerspParser : CableParser
     {
         private const int tablesCount = 4; // количество таблиц в документе
-        private const int cableBrandsCount = 672;  //672 марки в таблицах
+        private const int CABLE_BRANDS_COUNT = 672;  //672 марки в таблицах
         private int _recordsCount;
 
         public Kevv_KerspParser(string connectionString, FileInfo mSWordFile)
@@ -113,7 +113,7 @@ namespace CableDataParsing
                         }
                     }
                     tableData.Clear();
-                    OnParseReport(cableBrandsCount, _recordsCount);
+                    OnParseReport((double)_recordsCount / CABLE_BRANDS_COUNT);
                 }
             }
             _wordTableParser.CloseWordApp();

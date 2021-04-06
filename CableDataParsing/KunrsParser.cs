@@ -98,7 +98,7 @@ namespace CableDataParsing
                         }
                     }
                 }
-                OnParseReport(hasFoilShieldDictionary.Count, i + 1);
+                OnParseReport((double)(i + 1) / hasFoilShieldDictionary.Count);
                 _wordTableParser.DataStartRowIndex += _wordTableParser.DataRowsCount;
                 tableData.Clear();
             }

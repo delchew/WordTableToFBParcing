@@ -17,6 +17,8 @@ namespace WordTableToFBParsingGTK
         [UI] private ProgressBar progressBar = null;
         private FileChooserDialog chooserDialog;
 
+        private SynchronizationContext _context;
+
         public event System.Action TableParseStarted;
         public event Action<string> CableNameChanged;
         public event Action<string> DBConnectionNameChanged;
@@ -44,9 +46,9 @@ namespace WordTableToFBParsingGTK
             connectionCombobox.AppendTextCollection(connectionsNames);
         }
 
-        public void UpdateProgress(int parseOperationsCount, int completedOperationsCount)
+        public void UpdateProgress(double completedPersentage)
         {
-            //throw new NotImplementedException();
+            _context.Send(new SendOrPostCallback(obj => progressBar.Fraction = (double)obj), completedPersentage);
         }
 
         public void ParseFinishReport()
@@ -56,6 +58,7 @@ namespace WordTableToFBParsingGTK
             openDocButton.Sensitive = true;
             connectionCombobox.Sensitive = true;
             cableTypeCombobox.Sensitive = true;
+            progressBar.Fraction = 0;
         }
 
         private MainParseWindow(Builder builder) : base(builder.GetObject("MainParseWindow").Handle)
@@ -70,7 +73,7 @@ namespace WordTableToFBParsingGTK
             connectionCombobox.Changed += ConnectionCombobox_Changed;
             cableTypeCombobox.Changed += CableTypeCombobox_Changed;
 
-            var context = SynchronizationContext.Current;
+            _context = SynchronizationContext.Current;
         }
 
         private void Initialize()

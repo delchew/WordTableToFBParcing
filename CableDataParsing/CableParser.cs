@@ -19,11 +19,11 @@ namespace CableDataParsing
         protected CablesContext _dbContext;
         protected ICableTitleBuilder cableTitleBuilder;
 
-        public event Action<int, int> ParseReport;
+        public event Action<double> ParseReport;
 
-        protected void OnParseReport(int parseStepsCount, int currentStepNumber)
+        protected void OnParseReport(double completedPersentage)
         {
-            ParseReport?.Invoke(parseStepsCount, currentStepNumber);
+            ParseReport?.Invoke(completedPersentage);
         }
 
         static CableParser()

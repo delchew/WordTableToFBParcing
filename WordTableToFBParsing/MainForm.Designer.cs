@@ -119,6 +119,7 @@ namespace WordTableToFBParsing
             // 
             this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.progressBar.Location = new System.Drawing.Point(198, 6);
+            this.progressBar.Maximum = 1;
             this.progressBar.Name = "progressBar";
             this.progressBar.Size = new System.Drawing.Size(430, 23);
             this.progressBar.TabIndex = 1;

@@ -10,7 +10,7 @@ namespace GuiPresenter
 
         void SetCablesNames(string[] cablesNames);
         void SetDBConnectionsNames(string[] connectionsNames);
-        void UpdateProgress(int parseOperationsCount, int completedOperationsCount);
+        void UpdateProgress(double completedPersentage);
         void ParseFinishReport();
 
         event Action TableParseStarted;

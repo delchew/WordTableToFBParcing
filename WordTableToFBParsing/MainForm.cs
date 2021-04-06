@@ -9,7 +9,7 @@ namespace WordTableToFBParsing
     {
         private readonly OpenFileDialog _openDocDialog;
 
-        public event Action TableParseStarted;
+        public event Action<object> TableParseStarted;
         public event Action<string> CableNameChanged;
         public event Action<string> DBConnectionNameChanged;
 
@@ -51,13 +51,11 @@ namespace WordTableToFBParsing
             dbConnectionCheckComboBox.Items.AddRange(connectionsNames);
         }
 
-        public void UpdateProgress(int parseOperationsCount, int completedOperationsCount)
+        public void UpdateProgress(double completedPersentage)
         {
             Action action = () =>
             {
-                if (progressBar.Value == 0)
-                    progressBar.Maximum = parseOperationsCount;
-                progressBar.Value = completedOperationsCount;
+                progressBar.Value = (int)Math.Round(completedPersentage * 100, 0);
             };
             if (this.InvokeRequired)
                 this.Invoke(action);
@@ -92,7 +90,7 @@ namespace WordTableToFBParsing
             cableBrandCheckComboBox.Enabled = false;
             dbConnectionCheckComboBox.Enabled = false;
 
-            TableParseStarted?.Invoke();
+            TableParseStarted?.Invoke(null);
         }
 
         private void OpenDocButton_Click(object sender, EventArgs e)

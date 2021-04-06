@@ -19,10 +19,10 @@ namespace CableDataParsing
         {
             int recordsCount = 0;
 
-            _wordTableParser = new MSWordTableParser().SetDataRowsCount(1)
-                                                               .SetDataColumnsCount(11)
-                                                               .SetColumnHeadersRowIndex(3)
-                                                               .SetDataStartColumnIndex(2);
+            _wordTableParser = new XceedWordTableParser().SetDataRowsCount(1)
+                                                         .SetDataColumnsCount(11)
+                                                         .SetColumnHeadersRowIndex(2)
+                                                         .SetDataStartColumnIndex(1);
 
             List<TableCellData> tableData;
             var cablePropertiesList = _dbContext.CableProperties.ToList();
@@ -83,7 +83,7 @@ namespace CableDataParsing
                             Cables.Common.CableProperty.HasFoilShield | Cables.Common.CableProperty.HasBraidShield | Cables.Common.CableProperty.HasArmourTape | Cables.Common.CableProperty.HasArmourTube
                         };
 
-            var dataStartRowIndexes = new int[2] { 4, 8 };
+            var dataStartRowIndexes = new int[2] { 3, 7 };
             InsulatedBillet billet;
             var flagBG = false;
 
@@ -92,9 +92,9 @@ namespace CableDataParsing
             var currentPolymerGroupCount = 1;
             foreach (var techCondPolymerGroup in techCondPolymerGroupsList) //Не оптимально, но для разового метода сойдёт, если отделять БГ кабель от остальных со своей таблицей, придётся больше логики писать, пусть лучше чуть дольше работает метод)))
             {
-                var tableIndex = techCondPolymerGroup.paramGroups == coverPolymerGroupList42TC ? 2 : 1;
+                var tableIndex = techCondPolymerGroup.paramGroups == coverPolymerGroupList42TC ? 1 : 0;
                 
-                if (tableIndex == 2) flagBG = true;
+                if (tableIndex == 1) flagBG = true;
                 
                 foreach (var paramGroup in techCondPolymerGroup.paramGroups)
                 {
@@ -110,7 +110,7 @@ namespace CableDataParsing
                                 if (decimal.TryParse(tableCellData.ColumnHeaderData, out decimal elementsCount) &&
                                     decimal.TryParse(tableCellData.CellData, out decimal maxCoverDiameter))
                                 {
-                                    if (index < 8)
+                                    if (index < 7)
                                     {
                                         if (elementsCount < 4)
                                             billet = billet060_150;
@@ -155,7 +155,7 @@ namespace CableDataParsing
                             _wordTableParser.DataStartRowIndex++;
                         }
                     }
-                    OnParseReport(POLYMER_GROUP_COUNT, currentPolymerGroupCount);
+                    OnParseReport((double)currentPolymerGroupCount / POLYMER_GROUP_COUNT);
                     currentPolymerGroupCount++;
                 }
             }

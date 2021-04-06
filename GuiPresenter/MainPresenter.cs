@@ -97,7 +97,7 @@ namespace GuiPresenter
 
                     int recordsCount = await Task<int>.Factory.StartNew(parser.ParseDataToDatabase);
 
-                    _messageService.ShowMessage($"Успешно! Число записей, занесённых в базу: {recordsCount}");
+                    //_messageService.ShowMessage($"Успешно! Число записей, занесённых в базу: {recordsCount}");
                 }
                 else
                 {
@@ -114,9 +114,9 @@ namespace GuiPresenter
             }
         }
 
-        private void Parser_ParseReport(int parseOperationsCount, int completedOperationsCount)
+        private void Parser_ParseReport(double completedPersentage)
         {
-            _view.UpdateProgress(parseOperationsCount, completedOperationsCount);
+            _view.UpdateProgress(completedPersentage);
         }
 
         private bool FileExists(FileInfo file)
