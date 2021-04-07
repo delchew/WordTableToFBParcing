@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -18,13 +19,16 @@ namespace ConsoleParsingToFBDatabase
         static readonly string _connectionString2 = "character set=utf8;user id=SYSDBA;password=masterkey;dialect=3;data source=localhost;port number=3050;initial catalog=e:\\databases\\CABLES.FDB";
         static readonly string _connectionString3 = "character set=utf8;user id=SYSDBA;password=masterkey;dialect=3;data source=localhost;port number=3050;initial catalog=e:\\databases\\CABLESBRANDS.FDB";
         static readonly string _connectionString4 = "character set=utf8;user id=SYSDBA;password=masterkey;dialect=3;data source=localhost;port number=3050;initial catalog=e:\\databases\\database_repository\\CABLES.FDB";
-
+        static readonly string _connectionString5 = "character set=utf8;user id=SYSDBA;password=masterkey;dialect=3;data source=localhost;port number=3050;initial catalog=/Users/Shared/databases/CABLES1.FDB";
         static readonly string _wordFilePath = @"E:\CableDiametersTables\Kpsvev.docx";
+        static readonly string _wordFilePath1 = @"/Users/Shared/databases/database_repository/CablesDatabases/CableDiametersTables/Kpsvev.docx";
+
         static void Main()
         {
-            using var parser = new KpsvevParser(_connectionString4, new FileInfo(_wordFilePath));
+            using var parser = new KpsvevParser(_connectionString5, new FileInfo(_wordFilePath1));
             var recordsCount = parser.ParseDataToDatabase();
             Console.WriteLine("{0} записей внесено в базу.", recordsCount);
+
             Console.ReadKey();
         }
 
@@ -235,13 +239,13 @@ namespace ConsoleParsingToFBDatabase
         }
         private static void ParseSkabBillet()
         {
-            var parser = new SkabInsulatedBilletParser(_connectionString);
+            var parser = new BilletParser(_connectionString);
             int recordsCount = 0;
             Console.WriteLine("Нажмите любую клавишу для начала парсинга...");
             Console.ReadKey();
             try
             {
-                recordsCount = parser.ParseDataToDatabase();
+                //recordsCount = parser.ParseDataToDatabase();
                 Console.WriteLine("Добавлено {0} записей.", recordsCount);
             }
             catch (Exception ex)

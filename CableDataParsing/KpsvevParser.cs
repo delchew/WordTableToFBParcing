@@ -23,7 +23,7 @@ namespace CableDataParsing
             var PVCTermGroup = _dbContext.PolymerGroups.Find(11); //PVC term
             var PVCLSGroup = _dbContext.PolymerGroups.Find(6); //PVC LS
 
-            var polymerGroups = new List<PolymerGroup> { PVCGroup, /*PVCColdGroup,*/ PVCTermGroup, PVCLSGroup };
+            var polymerGroups = new List<PolymerGroup> { PVCGroup, PVCColdGroup, PVCTermGroup, PVCLSGroup };
 
             var PVCLSLTxGroup = _dbContext.PolymerGroups.Find(7); //PVC LSLTx
             var PESelfExtinguish = _dbContext.PolymerGroups.Find(12); //PE self extinguish
@@ -90,8 +90,9 @@ namespace CableDataParsing
 
                 foreach (var polymerGroup in polymerGroups)
                 {
+                    var insulationPolymerGroup = polymerGroup == PVCColdGroup ? PVCGroup : polymerGroup;
                     var currentPolymerGroupBillets = (from b in billets
-                                                      where b.PolymerGroup == polymerGroup
+                                                      where b.PolymerGroup == insulationPolymerGroup
                                                       select b);
                     foreach(var tableCellData in tableDataCommon)
                     {
@@ -109,77 +110,6 @@ namespace CableDataParsing
             }
             _wordTableParser.CloseWordApp();
             return recordsCount;
-        }
-
-        public int ParseBillets()
-        {
-            var conuctor05 = _dbContext.Conductors.Find(17);
-            var conuctor075 = _dbContext.Conductors.Find(18);
-            var conuctor1 = _dbContext.Conductors.Find(19);
-            var conuctor15 = _dbContext.Conductors.Find(20);
-            var conuctor25 = _dbContext.Conductors.Find(21);
-
-            var cableShortName = _dbContext.CableShortNames.Find(6); // КПСВ(Э)
-            var operatingVoltage = _dbContext.OperatingVoltages.Find(6); // 300В 50Гц, постоянка - до 500В
-
-            var polymerGroups = new List<PolymerGroup>
-            {
-                _dbContext.PolymerGroups.Find(1), // PVC
-                _dbContext.PolymerGroups.Find(6), //PVC LS
-                _dbContext.PolymerGroups.Find(7), //PVC LSLTx
-                _dbContext.PolymerGroups.Find(11) //PVC term
-            };
-
-            List<InsulatedBillet> kpsvvBillets;
-
-            foreach(var group in polymerGroups)
-            {
-                kpsvvBillets = new List<InsulatedBillet>
-                {
-                    new InsulatedBillet
-                    {
-                        CableShortName = cableShortName,
-                        Conductor = conuctor05,
-                        Diameter = 1.8m,
-                        OperatingVoltage = operatingVoltage,
-                        PolymerGroup = group
-                    },
-                    new InsulatedBillet
-                    {
-                        CableShortName = cableShortName,
-                        Conductor = conuctor075,
-                        Diameter = group.Id == 6 || group.Id == 7 ? 2.06m : 1.96m,
-                        OperatingVoltage = operatingVoltage,
-                        PolymerGroup = group
-                    },
-                    new InsulatedBillet
-                    {
-                        CableShortName = cableShortName,
-                        Conductor = conuctor1,
-                        Diameter = group.Id == 6 || group.Id == 7 ? 2.29m : 2.19m,
-                        OperatingVoltage = operatingVoltage,
-                        PolymerGroup = group
-                    },
-                    new InsulatedBillet
-                    {
-                        CableShortName = cableShortName,
-                        Conductor = conuctor15,
-                        Diameter = 2.66m,
-                        OperatingVoltage = operatingVoltage,
-                        PolymerGroup = group
-                    },
-                    new InsulatedBillet
-                    {
-                        CableShortName = cableShortName,
-                        Conductor = conuctor25,
-                        Diameter = 3.06m,
-                        OperatingVoltage = operatingVoltage,
-                        PolymerGroup = group
-                    }
-                };
-                _dbContext.AddRange(kpsvvBillets);
-            }
-            return _dbContext.SaveChanges();
         }
     }
 }

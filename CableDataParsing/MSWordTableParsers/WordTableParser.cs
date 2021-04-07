@@ -47,7 +47,7 @@ namespace CableDataParsing.MSWordTableParsers
             RowHeadersColumnIndex = index;
             return this;
         }
-        public abstract List<T> GetCableCellsCollection(int tableNumber);
+        public abstract IEnumerable<T> GetCableCellsCollection(int tableNumber);
 
         public abstract void OpenWordDocument(FileInfo _mSWordFile);
 

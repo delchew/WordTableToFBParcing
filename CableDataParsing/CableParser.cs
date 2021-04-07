@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using CableDataParsing.CableBulders;
@@ -12,6 +13,8 @@ namespace CableDataParsing
     public abstract class CableParser : IDisposable
     {
         private readonly List<CableProperty> cablePropertiesList;
+
+        private CultureInfo _cultureInfo;
 
         protected static int cablePropertiesCount;
         protected WordTableParser<TableCellData> _wordTableParser;
@@ -32,6 +35,9 @@ namespace CableDataParsing
             _dbContext = new CablesContext(connectionString);
             this.cableTitleBuilder = cableTitleBuilder;
             cablePropertiesList = _dbContext.CableProperties.ToList();
+
+            _cultureInfo = (CultureInfo)CultureInfo.InvariantCulture.Clone();
+            _cultureInfo.NumberFormat.CurrencyDecimalSeparator = ",";
         }
 
         public void Dispose()
@@ -69,21 +75,21 @@ namespace CableDataParsing
         protected void ParseTableCellData(Cable cable, TableCellData tableCellData, IEnumerable<InsulatedBillet> currentBilletsList,
                                 Cables.Common.CableProperty? cableProps = null, char splitter = ' ')
         {
-            if (decimal.TryParse(tableCellData.ColumnHeaderData, out decimal elementsCount) &&
-                decimal.TryParse(tableCellData.RowHeaderData, out decimal conductorAreaInSqrMm))
+            if (decimal.TryParse(tableCellData.ColumnHeaderData, NumberStyles.Any, _cultureInfo, out decimal elementsCount) &&
+                decimal.TryParse(tableCellData.RowHeaderData, NumberStyles.Any, _cultureInfo, out decimal conductorAreaInSqrMm))
             {
                 decimal height = 0m;
                 decimal width = 0m;
                 decimal? maxCoverDiameter;
-                if (decimal.TryParse(tableCellData.CellData, out decimal diameterValue))
+                if (decimal.TryParse(tableCellData.CellData, NumberStyles.Any, _cultureInfo, out decimal diameterValue))
                     maxCoverDiameter = diameterValue;
                 else
                 {
                     var cableSizes = tableCellData.CellData.Split(splitter);
                     if (cableSizes.Length < 2) return;
                     if (cableSizes.Length == 2 &&
-                        decimal.TryParse(cableSizes[0], out height) &&
-                        decimal.TryParse(cableSizes[1], out width))
+                        decimal.TryParse(cableSizes[0], NumberStyles.Any, _cultureInfo, out height) &&
+                        decimal.TryParse(cableSizes[1], NumberStyles.Any, _cultureInfo, out width))
                     {
                         maxCoverDiameter = null;
                     }

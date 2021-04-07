@@ -39,7 +39,7 @@ namespace CableDataParsing.MSWordTableParsers
         /// </summary>
         /// <param name="tableNumber">Номер таблицы документа MSWord. Внимание! В Microsoft Word таблицы нумеруются с 1, а не с 0!</param>
         /// <returns></returns>
-        public override List<TableCellData> GetCableCellsCollection(int tableNumber)
+        public override IEnumerable<TableCellData> GetCableCellsCollection(int tableNumber)
         {
             try
             {

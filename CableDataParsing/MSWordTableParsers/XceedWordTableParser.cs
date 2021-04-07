@@ -28,7 +28,7 @@ namespace CableDataParsing.MSWordTableParsers
         {
             _document.Dispose();
         }
-        public override List<TableCellData> GetCableCellsCollection(int tableNumber)
+        public override IEnumerable<TableCellData> GetCableCellsCollection(int tableNumber)
         {
             try
             {
