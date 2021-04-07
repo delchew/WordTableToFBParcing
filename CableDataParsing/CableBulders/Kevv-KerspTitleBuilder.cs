@@ -2,7 +2,7 @@
 using CablesDatabaseEFCoreFirebird.Entities;
 using System.Text;
 
-namespace CableDataParsing.CableTitleBulders
+namespace CableDataParsing.CableBulders
 {
     public class Kevv_KerspTitleBuilder : ICableTitleBuilder
     {

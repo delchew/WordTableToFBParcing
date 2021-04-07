@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Text;
 
-namespace CableDataParsing.CableTitleBulders
+namespace CableDataParsing.CableBulders
 {
     public class KpsvevTitleBuilder : ICableTitleBuilder
     {

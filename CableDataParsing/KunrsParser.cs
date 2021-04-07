@@ -20,12 +20,12 @@ namespace CableDataParsing
         {
             int recordsCount = 0;
 
-            _wordTableParser = new MSWordTableParser().SetDataColumnsCount(4)
-                                                    .SetDataRowsCount(8)
-                                                    .SetColumnHeadersRowIndex(3)
-                                                    .SetRowHeadersColumnIndex(2)
-                                                    .SetDataStartColumnIndex(3)
-                                                    .SetDataStartRowIndex(4);
+            _wordTableParser = new XceedWordTableParser().SetDataColumnsCount(4)
+                                                         .SetDataRowsCount(8)
+                                                         .SetColumnHeadersRowIndex(2)
+                                                         .SetRowHeadersColumnIndex(1)
+                                                         .SetDataStartColumnIndex(2)
+                                                         .SetDataStartRowIndex(3);
 
             var hasFoilShieldDictionary = new Dictionary<int, bool>
                     {

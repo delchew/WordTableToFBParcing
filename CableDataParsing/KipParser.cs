@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using CableDataParsing.CableTitleBulders;
+using CableDataParsing.CableBulders;
 using CableDataParsing.MSWordTableParsers;
 using CablesDatabaseEFCoreFirebird.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -101,6 +101,7 @@ namespace CableDataParsing
                     foreach (var index in dataStartRowIndexes)
                     {
                         _wordTableParser.DataStartRowIndex = index;
+
 
                         foreach (var cableProp in cableProps)
                         {

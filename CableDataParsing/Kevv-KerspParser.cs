@@ -1,10 +1,9 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using CablesDatabaseEFCoreFirebird.Entities;
-using CableDataParsing.CableTitleBulders;
+using CableDataParsing.CableBulders;
 using CableDataParsing.MSWordTableParsers;
 
 namespace CableDataParsing
@@ -67,6 +66,14 @@ namespace CableDataParsing
 
             _wordTableParser.OpenWordDocument(_mSWordFile);
 
+            var patternCable = new Cable
+            {
+                TwistedElementType = twistedElementType,
+                TechnicalConditions = techCond,
+                ClimaticMod = climaticMod,
+                OperatingVoltage = operatingVoltage
+            };
+
             for (int i = 0; i < tablesCount; i++)
             {
                 _wordTableParser.DataColumnsCount = (i + 1) % 2 == 0 ? 7 : 9; //выбираем число столбцов в зависимости от чётности номера таблицы
@@ -82,94 +89,33 @@ namespace CableDataParsing
                         
                         if (i < 2) //первые 2 таблицы для КЭВВ, остальные - КЭРс
                         {
-                            var cable = new Cable
-                            {
-                                TwistedElementType = twistedElementType,
-                                TechnicalConditions = techCond,
-                                ClimaticMod = climaticMod,
-                                OperatingVoltage = operatingVoltage,
-                                FireProtectionClass = fireClassPVCLS,
-                                CoverPolymerGroup = polymerPVCLS,
-                                CoverColor = colorGrey
-                            };
+                            var cable = patternCable.Clone();
+                            cable.FireProtectionClass = fireClassPVCLS;
+                            cable.CoverPolymerGroup = polymerPVCLS;
+                            cable.CoverColor = colorGrey;
+                            
                             ParseTableCellData(cable, tableCellData, pvcBillets, prop);
+                            _recordsCount++;
                         }
                         else
                         {
                             foreach (var param in kersParams)
                             {
-                                var cable = new Cable
-                                {
-                                    TwistedElementType = twistedElementType,
-                                    TechnicalConditions = techCond,
-                                    ClimaticMod = climaticMod,
-                                    OperatingVoltage = operatingVoltage,
-                                    FireProtectionClass = param.fireClass,
-                                    CoverPolymerGroup = param.polymer,
-                                    CoverColor = param.color
-                                };
+                                var cable = patternCable.Clone();
+                                cable.FireProtectionClass = param.fireClass;
+                                cable.CoverPolymerGroup = param.polymer;
+                                cable.CoverColor = param.color;
+
                                 ParseTableCellData(cable, tableCellData, rubberBillets, prop);
+                                _recordsCount++;
                             }
                         }
                     }
-                    tableData.Clear();
                     OnParseReport((double)_recordsCount / CABLE_BRANDS_COUNT);
                 }
             }
             _wordTableParser.CloseWordApp();
             return _recordsCount;
-        }
-
-        private void ParseTableCellData(Cable cable, TableCellData tableCellData, List<InsulatedBillet> currentBilletsList,
-                                            Cables.Common.CableProperty? cableProps, char splitter = ' ')
-        {
-            if (decimal.TryParse(tableCellData.ColumnHeaderData, out decimal elementsCount) &&
-                decimal.TryParse(tableCellData.RowHeaderData, out decimal conductorAreaInSqrMm))
-            {
-                decimal height = 0m;
-                decimal width = 0m;
-                decimal? maxCoverDiameter;
-                if (decimal.TryParse(tableCellData.CellData, out decimal diameterValue))
-                    maxCoverDiameter = diameterValue;
-                else
-                {
-                    var cableSizes = tableCellData.CellData.Split(splitter);
-                    if (cableSizes.Length < 2) return;
-                    if (cableSizes.Length == 2 &&
-                        decimal.TryParse(cableSizes[0], out height) &&
-                        decimal.TryParse(cableSizes[1], out width))
-                    {
-                        maxCoverDiameter = null;
-                    }
-                    else throw new Exception("Wrong format table cell data!");
-                }
-                var billet = (from b in currentBilletsList
-                              where b.Conductor.AreaInSqrMm == conductorAreaInSqrMm
-                              select b).First();
-                cable.ElementsCount = elementsCount;
-                cable.MaxCoverDiameter = maxCoverDiameter;
-                cable.Title = cableTitleBuilder.GetCableTitle(cable, billet, cableProps);
-
-                var cableRec = _dbContext.Cables.Add(cable).Entity;
-
-                _dbContext.ListCableBillets.Add(new ListCableBillets { Billet = billet, Cable = cableRec });
-
-                if (cableProps.HasValue)
-                {
-                    var listOfCableProperties = GetCableAssociatedPropertiesList(cableRec, cableProps.Value);
-                    _dbContext.ListCableProperties.AddRange(listOfCableProperties);
-                }
-                if (!maxCoverDiameter.HasValue)
-                {
-                    var flatSize = new FlatCableSize { Height = height, Width = width, Cable = cableRec };
-                    _dbContext.FlatCableSizes.Add(flatSize);
-                }
-                _dbContext.SaveChanges();
-
-                _recordsCount++;
-            }
-            else
-                throw new Exception($"Не удалось распарсить ячейку таблицы!");
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using CableDataParsing.CableTitleBulders;
+﻿using CableDataParsing.CableBulders;
 using CablesDatabaseEFCoreFirebird.Entities;
 using NUnit.Framework;
 

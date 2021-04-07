@@ -1,6 +1,6 @@
 ﻿using CablesDatabaseEFCoreFirebird.Entities;
 
-namespace CableDataParsing.CableTitleBulders
+namespace CableDataParsing.CableBulders
 {
     public interface ICableTitleBuilder
     {

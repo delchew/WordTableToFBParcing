@@ -15,8 +15,8 @@ namespace WordTableToFBParsingGTK
             app.Register(GLib.Cancellable.Current);
 
             var window = new MainParseWindow();
-            var messageDialog = new MessageService(window);
-            new MainPresenter(window, messageDialog);
+            var messageService = new MessageService(null);
+            new MainPresenter(window, messageService);
             app.AddWindow(window);
 
             window.Show();

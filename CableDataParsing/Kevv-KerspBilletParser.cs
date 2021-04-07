@@ -65,8 +65,6 @@ namespace CableDataParsing
             using (var dbContext = new CablesContext(_connectionString))
             {
                 dbContext.AddRange(kevvBillets);
-                dbContext.SaveChanges();
-
                 dbContext.AddRange(kersBillets);
                 dbContext.SaveChanges();
             }

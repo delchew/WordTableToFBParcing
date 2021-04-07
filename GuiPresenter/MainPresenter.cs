@@ -97,7 +97,7 @@ namespace GuiPresenter
 
                     int recordsCount = await Task<int>.Factory.StartNew(parser.ParseDataToDatabase);
 
-                    //_messageService.ShowMessage($"Успешно! Число записей, занесённых в базу: {recordsCount}");
+                    _messageService.ShowMessage($"Успешно! Число записей, занесённых в базу: {recordsCount}");
                 }
                 else
                 {
