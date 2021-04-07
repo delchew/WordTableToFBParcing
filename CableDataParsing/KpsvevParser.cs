@@ -70,7 +70,7 @@ namespace CableDataParsing
                                                          .SetDataRowsCount(5)
                                                          .SetDataStartColumnIndex(2);
 
-            List<TableCellData> tableData1, tableData2;
+            IEnumerable<TableCellData> tableData1, tableData2;
 
             _wordTableParser.OpenWordDocument(_mSWordFile);
 

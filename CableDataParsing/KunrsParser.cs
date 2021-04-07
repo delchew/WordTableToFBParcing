@@ -100,7 +100,6 @@ namespace CableDataParsing
                 }
                 OnParseReport((double)(i + 1) / hasFoilShieldDictionary.Count);
                 _wordTableParser.DataStartRowIndex += _wordTableParser.DataRowsCount;
-                tableData.Clear();
             }
             _wordTableParser.CloseWordApp();
             return recordsCount;
