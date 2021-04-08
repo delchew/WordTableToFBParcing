@@ -19,13 +19,13 @@ namespace CableDataParsing
         public override int ParseDataToDatabase()
         {
             int recordsCount = 0;
-
-            _wordTableParser = new XceedWordTableParser().SetDataColumnsCount(4)
+            var configurator = new TableParserConfigurator().SetDataColumnsCount(4)
                                                          .SetDataRowsCount(8)
                                                          .SetColumnHeadersRowIndex(2)
                                                          .SetRowHeadersColumnIndex(1)
                                                          .SetDataStartColumnIndex(2)
                                                          .SetDataStartRowIndex(3);
+            _wordTableParser = new XceedWordTableParser();
 
             var hasFoilShieldDictionary = new Dictionary<int, bool>
                     {
@@ -80,7 +80,7 @@ namespace CableDataParsing
 
             for (int i = 0; i < hasFoilShieldDictionary.Count; i++)
             {
-                var tableData = _wordTableParser.GetCableCellsCollection(i + 1);
+                var tableData = _wordTableParser.GetCableCellsCollection(i, configurator);
                 foreach (var tableCellData in tableData)
                 {
                     if (decimal.TryParse(tableCellData.ColumnHeaderData, out decimal elementsCount) &&
@@ -93,13 +93,13 @@ namespace CableDataParsing
                             for (int k = 0; k < powerColorSchemeArray.Length; k++)
                             {
                                 throw new NotImplementedException();
-                                recordsCount++;
+                                //recordsCount++;
                             }
                         }
                     }
                 }
                 OnParseReport((double)(i + 1) / hasFoilShieldDictionary.Count);
-                _wordTableParser.DataStartRowIndex += _wordTableParser.DataRowsCount;
+                configurator.DataStartRowIndex += configurator.DataRowsCount;
             }
             _wordTableParser.CloseWordApp();
             return recordsCount;

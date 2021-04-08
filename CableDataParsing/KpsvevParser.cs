@@ -74,19 +74,19 @@ namespace CableDataParsing
             var configMid10 = new TableParserConfigurator(8, 2, 10, 5, 2, 1);
             var configMid8 = new TableParserConfigurator(8, 2, 8, 5, 2, 1);
             var configLTx1 = new TableParserConfigurator(3, 2, 9, 5, 2, 1);
-            var configLTx2 = new TableParserConfigurator(9, 2, 9, 5, 2, 1);
-            var configLTx3 = new TableParserConfigurator(15, 2, 9, 5, 2, 1);
-            var configLTx4 = new TableParserConfigurator(21, 2, 9, 5, 2, 1);
+            var configLTx2 = new TableParserConfigurator(9, 2, 9, 5, 8, 1);
+            var configLTx3 = new TableParserConfigurator(15, 2, 9, 5, 14, 1);
+            var configLTx4 = new TableParserConfigurator(21, 2, 9, 5, 20, 1);
 
-            var configSet1 = (props: cablePropSimple, tu: TU2, configure: new List<(int tableIndex, TableParserConfigurator config)> { (0, configStart10), (1, configStart10) }, polymerGroups: polymerGroups);
+            var configSet1 = (props: cablePropSimple, tu: TU2, configure: new List<(int tableIndex, TableParserConfigurator config)> { (0, configStart10), (1, configStart8) }, polymerGroups: polymerGroups);
             var configSet2 = (props: cablePropShield, tu: TU2, configure: new List<(int tableIndex, TableParserConfigurator config)> { (0, configMid10), (1, configMid8) }, polymerGroups: polymerGroups);
-            var configSet3 = (props: cablePropSimple, tu: TU30, configure: new List<(int tableIndex, TableParserConfigurator config)> { (3, configStart10), (4, configStart10) }, polymerGroups: polymerGroupsPE);
+            var configSet3 = (props: cablePropSimple, tu: TU30, configure: new List<(int tableIndex, TableParserConfigurator config)> { (3, configStart10), (4, configStart8) }, polymerGroups: polymerGroupsPE);
             var configSet4 = (props: cablePropShield, tu: TU30, configure: new List<(int tableIndex, TableParserConfigurator config)> { (3, configMid10), (4, configMid8) }, polymerGroups: polymerGroupsPE);
             var configSet5 = (props: cablePropSimple, tu: TU49, configure: new List<(int tableIndex, TableParserConfigurator config)> { (2, configLTx1), (2, configLTx2) }, polymerGroups: polymerGroupsLTx);
             var configSet6 = (props: cablePropShield, tu: TU49, configure: new List<(int tableIndex, TableParserConfigurator config)> { (2, configLTx3), (2, configLTx4) }, polymerGroups: polymerGroupsLTx);
-            var configSet7 = (props: cablePropKG, tu: TU30, configure: new List<(int tableIndex, TableParserConfigurator config)> { (5, configStart10), (6, configStart10) }, polymerGroups: polymerGroupsFull);
+            var configSet7 = (props: cablePropKG, tu: TU30, configure: new List<(int tableIndex, TableParserConfigurator config)> { (5, configStart10), (6, configStart8) }, polymerGroups: polymerGroupsFull);
             var configSet8 = (props: cablePropKGShield, tu: TU30, configure: new List<(int tableIndex, TableParserConfigurator config)> { (5, configMid10), (6, configMid8) }, polymerGroups: polymerGroupsFull);
-            var configSet9 = (props: cablePropK, tu: TU30, configure: new List<(int tableIndex, TableParserConfigurator config)> { (7, configStart10), (8, configStart10) }, polymerGroups: polymerGroupsFull);
+            var configSet9 = (props: cablePropK, tu: TU30, configure: new List<(int tableIndex, TableParserConfigurator config)> { (7, configStart10), (8, configStart8) }, polymerGroups: polymerGroupsFull);
             var configSet10 = (props: cablePropKShield, tu: TU30, configure: new List<(int tableIndex, TableParserConfigurator config)> { (7, configMid10), (8, configMid8) }, polymerGroups: polymerGroupsFull);
             var configSet11 = (props: cablePropB, tu: TU30, configure: new List<(int tableIndex, TableParserConfigurator config)> { (9, configStart10) }, polymerGroups: polymerGroupsFull);
             var configSet12 = (props: cablePropBShield, tu: TU30, configure: new List<(int tableIndex, TableParserConfigurator config)> { (9, configMid10) }, polymerGroups: polymerGroupsFull);

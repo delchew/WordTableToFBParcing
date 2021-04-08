@@ -9,7 +9,7 @@ namespace WordTableToFBParsing
     {
         private readonly OpenFileDialog _openDocDialog;
 
-        public event Action<object> TableParseStarted;
+        public event Action TableParseStarted;
         public event Action<string> CableNameChanged;
         public event Action<string> DBConnectionNameChanged;
 
@@ -90,7 +90,7 @@ namespace WordTableToFBParsing
             cableBrandCheckComboBox.Enabled = false;
             dbConnectionCheckComboBox.Enabled = false;
 
-            TableParseStarted?.Invoke(null);
+            TableParseStarted?.Invoke();
         }
 
         private void OpenDocButton_Click(object sender, EventArgs e)

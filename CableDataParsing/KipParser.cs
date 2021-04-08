@@ -18,11 +18,11 @@ namespace CableDataParsing
         public override int ParseDataToDatabase()
         {
             int recordsCount = 0;
-
-            _wordTableParser = new XceedWordTableParser().SetDataRowsCount(1)
+            var configurator = new TableParserConfigurator().SetDataRowsCount(1)
                                                          .SetDataColumnsCount(11)
                                                          .SetColumnHeadersRowIndex(2)
                                                          .SetDataStartColumnIndex(1);
+            _wordTableParser = new XceedWordTableParser();
 
             IEnumerable<TableCellData> tableData;
             var cablePropertiesList = _dbContext.CableProperties.ToList();
@@ -100,11 +100,11 @@ namespace CableDataParsing
                 {
                     foreach (var index in dataStartRowIndexes)
                     {
-                        _wordTableParser.DataStartRowIndex = index;
+                        configurator.DataStartRowIndex = index;
 
                         foreach (var cableProp in cableProps)
                         {
-                            tableData = _wordTableParser.GetCableCellsCollection(tableIndex);
+                            tableData = _wordTableParser.GetCableCellsCollection(tableIndex, configurator);
                             foreach (var tableCellData in tableData)
                             {
                                 if (decimal.TryParse(tableCellData.ColumnHeaderData, out decimal elementsCount) &&
@@ -151,7 +151,7 @@ namespace CableDataParsing
                                 else
                                     continue;
                             }
-                            _wordTableParser.DataStartRowIndex++;
+                            configurator.DataStartRowIndex++;
                         }
                     }
                     OnParseReport((double)currentPolymerGroupCount / POLYMER_GROUP_COUNT);

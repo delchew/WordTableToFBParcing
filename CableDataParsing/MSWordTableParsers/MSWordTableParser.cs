@@ -9,7 +9,10 @@ namespace CableDataParsing.MSWordTableParsers
     {
         private readonly WordObj.Application _app;
 
-        public MSWordTableParser()
+        public MSWordTableParser(TableParserConfigurator configurator) : base(configurator)
+        { }
+
+        public MSWordTableParser() : base()
         {
             _app = new WordObj.Application { Visible = false };
         }
@@ -48,9 +51,9 @@ namespace CableDataParsing.MSWordTableParsers
                     throw new Exception("Отсутствуют таблицы для парсинга в указанном Word файле!");
                 var table = tables[tableNumber];
                 var tableCellDataList = new List<TableCellData>();
-                for (int i = 0; i < DataRowsCount; i++)
+                for (int i = 0; i < Configurator.DataRowsCount; i++)
                 {
-                    for (int j = 0; j < DataColumnsCount; j++)
+                    for (int j = 0; j < Configurator.DataColumnsCount; j++)
                     {
                         var tableCellData = GetCellData(table, i, j);
                         tableCellDataList.Add(tableCellData);
@@ -69,9 +72,9 @@ namespace CableDataParsing.MSWordTableParsers
         {
             var tableCellData = new TableCellData
             {
-                RowHeaderData = GetStringFromWordTableCell(table, DataStartRowIndex + rowIndex, RowHeadersColumnIndex),
-                ColumnHeaderData = GetStringFromWordTableCell(table, ColumnHeadersRowIndex, DataStartColumnIndex + columnIndex),
-                CellData = GetStringFromWordTableCell(table, DataStartRowIndex + rowIndex, DataStartColumnIndex + columnIndex)
+                RowHeaderData = GetStringFromWordTableCell(table, Configurator.DataStartRowIndex + rowIndex, Configurator.RowHeadersColumnIndex),
+                ColumnHeaderData = GetStringFromWordTableCell(table, Configurator.ColumnHeadersRowIndex, Configurator.DataStartColumnIndex + columnIndex),
+                CellData = GetStringFromWordTableCell(table, Configurator.DataStartRowIndex + rowIndex, Configurator.DataStartColumnIndex + columnIndex)
             };
             return tableCellData;
         }

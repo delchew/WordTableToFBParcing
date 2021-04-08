@@ -1,5 +1,4 @@
 ﻿using CablesDatabaseEFCoreFirebird.Entities;
-using System.Linq;
 using System.Text;
 
 namespace CableDataParsing.CableBulders
@@ -11,7 +10,10 @@ namespace CableDataParsing.CableBulders
         public string GetCableTitle(Cable cable, InsulatedBillet mainBillet, Cables.Common.CableProperty? cableProperty, object parameter = null)
         {
             _nameBuilder.Clear();
-            _nameBuilder.Append("КПСВ");
+            if (cable.CoverPolymerGroup.Title == "PVC LSLTx")
+            _nameBuilder.Append("ЛОУТОКС ");
+
+                _nameBuilder.Append("КПСВ");
             if (cableProperty != null && (cableProperty & Cables.Common.CableProperty.HasFoilShield) == Cables.Common.CableProperty.HasFoilShield)
                 _nameBuilder.Append("Э");
             string namePart = string.Empty;
@@ -21,9 +23,10 @@ namespace CableDataParsing.CableBulders
                 case "PVC Term":
                 case "PVC LS":
                 case "PVC Cold":
+                case "PVC LSLTx":
                     namePart = "В";
                     break;
-                case "PE Self extinguish":
+                case "PE Self Extinguish":
                     namePart = "Пс";
                     break;
             }
@@ -48,6 +51,8 @@ namespace CableDataParsing.CableBulders
                 _nameBuilder.Append("м");
             if (cable.CoverPolymerGroup.Title == "PVC LS")
                 _nameBuilder.Append("нг(А)-LS");
+            if (cable.CoverPolymerGroup.Title == "PVC LSLTx")
+                _nameBuilder.Append("нг(А)-LSLTx");
 
             var cableConductorArea = mainBillet.Conductor.AreaInSqrMm;
             namePart = Cables.Common.CableCalculations.FormatConductorArea((double)cableConductorArea);

@@ -42,15 +42,18 @@ namespace CableDataParsing
                                                    .Include(b => b.Conductor)
                                                    .Include(b => b.PolymerGroup)
                                                    .ToList();
+
             var rubberBillets = _dbContext.InsulatedBillets.Where(b => b.CableShortName.ShortName.ToLower().StartsWith("кэрс"))
                                                   .Include(b => b.Conductor)
                                                   .Include(b => b.PolymerGroup)
                                                   .ToList();
 
-            _wordTableParser = new XceedWordTableParser().SetDataRowsCount(7)
+            var configurator = new TableParserConfigurator().SetDataRowsCount(7)
                                                     .SetColumnHeadersRowIndex(2)
                                                     .SetRowHeadersColumnIndex(2)
                                                     .SetDataStartColumnIndex(3);
+
+            _wordTableParser = new XceedWordTableParser(configurator);
 
             var kersParams = new List<(FireProtectionClass fireClass, PolymerGroup polymer, Color color)>
             {
@@ -74,11 +77,11 @@ namespace CableDataParsing
 
             for (int i = 0; i < tablesCount; i++)
             {
-                _wordTableParser.DataColumnsCount = (i + 1) % 2 == 0 ? 7 : 9; //выбираем число столбцов в зависимости от чётности номера таблицы
+                configurator.DataColumnsCount = (i + 1) % 2 == 0 ? 7 : 9; //выбираем число столбцов в зависимости от чётности номера таблицы
 
                 foreach (var prop in cableProps)
                 {
-                    _wordTableParser.DataStartRowIndex = prop.HasValue ? 10 : 3;
+                    configurator.DataStartRowIndex = prop.HasValue ? 10 : 3;
 
                     var tableData = _wordTableParser.GetCableCellsCollection(i);
 

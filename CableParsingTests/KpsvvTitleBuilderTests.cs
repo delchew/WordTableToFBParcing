@@ -42,7 +42,7 @@ namespace CableParsingTests
         public void KpsvvTitleTest2()
         {
             conductor.AreaInSqrMm = 2.5m;
-            coverPolymerGroup.Title = "PE Self extinguish";
+            coverPolymerGroup.Title = "PE Self Extinguish";
             cable.ElementsCount = 4;
 
             title = builder.GetCableTitle(cable, billet, Cables.Common.CableProperty.HasArmourBraid |
@@ -73,6 +73,17 @@ namespace CableParsingTests
 
             title = builder.GetCableTitle(cable, billet, null);
             Assert.That(title, Is.EqualTo("КПСВВт 12х2х1,5"));
+        }
+
+        [Test]
+        public void KpsvvTitleTest5()
+        {
+            conductor.AreaInSqrMm = 1m;
+            coverPolymerGroup.Title = "PVC LSLTx";
+            cable.ElementsCount = 9;
+
+            title = builder.GetCableTitle(cable, billet, Cables.Common.CableProperty.HasFoilShield);
+            Assert.That(title, Is.EqualTo("ЛОУТОКС КПСВЭВнг(А)-LSLTx 9х2х1,0"));
         }
     }
 }

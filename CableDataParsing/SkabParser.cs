@@ -60,12 +60,10 @@ namespace CableDataParsing
                 {
                     var maxDiamTableCount = tables.Count / 2;
                     int tableNumber = 1;
-                    _wordTableParser = new MSWordTableParser
-                    {
-                        DataRowsCount = 5,
-                        RowHeadersColumnIndex = 2,
-                        DataStartColumnIndex = 3,
-                    };
+                    var configurator = new TableParserConfigurator().SetDataRowsCount(5)
+                                                                    .SetDataStartColumnIndex(3)
+                                                                    .SetRowHeadersColumnIndex(2);
+                    _wordTableParser = new MSWordTableParser();
 
                     var skabModifycationsList = new List<(bool HasWaterblockStripe, bool HasFilling, bool HasBraidShield)>
                     {
@@ -146,11 +144,11 @@ namespace CableDataParsing
                                         {
                                             foreach (var twistTypeParams in twistTypesParamsList)
                                             {
-                                                _wordTableParser.DataColumnsCount = twistTypeParams.dataColumnsCount;
-                                                _wordTableParser.ColumnHeadersRowIndex = twistTypeParams.ColumnHeadersRowIndex;
-                                                _wordTableParser.DataStartRowIndex = twistTypeParams.dataStartRowIndex;
+                                                configurator.DataColumnsCount = twistTypeParams.dataColumnsCount;
+                                                configurator.ColumnHeadersRowIndex = twistTypeParams.ColumnHeadersRowIndex;
+                                                configurator.DataStartRowIndex = twistTypeParams.dataStartRowIndex;
 
-                                                var tableData = _wordTableParser.GetCableCellsCollection(tableNumber);
+                                                var tableData = _wordTableParser.GetCableCellsCollection(tableNumber, configurator);
                                                 List<(int fireProtectID, int insPolymerGroupId, int coverPolymerGroupId)> materialParams;
                                                 foreach (var tableCellData in tableData)
                                                 {
