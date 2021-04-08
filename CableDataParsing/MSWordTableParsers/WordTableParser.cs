@@ -5,48 +5,25 @@ namespace CableDataParsing.MSWordTableParsers
 {
     public abstract class WordTableParser<T> where T : new()
     {
-        public int DataStartRowIndex { get; set; }
-        public int DataStartColumnIndex { get; set; }
-        public int DataColumnsCount { get; set; }
-        public int DataRowsCount { get; set; }
-        public int ColumnHeadersRowIndex { get; set; }
-        public int RowHeadersColumnIndex { get; set; }
+        public TableParserConfigurator Configurator { get; set; }
 
-        public WordTableParser<T> SetDataStartRowIndex(int index)
+        public WordTableParser()
         {
-            DataStartRowIndex = index;
-            return this;
+            Configurator = new TableParserConfigurator();
         }
 
-        public WordTableParser<T> SetDataStartColumnIndex(int index)
+        public WordTableParser(TableParserConfigurator configurator)
         {
-            DataStartColumnIndex = index;
-            return this;
+            Configurator = configurator;
+        }
+        
+        
+        public IEnumerable<T> GetCableCellsCollection(int tableNumber, TableParserConfigurator configurator)
+        {
+            Configurator = configurator;
+            return GetCableCellsCollection(tableNumber);
         }
 
-        public WordTableParser<T> SetDataRowsCount(int rowsCount)
-        {
-            DataRowsCount = rowsCount;
-            return this;
-        }
-
-        public WordTableParser<T> SetDataColumnsCount(int columnsCount)
-        {
-            DataColumnsCount = columnsCount;
-            return this;
-        }
-
-        public WordTableParser<T> SetColumnHeadersRowIndex(int index)
-        {
-            ColumnHeadersRowIndex = index;
-            return this;
-        }
-
-        public WordTableParser<T> SetRowHeadersColumnIndex(int index)
-        {
-            RowHeadersColumnIndex = index;
-            return this;
-        }
         public abstract IEnumerable<T> GetCableCellsCollection(int tableNumber);
 
         public abstract void OpenWordDocument(FileInfo _mSWordFile);

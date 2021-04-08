@@ -130,7 +130,6 @@ namespace CableDataParsing
                     var skabBoolPropertyesList = new List<(bool hasProp, CableProperty propType)>();
                     ConductorPresenter conductor;
                     CableBilletPresenter billet;
-                    List<TableCellData> tableData;
 
                     while (tableNumber < maxDiamTableCount)
                     {
@@ -151,7 +150,7 @@ namespace CableDataParsing
                                                 _wordTableParser.ColumnHeadersRowIndex = twistTypeParams.ColumnHeadersRowIndex;
                                                 _wordTableParser.DataStartRowIndex = twistTypeParams.dataStartRowIndex;
 
-                                                tableData = _wordTableParser.GetCableCellsCollection(tableNumber);
+                                                var tableData = _wordTableParser.GetCableCellsCollection(tableNumber);
                                                 List<(int fireProtectID, int insPolymerGroupId, int coverPolymerGroupId)> materialParams;
                                                 foreach (var tableCellData in tableData)
                                                 {
@@ -223,7 +222,6 @@ namespace CableDataParsing
                                                     }
                                                     else throw new Exception($"Не удалось распарсить ячейку таблицы №{tableNumber}!");
                                                 }
-                                                tableData.Clear();
                                             }
                                         }
                                         else throw new Exception("Таблица пуста!");

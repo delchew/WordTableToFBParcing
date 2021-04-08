@@ -10,6 +10,12 @@ namespace CableDataParsing.MSWordTableParsers
     {
         private DocX _document;
 
+        public XceedWordTableParser(TableParserConfigurator configurator) : base(configurator)
+        { }
+
+        public XceedWordTableParser() : base()
+        { }
+
         /// <summary>
         /// Вызывается для открытия документа прежде чем выполнить метод парсинга
         /// </summary>
@@ -28,6 +34,7 @@ namespace CableDataParsing.MSWordTableParsers
         {
             _document.Dispose();
         }
+
         public override IEnumerable<TableCellData> GetCableCellsCollection(int tableNumber)
         {
             try
@@ -37,9 +44,9 @@ namespace CableDataParsing.MSWordTableParsers
                     throw new Exception("Отсутствуют таблицы для парсинга в указанном Word файле!");
                 var table = tables[tableNumber];
                 var tableCellDataList = new List<TableCellData>();
-                for (int i = 0; i < DataRowsCount; i++)
+                for (int i = 0; i < Configurator.DataRowsCount; i++)
                 {
-                    for (int j = 0; j < DataColumnsCount; j++)
+                    for (int j = 0; j < Configurator.DataColumnsCount; j++)
                     {
                         var tableCellData = GetCellData(table, i, j);
                         tableCellDataList.Add(tableCellData);
@@ -58,9 +65,9 @@ namespace CableDataParsing.MSWordTableParsers
         {
             var tableCellData = new TableCellData
             {
-                RowHeaderData = GetStringFromWordTableCell(table, DataStartRowIndex + rowIndex, RowHeadersColumnIndex),
-                ColumnHeaderData = GetStringFromWordTableCell(table, ColumnHeadersRowIndex, DataStartColumnIndex + columnIndex),
-                CellData = GetStringFromWordTableCell(table, DataStartRowIndex + rowIndex, DataStartColumnIndex + columnIndex)
+                RowHeaderData = GetStringFromWordTableCell(table, Configurator.DataStartRowIndex + rowIndex, Configurator.RowHeadersColumnIndex),
+                ColumnHeaderData = GetStringFromWordTableCell(table, Configurator.ColumnHeadersRowIndex, Configurator.DataStartColumnIndex + columnIndex),
+                CellData = GetStringFromWordTableCell(table, Configurator.DataStartRowIndex + rowIndex, Configurator.DataStartColumnIndex + columnIndex)
             };
             return tableCellData;
         }

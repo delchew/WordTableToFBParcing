@@ -62,8 +62,6 @@ namespace CableDataParsing
                 null, Cables.Common.CableProperty.HasBraidShield
             };
 
-            List<TableCellData> tableData;
-
             _wordTableParser.OpenWordDocument(_mSWordFile);
 
             var patternCable = new Cable
@@ -82,7 +80,7 @@ namespace CableDataParsing
                 {
                     _wordTableParser.DataStartRowIndex = prop.HasValue ? 10 : 3;
 
-                    tableData = _wordTableParser.GetCableCellsCollection(i);
+                    var tableData = _wordTableParser.GetCableCellsCollection(i);
 
                     foreach (var tableCellData in tableData)
                     {
