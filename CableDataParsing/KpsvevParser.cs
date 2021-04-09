@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Cables.Common;
 using CableDataParsing.CableBulders;
 using CableDataParsing.MSWordTableParsers;
 using CablesDatabaseEFCoreFirebird.Entities;
@@ -60,14 +61,14 @@ namespace CableDataParsing
 
             var twistedElementType = _dbContext.TwistedElementTypes.Find(2); //pair
 
-            Cables.Common.CableProperty? cablePropSimple = null;
-            Cables.Common.CableProperty? cablePropShield = Cables.Common.CableProperty.HasFoilShield;
-            Cables.Common.CableProperty? cablePropKG = Cables.Common.CableProperty.HasArmourBraid;
-            Cables.Common.CableProperty? cablePropKGShield = Cables.Common.CableProperty.HasFoilShield | Cables.Common.CableProperty.HasArmourBraid;
-            Cables.Common.CableProperty? cablePropK = Cables.Common.CableProperty.HasArmourBraid | Cables.Common.CableProperty.HasArmourTube;
-            Cables.Common.CableProperty? cablePropKShield = Cables.Common.CableProperty.HasFoilShield | Cables.Common.CableProperty.HasArmourBraid | Cables.Common.CableProperty.HasArmourTube;
-            Cables.Common.CableProperty? cablePropB = Cables.Common.CableProperty.HasArmourTape | Cables.Common.CableProperty.HasArmourTube;
-            Cables.Common.CableProperty? cablePropBShield = Cables.Common.CableProperty.HasFoilShield | Cables.Common.CableProperty.HasArmourTape | Cables.Common.CableProperty.HasArmourTube;
+            CablePropertySet? cablePropSimple = null;
+            CablePropertySet? cablePropShield = CablePropertySet.HasFoilShield;
+            CablePropertySet? cablePropKG = CablePropertySet.HasArmourBraid;
+            CablePropertySet? cablePropKGShield = CablePropertySet.HasFoilShield | CablePropertySet.HasArmourBraid;
+            CablePropertySet? cablePropK = CablePropertySet.HasArmourBraid | CablePropertySet.HasArmourTube;
+            CablePropertySet? cablePropKShield = CablePropertySet.HasFoilShield | CablePropertySet.HasArmourBraid | CablePropertySet.HasArmourTube;
+            CablePropertySet? cablePropB = CablePropertySet.HasArmourTape | CablePropertySet.HasArmourTube;
+            CablePropertySet? cablePropBShield = CablePropertySet.HasFoilShield | CablePropertySet.HasArmourTape | CablePropertySet.HasArmourTube;
 
             var configStart10 = new TableParserConfigurator(3, 2, 10, 5, 2, 1);
             var configStart8 = new TableParserConfigurator(3, 2, 8, 5, 2, 1);

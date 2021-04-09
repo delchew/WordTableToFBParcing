@@ -7,6 +7,8 @@ namespace CableDataParsing.MSWordTableParsers
     {
         public TableParserConfigurator Configurator { get; set; }
 
+        public abstract int DocumentTablesCount { get; }
+
         public WordTableParser()
         {
             Configurator = new TableParserConfigurator();

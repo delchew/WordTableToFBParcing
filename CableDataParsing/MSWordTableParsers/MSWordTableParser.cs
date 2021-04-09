@@ -9,6 +9,11 @@ namespace CableDataParsing.MSWordTableParsers
     {
         private readonly WordObj.Application _app;
 
+        /// <summary>
+        /// Количество таблиц в документе. Выбросит исключение, если документ не был открыт до обращения к свойству
+        /// </summary>
+        public override int DocumentTablesCount => _app.ActiveDocument.Tables.Count;
+
         public MSWordTableParser(TableParserConfigurator configurator) : base(configurator)
         { }
 

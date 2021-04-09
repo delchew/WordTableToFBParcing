@@ -4,16 +4,12 @@ using CableDataParsing.MSWordTableParsers;
 using Cables.Common;
 using CableDataParsing.TableEntityes;
 using System.Linq;
-using CableDataParsing.NameBuilders;
-using System.Text;
 using System;
 
 namespace CableDataParsing
 {
     public class KunrsParser : CableParser
     {
-        private int _recordsCount;
-
         public KunrsParser(string connectionString, FileInfo mSWordFile)
             : base(connectionString, mSWordFile, null) { }
         public override int ParseDataToDatabase()
@@ -28,9 +24,9 @@ namespace CableDataParsing
             _wordTableParser = new XceedWordTableParser();
 
             var hasFoilShieldDictionary = new Dictionary<int, bool>
-                    {
-                        { 0, false }, { 1, true }, { 2, false }, { 3, true }
-                    };
+            {
+                { 0, false }, { 1, true }, { 2, false }, { 3, true }
+            };
             var hasArmourDictionary = new Dictionary<int, bool>
                     {
                         { 0, false }, { 1, false }, { 2, true }, { 3, true }
@@ -51,18 +47,18 @@ namespace CableDataParsing
                         { 5m, new [] { PowerWiresColorScheme.PEN, PowerWiresColorScheme.none } }
                     };
 
-            var dictCablePropsToId = new Dictionary<CableProperty, long>
+            var dictCablePropsToId = new Dictionary<CablePropertySet, long>
                     {
-                        { CableProperty.HasIndividualFoilShields, 1L },
-                        { CableProperty.HasIndividualBraidShield, 2L },
-                        { CableProperty.HasFoilShield, 3L },
-                        { CableProperty.HasBraidShield, 4L },
-                        { CableProperty.HasFilling, 5L },
-                        { CableProperty.HasArmourBraid, 6L },
-                        { CableProperty.HasArmourTape, 7L },
-                        { CableProperty.HasArmourTube, 8L },
-                        { CableProperty.HasWaterBlockStripe, 9L },
-                        { CableProperty.SparkSafety, 10L }
+                        { CablePropertySet.HasIndividualFoilShields, 1L },
+                        { CablePropertySet.HasIndividualBraidShield, 2L },
+                        { CablePropertySet.HasFoilShield, 3L },
+                        { CablePropertySet.HasBraidShield, 4L },
+                        { CablePropertySet.HasFilling, 5L },
+                        { CablePropertySet.HasArmourBraid, 6L },
+                        { CablePropertySet.HasArmourTape, 7L },
+                        { CablePropertySet.HasArmourTube, 8L },
+                        { CablePropertySet.HasWaterBlockStripe, 9L },
+                        { CablePropertySet.SparkSafety, 10L }
                     };
 
             var kunrs = new KunrsPresenter

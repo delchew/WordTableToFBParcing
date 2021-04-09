@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Cables.Common;
 using CableDataParsing.CableBulders;
 using CableDataParsing.MSWordTableParsers;
 using CablesDatabaseEFCoreFirebird.Entities;
@@ -75,12 +76,12 @@ namespace CableDataParsing
                 (_dbContext.TechnicalConditions.Where(t => t.Title.ToUpper().Contains("042-2010")).Single(), coverPolymerGroupList42TC)
             };
 
-            var cableProps = new List<Cables.Common.CableProperty>
+            var cableProps = new List<CablePropertySet>
             {
-                Cables.Common.CableProperty.HasFoilShield | Cables.Common.CableProperty.HasBraidShield,
-                Cables.Common.CableProperty.HasFoilShield | Cables.Common.CableProperty.HasBraidShield | Cables.Common.CableProperty.HasArmourBraid,
-                Cables.Common.CableProperty.HasFoilShield | Cables.Common.CableProperty.HasBraidShield | Cables.Common.CableProperty.HasArmourBraid | Cables.Common.CableProperty.HasArmourTube,
-                Cables.Common.CableProperty.HasFoilShield | Cables.Common.CableProperty.HasBraidShield | Cables.Common.CableProperty.HasArmourTape | Cables.Common.CableProperty.HasArmourTube
+                CablePropertySet.HasFoilShield | CablePropertySet.HasBraidShield,
+                CablePropertySet.HasFoilShield | CablePropertySet.HasBraidShield | CablePropertySet.HasArmourBraid,
+                CablePropertySet.HasFoilShield | CablePropertySet.HasBraidShield | CablePropertySet.HasArmourBraid | CablePropertySet.HasArmourTube,
+                CablePropertySet.HasFoilShield | CablePropertySet.HasBraidShield | CablePropertySet.HasArmourTape | CablePropertySet.HasArmourTube
             };
 
             var dataStartRowIndexes = new int[2] { 3, 7 };

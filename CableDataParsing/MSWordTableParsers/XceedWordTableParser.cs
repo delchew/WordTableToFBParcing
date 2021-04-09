@@ -10,6 +10,11 @@ namespace CableDataParsing.MSWordTableParsers
     {
         private DocX _document;
 
+        /// <summary>
+        /// Количество таблиц в документе. Выбросит исключение, если документ не был открыт до обращения к свойству
+        /// </summary>
+        public override int DocumentTablesCount => _document.Tables.Count;
+
         public XceedWordTableParser(TableParserConfigurator configurator) : base(configurator)
         { }
 

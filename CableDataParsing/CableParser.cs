@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Cables.Common;
 using CableDataParsing.CableBulders;
 using CableDataParsing.MSWordTableParsers;
 using CablesDatabaseEFCoreFirebird;
@@ -26,7 +27,7 @@ namespace CableDataParsing
 
         static CableParser()
         {
-            cablePropertiesCount = Enum.GetNames(typeof(Cables.Common.CableProperty)).Count();
+            cablePropertiesCount = Enum.GetNames(typeof(CablePropertySet)).Count();
         }
 
         public CableParser (string connectionString, FileInfo mSWordFile, ICableTitleBuilder cableTitleBuilder)
@@ -52,18 +53,18 @@ namespace CableDataParsing
             ParseReport?.Invoke(completedPersentage);
         }
 
-        protected IEnumerable<ListCableProperties> GetCableAssociatedPropertiesList(Cable cable, Cables.Common.CableProperty cableProps)
+        protected IEnumerable<ListCableProperties> GetCableAssociatedPropertiesList(Cable cable, CablePropertySet cableProps)
         {
             var propList = new List<ListCableProperties>();
 
             var intProp = 0b_0000000001;
             for (int i = 0; i < cablePropertiesCount; i++)
             {
-                var Prop = (Cables.Common.CableProperty)intProp;
+                var Prop = (CablePropertySet)intProp;
 
                 if ((cableProps & Prop) == Prop)
                 {
-                    var propertyObj = cablePropertiesList.Where(p => p.BitNumber == (int)Prop).Single();
+                    var propertyObj = cablePropertiesList.Where(p => p.BitNumber == (int)Prop).First();
                     propList.Add(new ListCableProperties { Property = propertyObj, Cable = cable });
                 }
                 intProp <<= 1;
@@ -73,7 +74,7 @@ namespace CableDataParsing
         }
 
         protected void ParseTableCellData(Cable cable, TableCellData tableCellData, IEnumerable<InsulatedBillet> currentBilletsList,
-                                Cables.Common.CableProperty? cableProps = null, char splitter = ' ')
+                                          CablePropertySet? cableProps = null, char splitter = ' ')
         {
             if (decimal.TryParse(tableCellData.ColumnHeaderData, NumberStyles.Any, _cultureInfo, out decimal elementsCount) &&
                 decimal.TryParse(tableCellData.RowHeaderData, NumberStyles.Any, _cultureInfo, out decimal conductorAreaInSqrMm))

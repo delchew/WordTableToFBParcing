@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using Cables.Common;
 using CablesDatabaseEFCoreFirebird.Entities;
 using CableDataParsing.CableBulders;
 using CableDataParsing.MSWordTableParsers;
@@ -60,9 +61,9 @@ namespace CableDataParsing
                 (fireClassHF, polymerHF, colorBlack), (fireClassPURHF, polymerPUR, colorOrange)
             };
 
-            var cableProps = new List<Cables.Common.CableProperty?>
+            var cableProps = new List<CablePropertySet?>
             {
-                null, Cables.Common.CableProperty.HasBraidShield
+                null, CablePropertySet.HasBraidShield
             };
 
             _wordTableParser.OpenWordDocument(_mSWordFile);

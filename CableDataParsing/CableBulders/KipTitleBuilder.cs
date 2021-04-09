@@ -1,4 +1,5 @@
 ﻿using CablesDatabaseEFCoreFirebird.Entities;
+using Cables.Common;
 using System.Text;
 
 namespace CableDataParsing.CableBulders
@@ -6,7 +7,7 @@ namespace CableDataParsing.CableBulders
     public class KipTitleBuilder : ICableTitleBuilder
     {
         private StringBuilder _nameBuilder = new StringBuilder();
-        public string GetCableTitle(Cable cable, InsulatedBillet mainBillet, Cables.Common.CableProperty? cableProperty, object parameter)
+        public string GetCableTitle(Cable cable, InsulatedBillet mainBillet, CablePropertySet? cableProperty, object parameter)
         {
             var flagBG = (bool)parameter;
 
@@ -44,15 +45,15 @@ namespace CableDataParsing.CableBulders
             }
             _nameBuilder.Append(namePart);
 
-            if ((cableProperty & Cables.Common.CableProperty.HasArmourBraid) == Cables.Common.CableProperty.HasArmourBraid)
+            if ((cableProperty & CablePropertySet.HasArmourBraid) == CablePropertySet.HasArmourBraid)
             {
-                if ((cableProperty & Cables.Common.CableProperty.HasArmourTube) == Cables.Common.CableProperty.HasArmourTube)
+                if ((cableProperty & CablePropertySet.HasArmourTube) == CablePropertySet.HasArmourTube)
                     _nameBuilder.Append($"К{namePart}");
                 else
                     _nameBuilder.Append("КГ");
             }
-            if ((cableProperty & Cables.Common.CableProperty.HasArmourTape | Cables.Common.CableProperty.HasArmourTube) ==
-                (Cables.Common.CableProperty.HasArmourTape | Cables.Common.CableProperty.HasArmourTube))
+            if ((cableProperty & CablePropertySet.HasArmourTape | CablePropertySet.HasArmourTube) ==
+                (CablePropertySet.HasArmourTape | CablePropertySet.HasArmourTube))
             {
                 _nameBuilder.Append($"Б{namePart}");
             }
