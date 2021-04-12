@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using CableDataParsing;
 using CableDataParsing.TableEntityes;
 using Cables;
@@ -23,13 +24,22 @@ namespace ConsoleParsingToFBDatabase
         static readonly string _wordFilePath = @"E:\CableDiametersTables\Kpsvev.docx";
         static readonly string _wordFilePath1 = @"/Users/Shared/databases/database_repository/CablesDatabases/CableDiametersTables/Kpsvev.docx";
 
+        private static SynchronizationContext _context;
+
         static void Main()
         {
             using var parser = new KpsvevParser(_connectionString5, new FileInfo(_wordFilePath1));
+            parser.ParseReport += Parser_ParseReport;
             var recordsCount = parser.ParseDataToDatabase();
             Console.WriteLine("{0} записей внесено в базу.", recordsCount);
 
             Console.ReadKey();
+        }
+
+        private static void Parser_ParseReport(double percentage)
+        {
+            Console.Clear();
+            Console.WriteLine(percentage * 100 + "% выполнено...");
         }
 
         static void WorkingWithADONetArrays()

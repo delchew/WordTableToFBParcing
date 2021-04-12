@@ -114,9 +114,9 @@ namespace CableDataParsing
             foreach (var option in mainConfigArray)
             {
                 var tableDataCommon = new List<TableCellData>();
-                foreach (var set in option.configure)
+                foreach (var (tableIndex, config) in option.configure)
                 {
-                    tableDataCommon.AddRange(_wordTableParser.GetCableCellsCollection(set.tableIndex, set.config));
+                    tableDataCommon.AddRange(_wordTableParser.GetCableCellsCollection(tableIndex, config));
                 }
 
                 foreach (var polymerGroup in option.polymerGroups)

@@ -77,7 +77,7 @@ namespace CableDataParsing
 
             var polymerLS = _dbContext.PolymerGroups.Find(6);
             var polymerHF = _dbContext.PolymerGroups.Find(4);
-            var polymerRupper = _dbContext.PolymerGroups.Find(3);
+            var polymerRubber = _dbContext.PolymerGroups.Find(3);
             var polymerPUR = _dbContext.PolymerGroups.Find(5);
 
             var configurator = new TableParserConfigurator().SetDataRowsCount(5)
@@ -102,15 +102,26 @@ namespace CableDataParsing
                 (pair, CablePropertySet.HasIndividualFoilShields, new TableParserConfigurator(22, 3, 13, 5, 21, 2)),
                 (triple, CablePropertySet.HasIndividualFoilShields, new TableParserConfigurator(27, 3, 13, 5, 21, 2))
             };
+            
+            //var plasticInsMaterialParams = new List<(int fireProtectID, int insPolymerGroupId, int coverPolymerGroupId)>
+            //        {
+            //            (8, 6, 6), (13, 4, 4)
+            //        };
 
-            var plasticInsMaterialParams = new List<(int fireProtectID, int insPolymerGroupId, int coverPolymerGroupId)>
-                    {
-                        (8, 6, 6), (13, 4, 4)
-                    };
-            var rubberInsMaterialParams = new List<(int fireProtectID, int insPolymerGroupId, int coverPolymerGroupId)>
-                    {
-                        (18, 3, 6), (23, 3, 4), (25, 3, 5)
-                    };
+            var plasticInsParams = new List<(FireProtectionClass fireClass, PolymerGroup insPolymerGroup, PolymerGroup coverPolymerGroup)>
+            {
+                (fireLS, polymerLS, polymerLS), (fireHF, polymerHF, polymerHF)
+            };
+
+            //var rubberInsMaterialParams = new List<(int fireProtectID, int insPolymerGroupId, int coverPolymerGroupId)>
+            //        {
+            //            (18, 3, 6), (23, 3, 4), (25, 3, 5)
+            //        };
+
+            var rubberInsParams = new List<(FireProtectionClass fireClass, PolymerGroup insPolymerGroup, PolymerGroup coverPolymerGroup)>
+            {
+                (fireFRLS, polymerRubber, polymerLS), (fireFRHF, polymerRubber, polymerHF), (fireCFRHF, polymerRubber, polymerPUR)
+            };
 
             //var exiParams = new List<bool> { false, true };
 
@@ -158,7 +169,7 @@ namespace CableDataParsing
                                             decimal.TryParse(tableCellData.CellData, out decimal maxCoverDiameter) &&
                                             decimal.TryParse(tableCellData.RowHeaderData, out decimal conductorAreaInSqrMm))
                                         {
-                                            var materialParams = insType == 0 ? plasticInsMaterialParams : rubberInsMaterialParams;
+                                            var materialParams = insType == 0 ? plasticInsParams : rubberInsParams;
                                             foreach (var matParam in materialParams)
                                             {
                                                 foreach (var exiParam in exiProperties)
@@ -167,19 +178,19 @@ namespace CableDataParsing
                                                         cableProps |= exiParam.Value;
 
                                                     var billet = billets.Where(b => b.OperatingVoltage == voltage &&
-                                                                                    b.PolymerGroupId == matParam.insPolymerGroupId &&
+                                                                                    b.PolymerGroup == matParam.insPolymerGroup &&
                                                                                     b.Conductor.AreaInSqrMm == conductorAreaInSqrMm)
                                                                         .First();
 
                                                     var cable = patternCable.Clone();
                                                     cable.ElementsCount = elementsCount;
-                                                    cable.OperatingVoltageId = voltage.Id;
-                                                    cable.TwistedElementTypeId = twistTypeParams.twistMode.Id;
+                                                    cable.OperatingVoltage = voltage;
+                                                    cable.TwistedElementType = twistTypeParams.twistMode;
                                                     cable.MaxCoverDiameter = maxCoverDiameter;
-                                                    cable.FireProtectionClassId = matParam.fireProtectID;
-                                                    cable.CoverPolymerGroupId = matParam.coverPolymerGroupId;
-                                                    cable.CoverColorId = (exiParam && armourType.hasArmourTube == false) ? 3 : 2;
-                                                    cable.ClimaticModId = matParam.coverPolymerGroupId == 6 ? 3 : 7;  //3 - УХЛ, 7 - В
+                                                    cable.FireProtectionClass = matParam.fireClass;
+                                                    cable.CoverPolymerGroup = matParam.coverPolymerGroup;
+                                                    //cable.CoverColorId = (exiParam && armourType.hasArmourTube == false) ? 3 : 2;
+                                                    cable.ClimaticModId = coverPolymerGroupId == 6 ? 3 : 7;  //3 - УХЛ, 7 - В
 
                                                     cable.Title = cableTitleBuilder.GetCableTitle(cable, billet, cableProps);
 
