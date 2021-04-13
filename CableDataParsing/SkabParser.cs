@@ -3,7 +3,6 @@ using System.IO;
 using System;
 using System.Linq;
 using CableDataParsing.MSWordTableParsers;
-using CableDataParsing.TableEntityes;
 using Cables.Common;
 using CableDataParsing.CableBulders;
 using CablesDatabaseEFCoreFirebird.Entities;
@@ -24,6 +23,12 @@ namespace CableDataParsing
 
             var voltage250 = _dbContext.OperatingVoltages.Find(2);
             var voltage660 = _dbContext.OperatingVoltages.Find(3);
+
+            var climaticModUHL = _dbContext.ClimaticMods.Find(3);
+            var climaticModV = _dbContext.ClimaticMods.Find(7);
+
+            var colorBlack = _dbContext.Colors.Find(2);
+            var colorBlue = _dbContext.Colors.Find(3);
 
             //var skabModifycationsList = new List<(bool HasWaterblockStripe, bool HasFilling, bool HasBraidShield)>
             //        {
@@ -84,7 +89,6 @@ namespace CableDataParsing
                                                 .SetDataStartColumnIndex(3)
                                                 .SetRowHeadersColumnIndex(2);
 
-
             //var twistTypesParamsList = new List<(TwistedElementType twistMode, CablePropertySet? hasIndividualFoilSHields, int dataStartRowIndex, int dataColumnsCount, int ColumnHeadersRowIndex)>
             //        {
             //            (single, null, 4, 13, 3),
@@ -96,11 +100,11 @@ namespace CableDataParsing
 
             var twistParamsList = new List<(TwistedElementType twistMode, CablePropertySet? hasIndividualFoilSHields, TableParserConfigurator configurator)>
             {
-                (single, null, new TableParserConfigurator(4, 3, 13, 5, 3, 2)),
-                (pair, null, new TableParserConfigurator(11, 3, 14, 5, 10, 2)),
-                (triple, null, new TableParserConfigurator(16, 3, 14, 5, 10, 2)),
-                (pair, CablePropertySet.HasIndividualFoilShields, new TableParserConfigurator(22, 3, 13, 5, 21, 2)),
-                (triple, CablePropertySet.HasIndividualFoilShields, new TableParserConfigurator(27, 3, 13, 5, 21, 2))
+                (single, null, new TableParserConfigurator(3, 2, 13, 5, 2, 1)),
+                (pair, null, new TableParserConfigurator(10, 2, 14, 5, 9, 1)),
+                (triple, null, new TableParserConfigurator(15, 2, 14, 5, 9, 1)),
+                (pair, CablePropertySet.HasIndividualFoilShields, new TableParserConfigurator(21, 2, 13, 5, 20, 1)),
+                (triple, CablePropertySet.HasIndividualFoilShields, new TableParserConfigurator(26, 2, 13, 5, 20, 1))
             };
             
             //var plasticInsMaterialParams = new List<(int fireProtectID, int insPolymerGroupId, int coverPolymerGroupId)>
@@ -189,12 +193,19 @@ namespace CableDataParsing
                                                     cable.MaxCoverDiameter = maxCoverDiameter;
                                                     cable.FireProtectionClass = matParam.fireClass;
                                                     cable.CoverPolymerGroup = matParam.coverPolymerGroup;
-                                                    //cable.CoverColorId = (exiParam && armourType.hasArmourTube == false) ? 3 : 2;
-                                                    cable.ClimaticModId = coverPolymerGroupId == 6 ? 3 : 7;  //3 - УХЛ, 7 - В
+                                                    cable.CoverColor = (exiParam.HasValue && (armourType.Value & CablePropertySet.HasArmourTube) != CablePropertySet.HasArmourTube) ? colorBlue : colorBlack;
+                                                    cable.ClimaticMod = matParam.coverPolymerGroup.Id == 6 ? climaticModUHL : climaticModV;
 
                                                     cable.Title = cableTitleBuilder.GetCableTitle(cable, billet, cableProps);
 
-                                                    ParseTableCellData(cable, tableCellData, new List<InsulatedBillet> { billet }, cableProps);
+                                                    var cableRec = _dbContext.Cables.Add(cable).Entity;
+
+                                                    _dbContext.ListCableBillets.Add(new ListCableBillets { Billet = billet, Cable = cableRec });
+
+                                                    var listOfCableProperties = GetCableAssociatedPropertiesList(cableRec, cableProps);
+                                                    _dbContext.ListCableProperties.AddRange(listOfCableProperties);
+
+                                                    _dbContext.SaveChanges();
                                                     recordsCount++;
                                                 }
                                             }

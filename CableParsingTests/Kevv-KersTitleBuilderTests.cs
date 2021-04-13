@@ -1,6 +1,7 @@
 ﻿using CableDataParsing.CableBulders;
 using CablesDatabaseEFCoreFirebird.Entities;
 using NUnit.Framework;
+using Cables.Common;
 
 namespace CableParsingTests
 {
@@ -47,7 +48,7 @@ namespace CableParsingTests
             billet.PolymerGroup.Title = "Rubber";
             cable.ElementsCount = 37;
 
-            title = builder.GetCableTitle(cable, billet, Cables.Common.CableProperty.HasBraidShield);
+            title = builder.GetCableTitle(cable, billet, CablePropertySet.HasBraidShield);
             Assert.That(title, Is.EqualTo("КЭРсЭПнг(А)-FRHF 37х0,75"));
         }
 
@@ -60,7 +61,7 @@ namespace CableParsingTests
             billet.PolymerGroup.Title = "Rubber";
             cable.ElementsCount = 2;
 
-            title = builder.GetCableTitle(cable, billet, Cables.Common.CableProperty.HasBraidShield);
+            title = builder.GetCableTitle(cable, billet, CablePropertySet.HasBraidShield);
             Assert.That(title, Is.EqualTo("КЭРсЭУнг(D)-FRHF 2х0,5"));
         }
     }
