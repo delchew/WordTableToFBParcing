@@ -30,22 +30,11 @@ namespace CableDataParsing
             var colorBlack = _dbContext.Colors.Find(2);
             var colorBlue = _dbContext.Colors.Find(3);
 
-            //var skabModifycationsList = new List<(bool HasWaterblockStripe, bool HasFilling, bool HasBraidShield)>
-            //        {
-            //            (false, true, true),
-            //            (true, true, true),
-            //            (false, false, true),
-            //            (true, false, true),
-            //            (false, true, false),
-            //            (true, true, false),
-            //            (false, false, false),
-            //            (true, false, false)
-            //        };
             var skabPropertiesList = new List<CablePropertySet?>
             {
                 CablePropertySet.HasFilling | CablePropertySet.HasBraidShield,
                 CablePropertySet.HasWaterBlockStripe | CablePropertySet.HasFilling | CablePropertySet.HasBraidShield,
-                CablePropertySet.HasBraidShield | CablePropertySet.HasFoilShield,
+                CablePropertySet.HasBraidShield,
                 CablePropertySet.HasWaterBlockStripe | CablePropertySet.HasBraidShield,
                 CablePropertySet.HasFilling,
                 CablePropertySet.HasWaterBlockStripe | CablePropertySet.HasFilling,
@@ -55,12 +44,6 @@ namespace CableDataParsing
 
             var operatingVoltages = new List<OperatingVoltage> { voltage250, voltage660 }; // 1 - СКАБ 250, 2 - СКАБ 660 
 
-            //var hasArmourList = new List<(bool hasArmourBraid, bool hasArmourTube)>
-            //        {
-            //            (hasArmourBraid: false, hasArmourTube: false),
-            //            (hasArmourBraid: true, hasArmourTube: false),
-            //            (hasArmourBraid: true, hasArmourTube: true)
-            //        };
             var skabArmorPropertiesList = new List<CablePropertySet?>
             {
                 null,
@@ -89,15 +72,6 @@ namespace CableDataParsing
                                                 .SetDataStartColumnIndex(3)
                                                 .SetRowHeadersColumnIndex(2);
 
-            //var twistTypesParamsList = new List<(TwistedElementType twistMode, CablePropertySet? hasIndividualFoilSHields, int dataStartRowIndex, int dataColumnsCount, int ColumnHeadersRowIndex)>
-            //        {
-            //            (single, null, 4, 13, 3),
-            //            (pair, null, 11, 14, 10),
-            //            (triple, null, 16, 14, 10),
-            //            (pair, CablePropertySet.HasIndividualFoilShields, 22, 13, 21),
-            //            (triple, CablePropertySet.HasIndividualFoilShields, 27, 13, 21)
-            //        };
-
             var twistParamsList = new List<(TwistedElementType twistMode, CablePropertySet? hasIndividualFoilSHields, TableParserConfigurator configurator)>
             {
                 (single, null, new TableParserConfigurator(3, 2, 13, 5, 2, 1)),
@@ -107,27 +81,15 @@ namespace CableDataParsing
                 (triple, CablePropertySet.HasIndividualFoilShields, new TableParserConfigurator(26, 2, 13, 5, 20, 1))
             };
             
-            //var plasticInsMaterialParams = new List<(int fireProtectID, int insPolymerGroupId, int coverPolymerGroupId)>
-            //        {
-            //            (8, 6, 6), (13, 4, 4)
-            //        };
-
             var plasticInsParams = new List<(FireProtectionClass fireClass, PolymerGroup insPolymerGroup, PolymerGroup coverPolymerGroup)>
             {
                 (fireLS, polymerLS, polymerLS), (fireHF, polymerHF, polymerHF)
             };
 
-            //var rubberInsMaterialParams = new List<(int fireProtectID, int insPolymerGroupId, int coverPolymerGroupId)>
-            //        {
-            //            (18, 3, 6), (23, 3, 4), (25, 3, 5)
-            //        };
-
             var rubberInsParams = new List<(FireProtectionClass fireClass, PolymerGroup insPolymerGroup, PolymerGroup coverPolymerGroup)>
             {
                 (fireFRLS, polymerRubber, polymerLS), (fireFRHF, polymerRubber, polymerHF), (fireCFRHF, polymerRubber, polymerPUR)
             };
-
-            //var exiParams = new List<bool> { false, true };
 
             var exiProperties = new List<CablePropertySet?> { null, CablePropertySet.SparkSafety };
 
@@ -136,15 +98,12 @@ namespace CableDataParsing
                                                      .Include(b => b.PolymerGroup)
                                                      .ToList();
 
-            var skabBoolPropertyesList = new List<(bool hasProp, CablePropertySet propType)>();
-
             _wordTableParser = new XceedWordTableParser();
             _wordTableParser.OpenWordDocument(_mSWordFile);
+
             var maxDiamTableCount = _wordTableParser.DocumentTablesCount / 2;
 
-            var patternCable = new Cable { TechnicalConditionsId = techCond.Id };
-
-            var cableProps = CablePropertySet.HasFoilShield;
+            var patternCable = new Cable { TechnicalConditions = techCond };
 
             for (int i = 0; i < maxDiamTableCount; i++)
             {
@@ -158,13 +117,6 @@ namespace CableDataParsing
                             {
                                 foreach (var twistTypeParams in twistParamsList)
                                 {
-                                    if (twistTypeParams.hasIndividualFoilSHields.HasValue)
-                                        cableProps |= twistTypeParams.hasIndividualFoilSHields.Value;
-                                    if (mod.HasValue)
-                                        cableProps |= mod.Value;
-                                    if (armourType.HasValue)
-                                        cableProps |= armourType.Value;
-
                                     var tableData = _wordTableParser.GetCableCellsCollection(i, twistTypeParams.configurator);
 
                                     foreach (var tableCellData in tableData)
@@ -178,6 +130,13 @@ namespace CableDataParsing
                                             {
                                                 foreach (var exiParam in exiProperties)
                                                 {
+                                                    var cableProps = CablePropertySet.HasFoilShield;
+                                                    if (twistTypeParams.hasIndividualFoilSHields.HasValue)
+                                                        cableProps |= twistTypeParams.hasIndividualFoilSHields.Value;
+                                                    if (mod.HasValue)
+                                                        cableProps |= mod.Value;
+                                                    if (armourType.HasValue)
+                                                        cableProps |= armourType.Value;
                                                     if (exiParam.HasValue)
                                                         cableProps |= exiParam.Value;
 
@@ -193,7 +152,7 @@ namespace CableDataParsing
                                                     cable.MaxCoverDiameter = maxCoverDiameter;
                                                     cable.FireProtectionClass = matParam.fireClass;
                                                     cable.CoverPolymerGroup = matParam.coverPolymerGroup;
-                                                    cable.CoverColor = (exiParam.HasValue && (armourType.Value & CablePropertySet.HasArmourTube) != CablePropertySet.HasArmourTube) ? colorBlue : colorBlack;
+                                                    cable.CoverColor = (exiParam.HasValue && (!armourType.HasValue || (armourType.Value & CablePropertySet.HasArmourTube) != CablePropertySet.HasArmourTube)) ? colorBlue : colorBlack;
                                                     cable.ClimaticMod = matParam.coverPolymerGroup.Id == 6 ? climaticModUHL : climaticModV;
 
                                                     cable.Title = cableTitleBuilder.GetCableTitle(cable, billet, cableProps);
