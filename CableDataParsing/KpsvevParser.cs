@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using Cables.Common;
-using CableDataParsing.CableBulders;
 using CableDataParsing.MSWordTableParsers;
 using CablesDatabaseEFCoreFirebird.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -10,13 +9,14 @@ using System.Globalization;
 using System;
 using FirebirdDatabaseProvider;
 using CableDataParsing.TableEntityes;
+using CableDataParsing.NameBuilders;
 
 namespace CableDataParsing
 {
     public class KpsvevParser : CableParser
     {
         private const char _splitter = '\u00D7'; //знак умножения в юникоде
-        private KpsvevTitleBuilder _cableTitleBuilder;
+        private KpsvevNameBuilder _cableNameBuilder;
         private FirebirdDBProvider _provider;
         private FirebirdDBTableProvider<CablePresenter> _cableTableProvider;
         private FirebirdDBTableProvider<ListCableBilletsPresenter> _listCableBilletsPresenter;
@@ -24,7 +24,7 @@ namespace CableDataParsing
         private FirebirdDBTableProvider<FlatCableSizePresenter> _FlatCableSizePresenter;
         public KpsvevParser(string connectionString, FileInfo mSWordFile) : base(connectionString, mSWordFile)
         {
-            _cableTitleBuilder = new KpsvevTitleBuilder();
+            _cableNameBuilder = new KpsvevNameBuilder();
             _provider = new FirebirdDBProvider(connectionString);
             _cableTableProvider = new FirebirdDBTableProvider<CablePresenter>(_provider);
             _listCableBilletsPresenter = new FirebirdDBTableProvider<ListCableBilletsPresenter>(_provider);
@@ -191,7 +191,7 @@ namespace CableDataParsing
                               select b).First();
                 cable.ElementsCount = elementsCount;
                 cable.MaxCoverDiameter = maxCoverDiameter;
-                cable.Title = _cableTitleBuilder.GetCableTitle(cable, billet, cableProps);  //TODO!!! Make NameBuider!
+                cable.Title = _cableNameBuilder.GetCableTitle(cable, billet.Conductor.AreaInSqrMm, cableProps);
 
                 var cablePresenterId = _cableTableProvider.AddItem(cable);
 

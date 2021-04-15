@@ -1,33 +1,33 @@
-﻿using CablesDatabaseEFCoreFirebird.Entities;
+﻿using System.Text;
+using CableDataParsing.TableEntityes;
 using Cables.Common;
-using System.Text;
 
-namespace CableDataParsing.CableBulders
+namespace CableDataParsing.NameBuilders
 {
-    public class KpsvevTitleBuilder
+    public class KpsvevNameBuilder
     {
         private StringBuilder _nameBuilder = new StringBuilder();
 
-        public string GetCableTitle(Cable cable, decimal areaInSqrMm, CablePropertySet? cableProperty, object parameter = null)
+        public string GetCableTitle(CablePresenter cable, decimal areaInSqrMm, CablePropertySet? cableProperty, object parameter = null)
         {
             _nameBuilder.Clear();
-            if (cable.CoverPolymerGroup.Title == "PVC LSLTx")
-            _nameBuilder.Append("ЛОУТОКС ");
+            if (cable.CoverPolimerGroupId == 7) //PVC LSLTx
+                _nameBuilder.Append("ЛОУТОКС ");
 
-                _nameBuilder.Append("КПСВ");
+            _nameBuilder.Append("КПСВ");
             if (cableProperty != null && (cableProperty & CablePropertySet.HasFoilShield) == CablePropertySet.HasFoilShield)
                 _nameBuilder.Append("Э");
             string namePart = string.Empty;
-            switch (cable.CoverPolymerGroup.Title)
+            switch (cable.CoverPolimerGroupId)
             {
-                case "PVC":
-                case "PVC Term":
-                case "PVC LS":
-                case "PVC Cold":
-                case "PVC LSLTx":
+                case 1: //PVC
+                case 11: //PVC Term
+                case 6: //PVC LS
+                case 10: //PVC Cold
+                case 7: //PVC LSLTx
                     namePart = "В";
                     break;
-                case "PE Self Extinguish":
+                case 12: //PE Self Extinguish
                     namePart = "Пс";
                     break;
             }
@@ -46,13 +46,13 @@ namespace CableDataParsing.CableBulders
                 _nameBuilder.Append($"Б{namePart}");
             }
 
-            if (cable.CoverPolymerGroup.Title == "PVC Term")
+            if (cable.CoverPolimerGroupId == 11)
                 _nameBuilder.Append("т");
-            if (cable.CoverPolymerGroup.Title == "PVC Cold")
+            if (cable.CoverPolimerGroupId == 10)
                 _nameBuilder.Append("м");
-            if (cable.CoverPolymerGroup.Title == "PVC LS")
+            if (cable.CoverPolimerGroupId == 6)
                 _nameBuilder.Append("нг(А)-LS");
-            if (cable.CoverPolymerGroup.Title == "PVC LSLTx")
+            if (cable.CoverPolimerGroupId == 7)
                 _nameBuilder.Append("нг(А)-LSLTx");
 
             var cableConductorArea = areaInSqrMm;
@@ -61,5 +61,6 @@ namespace CableDataParsing.CableBulders
 
             return _nameBuilder.ToString();
         }
+
     }
 }

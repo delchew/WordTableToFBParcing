@@ -23,12 +23,12 @@ namespace ConsoleParsingToFBDatabase
         static readonly string _connectionString5 = "character set=utf8;user id=SYSDBA;password=masterkey;dialect=3;data source=localhost;port number=3050;initial catalog=/Users/Shared/databases/CABLES1.FDB";
         static readonly string _wordFilePath = @"E:\CableDiametersTables\Kpsvev.docx";
         static readonly string _wordFilePath1 = @"/Users/Shared/databases/database_repository/CablesDatabases/CableDiametersTables/Kpsvev.docx";
-
-        private static SynchronizationContext _context;
+        static readonly string _wordFilePath2 = @"/Users/Shared/databases/database_repository/CablesDatabases/CableDiametersTables/Skab.docx";
 
         static void Main()
         {
             using var parser = new KpsvevParser(_connectionString5, new FileInfo(_wordFilePath1));
+            //using var parser = new SkabParser(_connectionString5, new FileInfo(_wordFilePath2));
             parser.ParseReport += Parser_ParseReport;
             var recordsCount = parser.ParseDataToDatabase();
             Console.WriteLine("{0} записей внесено в базу.", recordsCount);
