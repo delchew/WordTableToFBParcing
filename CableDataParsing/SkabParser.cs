@@ -7,13 +7,28 @@ using Cables.Common;
 using CableDataParsing.CableBulders;
 using CablesDatabaseEFCoreFirebird.Entities;
 using Microsoft.EntityFrameworkCore;
+using FirebirdDatabaseProvider;
+using CableDataParsing.TableEntityes;
+using CableDataParsing.NameBuilders;
+using System.Threading;
 
 namespace CableDataParsing
 {
     public class SkabParser : CableParser
     {
-        public SkabParser(string connectionString, FileInfo mSWordFile) : base(connectionString, mSWordFile, new SkabTitleBuilder())
-        { }
+        private FirebirdDBProvider _provider;
+        private FirebirdDBTableProvider<CablePresenter> _cableTableProvider;
+        private FirebirdDBTableProvider<ListCableBilletsPresenter> _listCableBilletsPresenter;
+        private FirebirdDBTableProvider<ListCablePropertiesPresenter> _listCablePropertiesPresenter;
+
+        public SkabParser(string connectionString, FileInfo mSWordFile) : base(connectionString, mSWordFile, null)
+        {
+            _provider = new FirebirdDBProvider(connectionString);
+            _cableTableProvider = new FirebirdDBTableProvider<CablePresenter>(_provider);
+            _listCableBilletsPresenter = new FirebirdDBTableProvider<ListCableBilletsPresenter>(_provider);
+            _listCablePropertiesPresenter = new FirebirdDBTableProvider<ListCablePropertiesPresenter>(_provider);
+        }
+
 
         public override int ParseDataToDatabase()
         {
@@ -96,6 +111,7 @@ namespace CableDataParsing
             var billets = _dbContext.InsulatedBillets.Where(b => b.CableShortName.ShortName == "СКАБ")
                                                      .Include(b => b.Conductor)
                                                      .Include(b => b.PolymerGroup)
+                                                     .Include(b => b.OperatingVoltage)
                                                      .ToList();
 
             _wordTableParser = new XceedWordTableParser();
@@ -103,9 +119,11 @@ namespace CableDataParsing
 
             var maxDiamTableCount = _wordTableParser.DocumentTablesCount / 2;
 
-            var patternCable = new Cable { TechnicalConditions = techCond };
-
-            for (int i = 0; i < maxDiamTableCount; i++)
+            var cablePresenter = new CablePresenter { TechCondId = techCond.Id };
+            var nameBuilder = new SkabNameBuilder();
+            _provider.OpenConnection();
+            var tableNumber = 0;
+            while (tableNumber < maxDiamTableCount)
             {
                 foreach (var mod in skabPropertiesList)
                 {
@@ -117,7 +135,7 @@ namespace CableDataParsing
                             {
                                 foreach (var twistTypeParams in twistParamsList)
                                 {
-                                    var tableData = _wordTableParser.GetCableCellsCollection(i, twistTypeParams.configurator);
+                                    var tableData = _wordTableParser.GetCableCellsCollection(tableNumber, twistTypeParams.configurator);
 
                                     foreach (var tableCellData in tableData)
                                     {
@@ -145,40 +163,50 @@ namespace CableDataParsing
                                                                                     b.Conductor.AreaInSqrMm == conductorAreaInSqrMm)
                                                                         .First();
 
-                                                    var cable = patternCable.Clone();
-                                                    cable.ElementsCount = elementsCount;
-                                                    cable.OperatingVoltage = voltage;
-                                                    cable.TwistedElementType = twistTypeParams.twistMode;
-                                                    cable.MaxCoverDiameter = maxCoverDiameter;
-                                                    cable.FireProtectionClass = matParam.fireClass;
-                                                    cable.CoverPolymerGroup = matParam.coverPolymerGroup;
-                                                    cable.CoverColor = (exiParam.HasValue && (!armourType.HasValue || (armourType.Value & CablePropertySet.HasArmourTube) != CablePropertySet.HasArmourTube)) ? colorBlue : colorBlack;
-                                                    cable.ClimaticMod = matParam.coverPolymerGroup.Id == 6 ? climaticModUHL : climaticModV;
+                                                    cablePresenter.ElementsCount = elementsCount;
+                                                    cablePresenter.OperatingVoltageId = voltage.Id;
+                                                    cablePresenter.TwistedElementTypeId = twistTypeParams.twistMode.Id;
+                                                    cablePresenter.MaxCoverDiameter = maxCoverDiameter;
+                                                    cablePresenter.FireProtectionId = matParam.fireClass.Id;
+                                                    cablePresenter.CoverPolimerGroupId = matParam.coverPolymerGroup.Id;
+                                                    cablePresenter.CoverColorId = (exiParam.HasValue && (!armourType.HasValue || (armourType.Value & CablePropertySet.HasArmourTube) != CablePropertySet.HasArmourTube)) ? colorBlue.Id : colorBlack.Id;
+                                                    cablePresenter.ClimaticModId = matParam.coverPolymerGroup.Id == 6 ? climaticModUHL.Id : climaticModV.Id;
 
-                                                    cable.Title = cableTitleBuilder.GetCableTitle(cable, billet, cableProps);
+                                                    cablePresenter.Title = nameBuilder.GetCableName(cablePresenter, conductorAreaInSqrMm, cableProps);
+                                                    var cablePresenterId = _cableTableProvider.AddItem(cablePresenter);
 
-                                                    var cableRec = _dbContext.Cables.Add(cable).Entity;
+                                                    _listCableBilletsPresenter.AddItem(new ListCableBilletsPresenter { CableId = cablePresenterId, BilletId = billet.Id });
 
-                                                    _dbContext.ListCableBillets.Add(new ListCableBillets { Billet = billet, Cable = cableRec });
+                                                    var intProp = 0b_0000000001;
 
-                                                    var listOfCableProperties = GetCableAssociatedPropertiesList(cableRec, cableProps);
-                                                    _dbContext.ListCableProperties.AddRange(listOfCableProperties);
+                                                    for (int j = 0; j < cablePropertiesCount; j++)
+                                                    {
+                                                        var Prop = (CablePropertySet)intProp;
 
-                                                    _dbContext.SaveChanges();
+                                                        if ((cableProps & Prop) == Prop)
+                                                        {
+                                                            var propertyObj = cablePropertiesList.Where(p => p.BitNumber == intProp).First();
+                                                            _listCablePropertiesPresenter.AddItem(new ListCablePropertiesPresenter { PropertyId = propertyObj.Id, CableId = cablePresenterId });
+
+                                                        }
+                                                        intProp <<= 1;
+                                                    }
                                                     recordsCount++;
                                                 }
                                             }
                                         }
-                                        else throw new Exception($"Не удалось распарсить ячейку таблицы №{i}!");
+                                        else throw new Exception($"Не удалось распарсить ячейку таблицы №{tableNumber}!");
                                     }
                                 }
-                                OnParseReport((double)(i + 1) / maxDiamTableCount);
+                                OnParseReport((double)(tableNumber + 1) / maxDiamTableCount);
+                                tableNumber++;
                             }
                         }
                     }
                 }
             }
             _wordTableParser.CloseWordApp();
+            _provider.CloseConnection();
             return recordsCount;
         }
     }

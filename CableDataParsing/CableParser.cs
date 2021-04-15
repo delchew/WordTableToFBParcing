@@ -13,7 +13,7 @@ namespace CableDataParsing
 {
     public abstract class CableParser : IDisposable
     {
-        private readonly List<CableProperty> cablePropertiesList;
+        protected readonly List<CableProperty> cablePropertiesList;
 
         private CultureInfo _cultureInfo;
 

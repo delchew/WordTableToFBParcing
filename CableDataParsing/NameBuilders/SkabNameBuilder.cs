@@ -5,32 +5,26 @@ using Cables.Materials;
 
 namespace CableDataParsing.NameBuilders
 {
-    public class SkabNameBuilder : ICableNameBuilder<SkabPresenter>
+    public class SkabNameBuilder
     {
         private readonly StringBuilder _nameBuilder;
 
-        public SkabNameBuilder(StringBuilder nameBuilder)
+        public SkabNameBuilder()
         {
-            if (_nameBuilder != null)
-                _nameBuilder = nameBuilder;
-            else
-                _nameBuilder = new StringBuilder();
+            _nameBuilder = new StringBuilder();
         }
 
-        public SkabNameBuilder() : this(new StringBuilder())
-        { }
-
-        public string GetCableName(SkabPresenter cable, CableBilletPresenter insBillet = null, ConductorPresenter conductor = null, object parameter = null)
+        public string GetCableName(CablePresenter cable, decimal areaInSqrMm, CablePropertySet? cableProperty)
         {
             _nameBuilder.Clear();
 
             var skabVoltageType = cable.OperatingVoltageId == 2 ? 250 : 660;
             _nameBuilder.Append($"СКАБ {skabVoltageType}");
 
-            if (cable.HasArmourTube)
+            if ((cableProperty & CablePropertySet.HasArmourTube) == CablePropertySet.HasArmourTube)
                 _nameBuilder.Append("K");
             else
-                if (cable.HasArmourBraid)
+                if ((cableProperty & CablePropertySet.HasArmourBraid) == CablePropertySet.HasArmourBraid)
                 _nameBuilder.Append("KГ");
 
             if (cable.CoverPolimerGroupId == (long)PolymerGroup.PUR)
@@ -44,20 +38,27 @@ namespace CableDataParsing.NameBuilders
                 _nameBuilder.Append($" {cable.ElementsCount}х");
             else
             {
-                namePart = cable.HasIndividualFoilShields ? "э" : string.Empty;
+                namePart = (cableProperty & CablePropertySet.HasIndividualFoilShields) == CablePropertySet.HasIndividualFoilShields ? "э" : string.Empty;
                 _nameBuilder.Append($" {cable.ElementsCount}х{(int)cable.TwistedElementTypeId}{namePart}х");
             }
 
-            namePart = CableCalculations.FormatConductorArea((double)conductor.AreaInSqrMm);
+            namePart = CableCalculations.FormatConductorArea(areaInSqrMm);
             _nameBuilder.Append(namePart + "л");
 
-            var braidMod = !cable.HasBraidShield ? "ф" : string.Empty;
-            var fillMod = !cable.HasFilling ? "о" : string.Empty;
-            var waterBlockMod = cable.HasWaterBlockStripe ? "в" : string.Empty;
-            _nameBuilder.Append($" {braidMod}{fillMod}{waterBlockMod}");
+            var onlyFoilShield = (cableProperty & CablePropertySet.HasBraidShield) != CablePropertySet.HasBraidShield;
+            var withoutFilling = (cableProperty & CablePropertySet.HasFilling) != CablePropertySet.HasFilling;
+            var hasWaterblockStripe = (cableProperty & CablePropertySet.HasWaterBlockStripe) == CablePropertySet.HasWaterBlockStripe;
 
-            _nameBuilder.Append(cable.SparkSafety ? " Ex-i" : string.Empty);
+            if (onlyFoilShield || withoutFilling || hasWaterblockStripe)
+            {
+                _nameBuilder.Append(" ");
+                if (onlyFoilShield) _nameBuilder.Append("ф");
+                if (withoutFilling) _nameBuilder.Append("о");
+                if (hasWaterblockStripe) _nameBuilder.Append("в");
+            }
 
+            if ((cableProperty & CablePropertySet.SparkSafety) == CablePropertySet.SparkSafety)
+                _nameBuilder.Append(" Ex-i");
             return _nameBuilder.ToString();
         }
 

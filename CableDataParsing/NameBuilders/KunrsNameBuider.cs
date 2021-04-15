@@ -5,7 +5,7 @@ using CableDataParsing.TableEntityes;
 
 namespace CableDataParsing.NameBuilders
 {
-    public class KunrsNameBuider : ICableNameBuilder<KunrsPresenter>
+    public class KunrsNameBuider
     {
         private readonly StringBuilder _nameBuilder;
         private readonly Dictionary<long, string> _polymerNamePartsDict;
@@ -29,13 +29,13 @@ namespace CableDataParsing.NameBuilders
         public KunrsNameBuider() : this(new StringBuilder())
         { }
 
-        public string GetCableName(KunrsPresenter cable, CableBilletPresenter insBillet = null, ConductorPresenter conductor = null, object parameter = null)
+        public string GetCableName(CablePresenter cable, InsulatedBilletPresenter insBillet = null, ConductorPresenter conductor = null, object parameter = null)
         {
             _nameBuilder.Clear();
             _nameBuilder.Append("КУНРС ");
-            _nameBuilder.Append(cable.HasFoilShield ? "Э" : string.Empty);
+            //_nameBuilder.Append(cable.HasFoilShield ? "Э" : string.Empty);
             var namePart = _polymerNamePartsDict[cable.CoverPolimerGroupId];
-            _nameBuilder.Append(cable.HasArmourTube ? $"{namePart}K" : string.Empty);
+            //_nameBuilder.Append(cable.HasArmourTube ? $"{namePart}K" : string.Empty);
             _nameBuilder.Append(namePart);
             _nameBuilder.Append(cable.CoverPolimerGroupId == 6 ? "нг(А)-FRLS" : "нг(А)-FRHF");
             namePart = CableCalculations.FormatConductorArea((double)conductor.AreaInSqrMm);

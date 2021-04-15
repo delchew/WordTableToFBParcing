@@ -4,11 +4,11 @@ using FirebirdDatabaseProvider.Attributes;
 namespace CableDataParsing.TableEntityes
 {
     [FBTableName("INSULATED_BILLET")]
-    public class CableBilletPresenter
+    public class InsulatedBilletPresenter
     {
         [FBTableField(TableFieldName = "ID", TypeName = "INTEGER", IsNotNull = true, IsPrymaryKey = true)]
         [FBFieldAutoincrement(GeneratorName = "INSULATED_BILLET_ID_GEN")]
-        public long BilletId { get; set; }
+        public long Id { get; set; }
 
         [FBTableField(TableFieldName = "COND_ID", TypeName = "INTEGER", IsNotNull = true)]
         public long ConductorId { get; set; }
@@ -23,9 +23,9 @@ namespace CableDataParsing.TableEntityes
         public decimal Diameter { get; set; }
 
         [FBTableField(TableFieldName = "MIN_THICKNESS", TypeName = "NUMERIC(2, 2)", IsNotNull = true)]
-        public decimal MinThickness { get; set; }
+        public decimal? MinThickness { get; set; }
 
-        [FBTableField(TableFieldName = "NOMINAL_THICKNESS", TypeName = "NUMERIC(2, 2)")]
+        [FBTableField(TableFieldName = "NOMINAL_THICKNESS", TypeName = "NUMERIC(2, 2)", IsNotNull = true)]
         public decimal? NominalThickness { get; set; }
 
         [FBTableField(TableFieldName = "CABLE_SHORT_NAME_ID", TypeName = "INTEGER", IsNotNull = true)]

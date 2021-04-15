@@ -61,14 +61,14 @@ namespace CableDataParsing
                         { CablePropertySet.SparkSafety, 10L }
                     };
 
-            var kunrs = new KunrsPresenter
-            {
-                TwistedElementTypeId = 1,
-                TechCondId = 25,
-                HasFilling = true,
-                OperatingVoltageId = 1,
-                ClimaticModId = 3
-            };
+            //var kunrs = new KunrsPresenter
+            //{
+            //    TwistedElementTypeId = 1,
+            //    TechCondId = 25,
+            //    HasFilling = true,
+            //    OperatingVoltageId = 1,
+            //    ClimaticModId = 3
+            //};
 
             PowerWiresColorScheme[] powerColorSchemeArray;
 
