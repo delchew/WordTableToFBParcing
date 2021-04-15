@@ -7,14 +7,17 @@ using CableDataParsing.MSWordTableParsers;
 using CablesDatabaseEFCoreFirebird.Entities;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace CableDataParsing
 {
     public class KipParser : CableParser
     {
         private const int POLYMER_GROUP_COUNT = 7;
+        private KipTitleBuilder _cableTitleBuilder;
 
-        public KipParser(string connectionString, FileInfo mSWordFile) : base(connectionString, mSWordFile, new KipTitleBuilder()) { }
+        public KipParser(string connectionString, FileInfo mSWordFile) : base(connectionString, mSWordFile)
+        {
+            _cableTitleBuilder = new KipTitleBuilder();
+        }
 
         public override int ParseDataToDatabase()
         {
@@ -134,7 +137,7 @@ namespace CableDataParsing
                                         TwistedElementType = twistedElementType,
                                     };
 
-                                    kip.Title = cableTitleBuilder.GetCableTitle(kip, billet, cableProp, flagBG);
+                                    kip.Title = _cableTitleBuilder.GetCableTitle(kip, billet, cableProp, flagBG);
                                     var cableRec = _dbContext.Cables.Add(kip).Entity;
 
                                     _dbContext.ListCableBillets.Add(new ListCableBillets { Billet = billet, Cable = cableRec });

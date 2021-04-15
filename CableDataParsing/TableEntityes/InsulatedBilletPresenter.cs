@@ -1,5 +1,4 @@
-﻿
-using FirebirdDatabaseProvider.Attributes;
+﻿using FirebirdDatabaseProvider.Attributes;
 
 namespace CableDataParsing.TableEntityes
 {

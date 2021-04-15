@@ -10,8 +10,10 @@ namespace CableDataParsing
 {
     public class KunrsParser : CableParser
     {
-        public KunrsParser(string connectionString, FileInfo mSWordFile)
-            : base(connectionString, mSWordFile, null) { }
+        public KunrsParser(string connectionString, FileInfo mSWordFile) : base(connectionString, mSWordFile)
+        {
+        
+        }
         public override int ParseDataToDatabase()
         {
             int recordsCount = 0;

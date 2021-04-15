@@ -6,6 +6,8 @@ using Cables.Common;
 using CablesDatabaseEFCoreFirebird.Entities;
 using CableDataParsing.CableBulders;
 using CableDataParsing.MSWordTableParsers;
+using System.Globalization;
+using System;
 
 namespace CableDataParsing
 {
@@ -14,9 +16,12 @@ namespace CableDataParsing
         private const int tablesCount = 4; // количество таблиц в документе
         private const int CABLE_BRANDS_COUNT = 672;  //672 марки в таблицах
         private int _recordsCount;
-
+        private Kevv_KerspTitleBuilder _cableTitleBuilder;
         public Kevv_KerspParser(string connectionString, FileInfo mSWordFile)
-            : base(connectionString, mSWordFile, new Kevv_KerspTitleBuilder()) { }
+            : base(connectionString, mSWordFile) 
+        {
+            _cableTitleBuilder = new Kevv_KerspTitleBuilder();
+        }
 
         public override int ParseDataToDatabase()
         {
@@ -118,6 +123,35 @@ namespace CableDataParsing
             }
             _wordTableParser.CloseWordApp();
             return _recordsCount;
+        }
+
+        private void ParseTableCellData(Cable cable, TableCellData tableCellData, IEnumerable<InsulatedBillet> currentBilletsList,
+                                          CablePropertySet? cableProps = null)
+        {
+            if (decimal.TryParse(tableCellData.ColumnHeaderData, NumberStyles.Any, _cultureInfo, out decimal elementsCount) &&
+                decimal.TryParse(tableCellData.RowHeaderData, NumberStyles.Any, _cultureInfo, out decimal conductorAreaInSqrMm) &&
+                decimal.TryParse(tableCellData.CellData, NumberStyles.Any, _cultureInfo, out decimal maxCoverDiameter))
+            {
+                var billet = (from b in currentBilletsList
+                              where b.Conductor.AreaInSqrMm == conductorAreaInSqrMm
+                              select b).First();
+                cable.ElementsCount = elementsCount;
+                cable.MaxCoverDiameter = maxCoverDiameter;
+                cable.Title = _cableTitleBuilder.GetCableTitle(cable, billet, cableProps);
+
+                var cableRec = _dbContext.Cables.Add(cable).Entity;
+
+                _dbContext.ListCableBillets.Add(new ListCableBillets { Billet = billet, Cable = cableRec });
+
+                if (cableProps.HasValue)
+                {
+                    var listOfCableProperties = GetCableAssociatedPropertiesList(cableRec, cableProps.Value);
+                    _dbContext.ListCableProperties.AddRange(listOfCableProperties);
+                }
+                _dbContext.SaveChanges();
+            }
+            else
+                throw new Exception($"Не удалось распарсить ячейку таблицы!");
         }
     }
 }
