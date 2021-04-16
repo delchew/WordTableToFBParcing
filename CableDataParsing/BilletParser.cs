@@ -15,6 +15,30 @@ namespace CableDataParsing
             _connectionString = connectionString;
         }
 
+        public int ParseKpse()
+        {
+            int recordsCount = 0;
+
+            var kpseBillets = new List<InsulatedBillet>
+            {
+                new InsulatedBillet{ConductorId = 29, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 1.60m, MinThickness = 0.30m, CableShortNameId = 7 },
+                new InsulatedBillet{ConductorId = 31, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 1.90m, MinThickness = 0.30m, CableShortNameId = 7 },
+                new InsulatedBillet{ConductorId = 17, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 2.05m, MinThickness = 0.30m, CableShortNameId = 7 },
+                new InsulatedBillet{ConductorId = 18, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 2.25m, MinThickness = 0.30m, CableShortNameId = 7 },
+                new InsulatedBillet{ConductorId = 19, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 2.48m, MinThickness = 0.30m, CableShortNameId = 7 },
+                new InsulatedBillet{ConductorId = 20, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 2.73m, MinThickness = 0.30m, CableShortNameId = 7 },
+                new InsulatedBillet{ConductorId = 21, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 3.28m, MinThickness = 0.30m, CableShortNameId = 7 }
+            };
+
+            using (var _dbContext = new CablesContext(_connectionString))
+            {
+                _dbContext.AddRange(kpseBillets);
+                _dbContext.SaveChanges();
+            }
+
+            return recordsCount;
+        }
+
         public int ParseKevv_Kers()
         {
             int recordsCount = 0;

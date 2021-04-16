@@ -82,8 +82,8 @@ namespace CableDataParsing
             var polymerPUR = _dbContext.PolymerGroups.Find(5);
 
             var configurator = new TableParserConfigurator().SetDataRowsCount(5)
-                                                .SetDataStartColumnIndex(3)
-                                                .SetRowHeadersColumnIndex(2);
+                                                            .SetDataStartColumnIndex(3)
+                                                            .SetRowHeadersColumnIndex(2);
 
             var twistParamsList = new List<(TwistedElementType twistMode, CablePropertySet? hasIndividualFoilSHields, TableParserConfigurator configurator)>
             {
