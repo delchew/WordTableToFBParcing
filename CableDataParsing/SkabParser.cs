@@ -17,15 +17,15 @@ namespace CableDataParsing
     {
         private FirebirdDBProvider _provider;
         private FirebirdDBTableProvider<CablePresenter> _cableTableProvider;
-        private FirebirdDBTableProvider<ListCableBilletsPresenter> _listCableBilletsPresenter;
-        private FirebirdDBTableProvider<ListCablePropertiesPresenter> _listCablePropertiesPresenter;
+        private FirebirdDBTableProvider<ListCableBilletsPresenter> _listCableBilletsProvider;
+        private FirebirdDBTableProvider<ListCablePropertiesPresenter> _listCablePropertiesProvider;
 
         public SkabParser(string connectionString, FileInfo mSWordFile) : base(connectionString, mSWordFile)
         {
             _provider = new FirebirdDBProvider(connectionString);
             _cableTableProvider = new FirebirdDBTableProvider<CablePresenter>(_provider);
-            _listCableBilletsPresenter = new FirebirdDBTableProvider<ListCableBilletsPresenter>(_provider);
-            _listCablePropertiesPresenter = new FirebirdDBTableProvider<ListCablePropertiesPresenter>(_provider);
+            _listCableBilletsProvider = new FirebirdDBTableProvider<ListCableBilletsPresenter>(_provider);
+            _listCablePropertiesProvider = new FirebirdDBTableProvider<ListCablePropertiesPresenter>(_provider);
         }
 
         public override int ParseDataToDatabase()
@@ -175,7 +175,7 @@ namespace CableDataParsing
                                                         cablePresenter.Title = nameBuilder.GetCableName(cablePresenter, conductorAreaInSqrMm, cableProps);
                                                         var cablePresenterId = _cableTableProvider.AddItem(cablePresenter);
 
-                                                        _listCableBilletsPresenter.AddItem(new ListCableBilletsPresenter { CableId = cablePresenterId, BilletId = billet.Id });
+                                                        _listCableBilletsProvider.AddItem(new ListCableBilletsPresenter { CableId = cablePresenterId, BilletId = billet.Id });
 
                                                         var intProp = 0b_0000000001;
 
@@ -186,8 +186,7 @@ namespace CableDataParsing
                                                             if ((cableProps & Prop) == Prop)
                                                             {
                                                                 var propertyObj = cablePropertiesList.Where(p => p.BitNumber == intProp).First();
-                                                                _listCablePropertiesPresenter.AddItem(new ListCablePropertiesPresenter { PropertyId = propertyObj.Id, CableId = cablePresenterId });
-
+                                                                _listCablePropertiesProvider.AddItem(new ListCablePropertiesPresenter { PropertyId = propertyObj.Id, CableId = cablePresenterId });
                                                             }
                                                             intProp <<= 1;
                                                         }

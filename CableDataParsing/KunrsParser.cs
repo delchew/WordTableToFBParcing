@@ -4,19 +4,31 @@ using CableDataParsing.MSWordTableParsers;
 using Cables.Common;
 using CableDataParsing.TableEntityes;
 using System.Linq;
-using System;
+using CableDataParsing.NameBuilders;
+using FirebirdDatabaseProvider;
+using Microsoft.EntityFrameworkCore;
 
 namespace CableDataParsing
 {
     public class KunrsParser : CableParser
     {
+        private FirebirdDBProvider _provider;
+        private FirebirdDBTableProvider<CablePresenter> _cableTableProvider;
+        private FirebirdDBTableProvider<ListCableBilletsPresenter> _listCableBilletsProvider;
+        private FirebirdDBTableProvider<ListCablePropertiesPresenter> _listCablePropertiesProvider;
+        private FirebirdDBTableProvider<ListCablePowerColorPresenter> _listCablePowerColorProvider;
         public KunrsParser(string connectionString, FileInfo mSWordFile) : base(connectionString, mSWordFile)
         {
-        
+            _provider = new FirebirdDBProvider(connectionString);
+            _cableTableProvider = new FirebirdDBTableProvider<CablePresenter>(_provider);
+            _listCableBilletsProvider = new FirebirdDBTableProvider<ListCableBilletsPresenter>(_provider);
+            _listCablePropertiesProvider = new FirebirdDBTableProvider<ListCablePropertiesPresenter>(_provider);
+            _listCablePowerColorProvider = new FirebirdDBTableProvider<ListCablePowerColorPresenter>(_provider);
         }
         public override int ParseDataToDatabase()
         {
             int recordsCount = 0;
+            var nameBuilder = new KunrsNameBuider();
             var configurator = new TableParserConfigurator().SetDataColumnsCount(4)
                                                          .SetDataRowsCount(8)
                                                          .SetColumnHeadersRowIndex(2)
@@ -25,81 +37,103 @@ namespace CableDataParsing
                                                          .SetDataStartRowIndex(3);
             _wordTableParser = new XceedWordTableParser();
 
-            var hasFoilShieldDictionary = new Dictionary<int, bool>
+            var cablePropsList = new List<CablePropertySet?>
             {
-                { 0, false }, { 1, true }, { 2, false }, { 3, true }
+                null,
+                CablePropertySet.HasFoilShield,
+                CablePropertySet.HasArmourBraid | CablePropertySet.HasArmourTube,
+                CablePropertySet.HasFoilShield | CablePropertySet.HasArmourBraid | CablePropertySet.HasArmourTube
             };
-            var hasArmourDictionary = new Dictionary<int, bool>
-                    {
-                        { 0, false }, { 1, false }, { 2, true }, { 3, true }
-                    };
-            var polimerGroupIdDictionary = new Dictionary<int, int>
-                    {
-                        { 0, 6 }, { 1, 4 }, { 2, 5 }
-                    };
-            var insBilletKunrsIdDictionary = new Dictionary<decimal, int>
-                    {
-                        { 0.75m, 1 }, { 1.0m, 2 }, { 1.5m, 3 }, { 2.5m, 4 }, { 4.0m, 5 }, { 6.0m, 6 }, { 10.0m, 7 }, { 16.0m, 8 }
-                    };
+
+            var polymerGroupIdList = new List<int> { 6, 4, 5 };
+
             var powerColorsDict = new Dictionary<decimal, PowerWiresColorScheme[]>
-                    {
-                        { 2m, new [] { PowerWiresColorScheme.N } },
-                        { 3m, new [] { PowerWiresColorScheme.PEN, PowerWiresColorScheme.none} },
-                        { 4m, new [] { PowerWiresColorScheme.N, PowerWiresColorScheme.PE } },
-                        { 5m, new [] { PowerWiresColorScheme.PEN, PowerWiresColorScheme.none } }
-                    };
+            {
+                { 2m, new [] { PowerWiresColorScheme.N } },
+                { 3m, new [] { PowerWiresColorScheme.PEN, PowerWiresColorScheme.none} },
+                { 4m, new [] { PowerWiresColorScheme.N, PowerWiresColorScheme.PE } },
+                { 5m, new [] { PowerWiresColorScheme.PEN, PowerWiresColorScheme.none } }
+            };
 
-            var dictCablePropsToId = new Dictionary<CablePropertySet, long>
-                    {
-                        { CablePropertySet.HasIndividualFoilShields, 1L },
-                        { CablePropertySet.HasIndividualBraidShield, 2L },
-                        { CablePropertySet.HasFoilShield, 3L },
-                        { CablePropertySet.HasBraidShield, 4L },
-                        { CablePropertySet.HasFilling, 5L },
-                        { CablePropertySet.HasArmourBraid, 6L },
-                        { CablePropertySet.HasArmourTape, 7L },
-                        { CablePropertySet.HasArmourTube, 8L },
-                        { CablePropertySet.HasWaterBlockStripe, 9L },
-                        { CablePropertySet.SparkSafety, 10L }
-                    };
+            var billets = _dbContext.InsulatedBillets.Where(b => b.CableShortName.ShortName == "КУНРС")
+                                                     .Include(b => b.Conductor)
+                                                     .ToList();
 
-            //var kunrs = new KunrsPresenter
-            //{
-            //    TwistedElementTypeId = 1,
-            //    TechCondId = 25,
-            //    HasFilling = true,
-            //    OperatingVoltageId = 1,
-            //    ClimaticModId = 3
-            //};
+            var kunrs = new CablePresenter
+            {
+                TwistedElementTypeId = 1,
+                TechCondId = 25,
+                OperatingVoltageId = 1,
+                ClimaticModId = 3
+            };
 
             PowerWiresColorScheme[] powerColorSchemeArray;
 
             _wordTableParser.OpenWordDocument(_mSWordFile);
-
-            for (int i = 0; i < hasFoilShieldDictionary.Count; i++)
+            _provider.OpenConnection();
+            try
             {
-                var tableData = _wordTableParser.GetCableCellsCollection(i, configurator);
-                foreach (var tableCellData in tableData)
+                var parsePartNumber = 1d;
+                foreach (var prop in cablePropsList)
                 {
-                    if (decimal.TryParse(tableCellData.ColumnHeaderData, out decimal elementsCount) &&
-                        decimal.TryParse(tableCellData.CellData, out decimal maxCoverDiameter) &&
-                        decimal.TryParse(tableCellData.RowHeaderData, out decimal conductorAreaInSqrMm))
+                    var tableData = _wordTableParser.GetCableCellsCollection(0, configurator);
+                    foreach (var tableCellData in tableData)
                     {
-                        for (int j = 0; j < polimerGroupIdDictionary.Count; j++)
+                        if (decimal.TryParse(tableCellData.ColumnHeaderData, out decimal elementsCount) &&
+                            decimal.TryParse(tableCellData.CellData, out decimal maxCoverDiameter) &&
+                            decimal.TryParse(tableCellData.RowHeaderData, out decimal conductorAreaInSqrMm))
                         {
-                            powerColorSchemeArray = powerColorsDict[elementsCount];
-                            for (int k = 0; k < powerColorSchemeArray.Length; k++)
+                            foreach (var polymerGroupId in polymerGroupIdList)
                             {
-                                throw new NotImplementedException();
-                                //recordsCount++;
+                                powerColorSchemeArray = powerColorsDict[elementsCount];
+                                foreach (var powerColorScheme in powerColorSchemeArray)
+                                {
+                                    var cableProps = CablePropertySet.HasFilling;
+                                    if (prop.HasValue)
+                                        cableProps |= prop.Value;
+
+                                    kunrs.ElementsCount = elementsCount;
+                                    kunrs.MaxCoverDiameter = maxCoverDiameter;
+                                    kunrs.FireProtectionId = polymerGroupId == 6 ? 18 : 23;
+                                    kunrs.CoverPolimerGroupId = polymerGroupId;
+                                    kunrs.CoverColorId = polymerGroupId == 5 ? 8 : 2;
+                                    var billet = (from b in billets
+                                                 where b.Conductor.AreaInSqrMm == conductorAreaInSqrMm
+                                                 select b).Single();
+                                    kunrs.Title = nameBuilder.GetCableName(kunrs, conductorAreaInSqrMm, cableProps, powerColorScheme);
+                                    var cableId = _cableTableProvider.AddItem(kunrs);
+
+                                    _listCableBilletsProvider.AddItem(new ListCableBilletsPresenter { CableId = cableId, BilletId = billet.Id });
+                                    _listCablePowerColorProvider.AddItem(new ListCablePowerColorPresenter { CableId = cableId, PowerColorSchemeId = (int)powerColorScheme });
+
+                                    var intProp = 0b_0000000001;
+
+                                    for (int m = 0; m < cablePropertiesCount; m++)
+                                    {
+                                        var Prop = (CablePropertySet)intProp;
+
+                                        if ((cableProps & Prop) == Prop)
+                                        {
+                                            var propertyObj = cablePropertiesList.Where(p => p.BitNumber == intProp).First();
+                                            _listCablePropertiesProvider.AddItem(new ListCablePropertiesPresenter { PropertyId = propertyObj.Id, CableId = cableId });
+                                        }
+                                        intProp <<= 1;
+                                    }
+                                    recordsCount++;
+                                }
                             }
                         }
                     }
+                    OnParseReport(parsePartNumber / cablePropsList.Count);
+                    configurator.DataStartRowIndex += configurator.DataRowsCount;
+                    parsePartNumber++;
                 }
-                OnParseReport((double)(i + 1) / hasFoilShieldDictionary.Count);
-                configurator.DataStartRowIndex += configurator.DataRowsCount;
             }
-            _wordTableParser.CloseWordApp();
+            finally
+            {
+                _wordTableParser.CloseWordApp();
+                _provider.CloseConnection();
+            }
             return recordsCount;
         }
     }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Cables.Common;
 using CableDataParsing.TableEntityes;
+using Cables;
 
 namespace CableDataParsing.NameBuilders
 {
@@ -29,18 +30,22 @@ namespace CableDataParsing.NameBuilders
         public KunrsNameBuider() : this(new StringBuilder())
         { }
 
-        public string GetCableName(CablePresenter cable, InsulatedBilletPresenter insBillet = null, ConductorPresenter conductor = null, object parameter = null)
+        public string GetCableName(CablePresenter cable, decimal areaInSqrMm, CablePropertySet? cableProperty, PowerWiresColorScheme? powerWiresColorScheme)
         {
             _nameBuilder.Clear();
             _nameBuilder.Append("КУНРС ");
-            //_nameBuilder.Append(cable.HasFoilShield ? "Э" : string.Empty);
             var namePart = _polymerNamePartsDict[cable.CoverPolimerGroupId];
-            //_nameBuilder.Append(cable.HasArmourTube ? $"{namePart}K" : string.Empty);
+            if (cableProperty.HasValue)
+            {
+                _nameBuilder.Append((cableProperty & CablePropertySet.HasFoilShield) == CablePropertySet.HasFoilShield ? "Э" : string.Empty);
+                _nameBuilder.Append((cableProperty & CablePropertySet.HasArmourTube) == CablePropertySet.HasArmourTube ? $"{namePart}K" : string.Empty);
+            }
             _nameBuilder.Append(namePart);
             _nameBuilder.Append(cable.CoverPolimerGroupId == 6 ? "нг(А)-FRLS" : "нг(А)-FRHF");
-            namePart = CableCalculations.FormatConductorArea((double)conductor.AreaInSqrMm);
+            namePart = CableCalculations.FormatConductorArea(areaInSqrMm);
             _nameBuilder.Append($" {cable.ElementsCount}х{namePart}");
-            namePart = (string)parameter;
+            if(powerWiresColorScheme.HasValue)
+                namePart= powerWiresColorScheme.Value.GetDescription();
             if (!string.IsNullOrEmpty(namePart))
                 _nameBuilder.Append($" {namePart}");
             return _nameBuilder.ToString();

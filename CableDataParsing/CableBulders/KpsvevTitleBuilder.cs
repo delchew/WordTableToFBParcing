@@ -8,7 +8,7 @@ namespace CableDataParsing.CableBulders
     {
         private StringBuilder _nameBuilder = new StringBuilder();
 
-        public string GetCableTitle(Cable cable, decimal areaInSqrMm, CablePropertySet? cableProperty, object parameter = null)
+        public string GetCableTitle(Cable cable, InsulatedBillet billet, CablePropertySet? cableProperty, object parameter = null)
         {
             _nameBuilder.Clear();
             if (cable.CoverPolymerGroup.Title == "PVC LSLTx")
@@ -55,7 +55,7 @@ namespace CableDataParsing.CableBulders
             if (cable.CoverPolymerGroup.Title == "PVC LSLTx")
                 _nameBuilder.Append("нг(А)-LSLTx");
 
-            var cableConductorArea = areaInSqrMm;
+            var cableConductorArea = billet.Conductor.AreaInSqrMm;
             namePart = CableCalculations.FormatConductorArea(cableConductorArea);
             _nameBuilder.Append($" {cable.ElementsCount}х2х{namePart}");
 

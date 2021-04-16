@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,6 +18,7 @@ namespace GuiPresenter
         private string _cableName;
         private string _connectionString;
         private IConfigurationRoot _connectionStringConfig;
+        private Stopwatch _stopwatch;
 
         public MainPresenter(IView view, IMessageService messageService)
         {
@@ -34,6 +36,8 @@ namespace GuiPresenter
             _view.CableNameChanged += View_CableNameChanged;
             _view.TableParseStarted += View_TableParseStarted;
             _view.DBConnectionNameChanged += View_DBConnectionNameChanged;
+
+            _stopwatch = new Stopwatch();
         }
 
         private void Initialize()
@@ -41,10 +45,10 @@ namespace GuiPresenter
             _cableTypesDict = new Dictionary<string, Func<CableParser>>
             {
                 { "КПСВ(Э)", () => new KpsvevParser(_connectionString, _view.MSWordFile) },
-                //{"КУНРС", () => new KunrsParser(_connectionString, _view.MSWordFile) },
-                {"СКАБ", () => new SkabParser(_connectionString, _view.MSWordFile) },
-                {"КЭВ(Э)В, КЭРс(Э)", () => new Kevv_KerspParser(_connectionString, _view.MSWordFile) },
-                {"КИП", () => new KipParser(_connectionString, _view.MSWordFile) }
+                { "КУНРС", () => new KunrsParser(_connectionString, _view.MSWordFile) },
+                { "СКАБ", () => new SkabParser(_connectionString, _view.MSWordFile) },
+                { "КЭВ(Э)В, КЭРс(Э)", () => new Kevv_KerspParser(_connectionString, _view.MSWordFile) },
+                { "КИП", () => new KipParser(_connectionString, _view.MSWordFile) }
             };
 
             _dbConnectionsNames = new string[]
@@ -91,18 +95,25 @@ namespace GuiPresenter
                     return;
                 }
                 using (var parser = _cableTypesDict[_cableName]?.Invoke())
-                if (parser != null)
                 {
-                    parser.ParseReport += Parser_ParseReport;
+                    if (parser != null)
+                    {
+                        parser.ParseReport += Parser_ParseReport;
 
-                    int recordsCount = await Task<int>.Factory.StartNew(parser.ParseDataToDatabase);
-
-                    _messageService.ShowMessage($"Успешно! Число записей, занесённых в базу: {recordsCount}");
+                        _stopwatch.Reset();
+                        _stopwatch.Start();
+                        int recordsCount = await Task<int>.Factory.StartNew(parser.ParseDataToDatabase);
+                        _stopwatch.Stop();
+                        var timeSpan = _stopwatch.Elapsed;
+                        var elapsedTime = string.Format("{0:00}:{1:00}:{2:00}", timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds);
+                        _messageService.ShowMessage($"Успешно! Число записей, занесённых в базу: {recordsCount}{Environment.NewLine}Времени прошло: {elapsedTime}");
+                    }
+                    else
+                    {
+                        _messageService.ShowError("Не задан парсер для этого типа кабеля!");
+                    }
                 }
-                else
-                {
-                    _messageService.ShowError("Не задан парсер для этого типа кабеля!");
-                }
+                
             }
             catch (Exception ex)
             {
