@@ -27,10 +27,12 @@ namespace ConsoleParsingToFBDatabase
 
         static void Main()
         {
-            using var parser = new KpsvevParser(_connectionString5, new FileInfo(_wordFilePath1));
+            //using var parser = new KpsvevParser(_connectionString5, new FileInfo(_wordFilePath1));
             //using var parser = new SkabParser(_connectionString5, new FileInfo(_wordFilePath2));
-            parser.ParseReport += Parser_ParseReport;
-            var recordsCount = parser.ParseDataToDatabase();
+            var parser = new BilletParser(_connectionString2);
+            //parser.ParseReport += Parser_ParseReport;
+            //var recordsCount = parser.ParseDataToDatabase();
+            var recordsCount = parser.ParseKpse();
             Console.WriteLine("{0} записей внесено в базу.", recordsCount);
 
             Console.ReadKey();
