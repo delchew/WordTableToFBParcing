@@ -71,7 +71,7 @@ namespace CableDataParsing
             var redColor = _dbContext.Colors.Find(1);
             var blackColor = _dbContext.Colors.Find(2);
 
-            var cableShortName = _dbContext.CableShortNames.Find(6); // КПСВ(Э)
+            var cableBrandName = _dbContext.CableBrandNames.Find(6); // КПСВ(Э)
 
             var operatingVoltage = _dbContext.OperatingVoltages.Find(6); // 300В 50Гц, постоянка - до 500В
             var operatingVoltageLoutoks = _dbContext.OperatingVoltages.Find(5); // 300В 50Гц
@@ -112,7 +112,7 @@ namespace CableDataParsing
             var mainConfigArray = new[]
             { configSet1, configSet2, configSet3, configSet4, configSet5, configSet6, configSet7, configSet8, configSet9, configSet10, configSet11, configSet12 };
 
-            var billets = _dbContext.InsulatedBillets.Where(b => b.CableShortNameId == 6)
+            var billets = _dbContext.InsulatedBillets.Where(b => b.CableBrandNameId == 6)
                                                      .Include(p => p.Conductor)
                                                      .Include(p => p.PolymerGroup)
                                                      .ToList();

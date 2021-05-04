@@ -6,6 +6,7 @@ using CableDataParsing.CableBulders;
 using CableDataParsing.MSWordTableParsers;
 using CablesDatabaseEFCoreFirebird.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace CableDataParsing
 {
@@ -44,13 +45,13 @@ namespace CableDataParsing
 
             var cond078 = _dbContext.Conductors.Where(c => c.WiresDiameter == 0.26m && c.WiresCount == 7 && c.MetalId == 2).Single();
             var cond060 = _dbContext.Conductors.Where(c => c.WiresDiameter == 0.20m && c.WiresCount == 7 && c.MetalId == 2).Single();
-            var cableShortName = _dbContext.CableShortNames.Where(n => n.ShortName == "КИП").Single();
+            var cableBrandName = _dbContext.CableBrandNames.Where(n => n.BrandName == "КИП").Single();
             var twistedElementType = _dbContext.TwistedElementTypes.Where(t => t.Id == 2).Single();
 
-            var billet060_150 = _dbContext.InsulatedBillets.Include(b => b.Conductor).Where(b => b.ConductorId == cond060.Id && b.Diameter == 1.50m && b.CableShortName.ShortName == cableShortName.ShortName).Single();
-            var billet060_142 = _dbContext.InsulatedBillets.Include(b => b.Conductor).Where(b => b.ConductorId == cond060.Id && b.Diameter == 1.42m && b.CableShortName.ShortName == cableShortName.ShortName).Single();
-            var billet078PE = _dbContext.InsulatedBillets.Include(b => b.Conductor).Where(b => b.ConductorId == cond078.Id && b.Diameter == 1.78m && b.CableShortName.ShortName == cableShortName.ShortName).Single();
-            var billet078PVC = _dbContext.InsulatedBillets.Include(b => b.Conductor).Where(b => b.ConductorId == cond078.Id && b.Diameter == 1.60m && b.CableShortName.ShortName == cableShortName.ShortName).Single();
+            var billet060_150 = _dbContext.InsulatedBillets.Include(b => b.Conductor).Where(b => b.ConductorId == cond060.Id && b.Diameter == 1.50m && b.CableBrandName.BrandName == cableBrandName.BrandName).Single();
+            var billet060_142 = _dbContext.InsulatedBillets.Include(b => b.Conductor).Where(b => b.ConductorId == cond060.Id && b.Diameter == 1.42m && b.CableBrandName.BrandName == cableBrandName.BrandName).Single();
+            var billet078PE = _dbContext.InsulatedBillets.Include(b => b.Conductor).Where(b => b.ConductorId == cond078.Id && b.Diameter == 1.78m && b.CableBrandName.BrandName == cableBrandName.BrandName).Single();
+            var billet078PVC = _dbContext.InsulatedBillets.Include(b => b.Conductor).Where(b => b.ConductorId == cond078.Id && b.Diameter == 1.60m && b.CableBrandName.BrandName == cableBrandName.BrandName).Single();
 
             var coverPolymerGroupList8TC = new List<(PolymerGroup polymerGroup, FireProtectionClass fireClass)>
             {
@@ -111,8 +112,8 @@ namespace CableDataParsing
                             tableData = _wordTableParser.GetCableCellsCollection(tableIndex, configurator);
                             foreach (var tableCellData in tableData)
                             {
-                                if (decimal.TryParse(tableCellData.ColumnHeaderData, out decimal elementsCount) &&
-                                    decimal.TryParse(tableCellData.CellData, out decimal maxCoverDiameter))
+                                if (decimal.TryParse(tableCellData.ColumnHeaderData, NumberStyles.Any, _cultureInfo, out decimal elementsCount) &&
+                                    decimal.TryParse(tableCellData.CellData, NumberStyles.Any, _cultureInfo, out decimal maxCoverDiameter))
                                 {
                                     if (index < 7)
                                     {

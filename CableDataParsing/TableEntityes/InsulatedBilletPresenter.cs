@@ -27,7 +27,7 @@ namespace CableDataParsing.TableEntityes
         [FBTableField(TableFieldName = "NOMINAL_THICKNESS", TypeName = "NUMERIC(2, 2)", IsNotNull = true)]
         public decimal? NominalThickness { get; set; }
 
-        [FBTableField(TableFieldName = "CABLE_SHORT_NAME_ID", TypeName = "INTEGER", IsNotNull = true)]
-        public long CableShortNameId { get; set; }
+        [FBTableField(TableFieldName = "CABLE_BRAND_NAME_ID", TypeName = "INTEGER", IsNotNull = true)]
+        public long CableBrandNameId { get; set; }
     }
 }

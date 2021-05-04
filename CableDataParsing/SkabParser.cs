@@ -106,7 +106,7 @@ namespace CableDataParsing
 
             var exiProperties = new List<CablePropertySet?> { null, CablePropertySet.SparkSafety };
 
-            var billets = _dbContext.InsulatedBillets.Where(b => b.CableShortName.ShortName == "СКАБ")
+            var billets = _dbContext.InsulatedBillets.Where(b => b.CableBrandName.BrandName == "СКАБ")
                                                      .Include(b => b.Conductor)
                                                      .Include(b => b.PolymerGroup)
                                                      .Include(b => b.OperatingVoltage)

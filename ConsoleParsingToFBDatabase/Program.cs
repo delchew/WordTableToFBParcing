@@ -21,18 +21,22 @@ namespace ConsoleParsingToFBDatabase
         static readonly string _connectionString3 = "character set=utf8;user id=SYSDBA;password=masterkey;dialect=3;data source=localhost;port number=3050;initial catalog=e:\\databases\\CABLESBRANDS.FDB";
         static readonly string _connectionString4 = "character set=utf8;user id=SYSDBA;password=masterkey;dialect=3;data source=localhost;port number=3050;initial catalog=e:\\databases\\database_repository\\CABLES.FDB";
         static readonly string _connectionString5 = "character set=utf8;user id=SYSDBA;password=masterkey;dialect=3;data source=localhost;port number=3050;initial catalog=/Users/Shared/databases/CABLES1.FDB";
+        static readonly string _connectionString6 = "character set=utf8;user id=SYSDBA;password=masterkey;dialect=3;data source=localhost;port number=3050;initial catalog=/Users/Shared/databases/database_repository/CBLS.FDB";
+
         static readonly string _wordFilePath = @"E:\CableDiametersTables\Kpsvev.docx";
         static readonly string _wordFilePath1 = @"/Users/Shared/databases/database_repository/CablesDatabases/CableDiametersTables/Kpsvev.docx";
         static readonly string _wordFilePath2 = @"/Users/Shared/databases/database_repository/CablesDatabases/CableDiametersTables/Skab.docx";
+        static readonly string _wordFilePath3 = @"/Users/Shared/databases/database_repository/CablesDatabases/CableDiametersTables/kunrs.docx";
 
         static void Main()
         {
-            //using var parser = new KpsvevParser(_connectionString5, new FileInfo(_wordFilePath1));
+            //using var parser = new KpsvevParser(_connectionString6, new FileInfo(_wordFilePath1));
+            using var parser = new KunrsParser(_connectionString6, new FileInfo(_wordFilePath3));
             //using var parser = new SkabParser(_connectionString5, new FileInfo(_wordFilePath2));
-            var parser = new BilletParser(_connectionString2);
-            //parser.ParseReport += Parser_ParseReport;
-            //var recordsCount = parser.ParseDataToDatabase();
-            var recordsCount = parser.ParseKpse();
+            //using var parser = new BilletParser(_connectionString6);
+            parser.ParseReport += Parser_ParseReport;
+            var recordsCount = parser.ParseDataToDatabase();
+            //var recordsCount = parser.AddAllBillets();
             Console.WriteLine("{0} записей внесено в базу.", recordsCount);
 
             Console.ReadKey();

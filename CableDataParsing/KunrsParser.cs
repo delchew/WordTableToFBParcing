@@ -7,6 +7,7 @@ using System.Linq;
 using CableDataParsing.NameBuilders;
 using FirebirdDatabaseProvider;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace CableDataParsing
 {
@@ -55,7 +56,7 @@ namespace CableDataParsing
                 { 5m, new [] { PowerWiresColorScheme.PEN, PowerWiresColorScheme.none } }
             };
 
-            var billets = _dbContext.InsulatedBillets.Where(b => b.CableShortName.ShortName == "КУНРС")
+            var billets = _dbContext.InsulatedBillets.Where(b => b.CableBrandName.BrandName == "КУНРС")
                                                      .Include(b => b.Conductor)
                                                      .ToList();
 
@@ -79,9 +80,9 @@ namespace CableDataParsing
                     var tableData = _wordTableParser.GetCableCellsCollection(0, configurator);
                     foreach (var tableCellData in tableData)
                     {
-                        if (decimal.TryParse(tableCellData.ColumnHeaderData, out decimal elementsCount) &&
-                            decimal.TryParse(tableCellData.CellData, out decimal maxCoverDiameter) &&
-                            decimal.TryParse(tableCellData.RowHeaderData, out decimal conductorAreaInSqrMm))
+                        if (decimal.TryParse(tableCellData.ColumnHeaderData, NumberStyles.Any, _cultureInfo, out decimal elementsCount) &&
+                            decimal.TryParse(tableCellData.CellData, NumberStyles.Any, _cultureInfo, out decimal maxCoverDiameter) &&
+                            decimal.TryParse(tableCellData.RowHeaderData, NumberStyles.Any, _cultureInfo, out decimal conductorAreaInSqrMm))
                         {
                             foreach (var polymerGroupId in polymerGroupIdList)
                             {

@@ -1,95 +1,114 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using CablesDatabaseEFCoreFirebird;
 using CablesDatabaseEFCoreFirebird.Entities;
 
 namespace CableDataParsing
 {
-    public class BilletParser 
+    public class BilletParser : IDisposable
     {
-        private string _connectionString;
         private CablesContext _dbContext;
 
         public BilletParser(string connectionString)
         {
-            _connectionString = connectionString;
+            _dbContext = new CablesContext(connectionString);
         }
 
-        public int ParseKpse()
+        public int AddAllBillets()
         {
-            int recordsCount = 0;
+            var c1 = AddKunrsBillets();
+            var c2 = AddKpseBillets();
+            var c3 = AddKevv_KersBillets();
+            var c4 = AddKipBillets();
+            var c5 = AddKpsvevBillets();
+            var c6 = AddSkabBillets();
+            return c1 + c2 + c3 + c4 + c5 + c6;
+        }
 
-            var kpseBillets = new List<InsulatedBillet>
+        public int AddKunrsBillets()
+        {
+            var kunrsBillets = new List<InsulatedBillet>
             {
-                new InsulatedBillet{ConductorId = 29, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 1.60m, MinThickness = 0.30m, CableShortNameId = 7 },
-                new InsulatedBillet{ConductorId = 31, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 1.90m, MinThickness = 0.30m, CableShortNameId = 7 },
-                new InsulatedBillet{ConductorId = 17, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 2.05m, MinThickness = 0.30m, CableShortNameId = 7 },
-                new InsulatedBillet{ConductorId = 18, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 2.25m, MinThickness = 0.30m, CableShortNameId = 7 },
-                new InsulatedBillet{ConductorId = 19, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 2.48m, MinThickness = 0.30m, CableShortNameId = 7 },
-                new InsulatedBillet{ConductorId = 20, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 2.73m, MinThickness = 0.30m, CableShortNameId = 7 },
-                new InsulatedBillet{ConductorId = 21, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 3.28m, MinThickness = 0.30m, CableShortNameId = 7 }
+                new InsulatedBillet{ConductorId = 2, PolymerGroupId = 3, OperatingVoltageId = 1, Diameter = 2.70m, MinThickness = 0.70m, NominalThickness = 0.90m, CableBrandNameId = 1 },
+                new InsulatedBillet{ConductorId = 4, PolymerGroupId = 3, OperatingVoltageId = 1, Diameter = 3.15m, MinThickness = 0.70m, NominalThickness = 0.90m, CableBrandNameId = 1 },
+                new InsulatedBillet{ConductorId = 6, PolymerGroupId = 3, OperatingVoltageId = 1, Diameter = 3.30m, MinThickness = 0.70m, NominalThickness = 0.90m, CableBrandNameId = 1 },
+                new InsulatedBillet{ConductorId = 8, PolymerGroupId = 3, OperatingVoltageId = 1, Diameter = 3.80m, MinThickness = 0.70m, NominalThickness = 0.90m, CableBrandNameId = 1 },
+                new InsulatedBillet{ConductorId = 10, PolymerGroupId = 3, OperatingVoltageId = 1, Diameter = 4.55m, MinThickness = 0.80m, NominalThickness = 1.00m, CableBrandNameId = 1 },
+                new InsulatedBillet{ConductorId = 12, PolymerGroupId = 3, OperatingVoltageId = 1, Diameter = 5.20m, MinThickness = 0.80m, NominalThickness = 1.00m, CableBrandNameId = 1 },
+                new InsulatedBillet{ConductorId = 14, PolymerGroupId = 3, OperatingVoltageId = 1, Diameter = 6.40m, MinThickness = 0.90m, NominalThickness = 1.10m, CableBrandNameId = 1 },
+                new InsulatedBillet{ConductorId = 16, PolymerGroupId = 3, OperatingVoltageId = 1, Diameter = 8.00m, MinThickness = 0.90m, NominalThickness = 1.10m, CableBrandNameId = 1 }
             };
 
-            using (var _dbContext = new CablesContext(_connectionString))
-            {
-                _dbContext.AddRange(kpseBillets);
-                _dbContext.SaveChanges();
-            }
+            _dbContext.AddRange(kunrsBillets);
 
-            return recordsCount;
+            return _dbContext.SaveChanges();
         }
 
-        public int ParseKevv_Kers()
+        public int AddKpseBillets()
         {
-            int recordsCount = 0;
+            var kpseBillets = new List<InsulatedBillet>
+            {
+                new InsulatedBillet{ConductorId = 29, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 1.60m, MinThickness = 0.30m, CableBrandNameId = 7 },
+                new InsulatedBillet{ConductorId = 31, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 1.90m, MinThickness = 0.30m, CableBrandNameId = 7 },
+                new InsulatedBillet{ConductorId = 17, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 2.05m, MinThickness = 0.30m, CableBrandNameId = 7 },
+                new InsulatedBillet{ConductorId = 18, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 2.25m, MinThickness = 0.30m, CableBrandNameId = 7 },
+                new InsulatedBillet{ConductorId = 19, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 2.48m, MinThickness = 0.30m, CableBrandNameId = 7 },
+                new InsulatedBillet{ConductorId = 20, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 2.73m, MinThickness = 0.30m, CableBrandNameId = 7 },
+                new InsulatedBillet{ConductorId = 21, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 3.28m, MinThickness = 0.30m, CableBrandNameId = 7 }
+            };
 
+            _dbContext.AddRange(kpseBillets);
+            
+            return _dbContext.SaveChanges();
+        }
+
+        public int AddKevv_KersBillets()
+        {
             var kevvBillets = new List<InsulatedBillet>
             {
-                new InsulatedBillet{ConductorId = 22, PolymerGroupId = 6, OperatingVoltageId = 4, Diameter = 1.2m, CableShortNameId = 3 },
-                new InsulatedBillet{ConductorId = 23, PolymerGroupId = 6, OperatingVoltageId = 4, Diameter = 1.5m, CableShortNameId = 3 },
-                new InsulatedBillet{ConductorId = 24, PolymerGroupId = 6, OperatingVoltageId = 4, Diameter = 1.8m, CableShortNameId = 3 },
-                new InsulatedBillet{ConductorId = 25, PolymerGroupId = 6, OperatingVoltageId = 4, Diameter = 2.3m, CableShortNameId = 3 },
-                new InsulatedBillet{ConductorId = 26, PolymerGroupId = 6, OperatingVoltageId = 4, Diameter = 2.5m, CableShortNameId = 3 },
-                new InsulatedBillet{ConductorId = 27, PolymerGroupId = 6, OperatingVoltageId = 4, Diameter = 3.2m, CableShortNameId = 3 },
-                new InsulatedBillet{ConductorId = 28, PolymerGroupId = 6, OperatingVoltageId = 4, Diameter = 3.6m, CableShortNameId = 3 }
+                new InsulatedBillet{ConductorId = 22, PolymerGroupId = 6, OperatingVoltageId = 4, Diameter = 1.2m, CableBrandNameId = 3 },
+                new InsulatedBillet{ConductorId = 23, PolymerGroupId = 6, OperatingVoltageId = 4, Diameter = 1.5m, CableBrandNameId = 3 },
+                new InsulatedBillet{ConductorId = 24, PolymerGroupId = 6, OperatingVoltageId = 4, Diameter = 1.8m, CableBrandNameId = 3 },
+                new InsulatedBillet{ConductorId = 25, PolymerGroupId = 6, OperatingVoltageId = 4, Diameter = 2.3m, CableBrandNameId = 3 },
+                new InsulatedBillet{ConductorId = 26, PolymerGroupId = 6, OperatingVoltageId = 4, Diameter = 2.5m, CableBrandNameId = 3 },
+                new InsulatedBillet{ConductorId = 27, PolymerGroupId = 6, OperatingVoltageId = 4, Diameter = 3.2m, CableBrandNameId = 3 },
+                new InsulatedBillet{ConductorId = 28, PolymerGroupId = 6, OperatingVoltageId = 4, Diameter = 3.6m, CableBrandNameId = 3 }
             };
 
             var kersBillets = new List<InsulatedBillet>
             {
-                new InsulatedBillet{ConductorId = 22, PolymerGroupId = 3, OperatingVoltageId = 4, Diameter = 1.5m, CableShortNameId = 4 },
-                new InsulatedBillet{ConductorId = 23, PolymerGroupId = 3, OperatingVoltageId = 4, Diameter = 1.8m, CableShortNameId = 4 },
-                new InsulatedBillet{ConductorId = 24, PolymerGroupId = 3, OperatingVoltageId = 4, Diameter = 2.1m, CableShortNameId = 4 },
-                new InsulatedBillet{ConductorId = 25, PolymerGroupId = 3, OperatingVoltageId = 4, Diameter = 2.5m, CableShortNameId = 4 },
-                new InsulatedBillet{ConductorId = 26, PolymerGroupId = 3, OperatingVoltageId = 4, Diameter = 2.7m, CableShortNameId = 4 },
-                new InsulatedBillet{ConductorId = 27, PolymerGroupId = 3, OperatingVoltageId = 4, Diameter = 3.3m, CableShortNameId = 4 },
-                new InsulatedBillet{ConductorId = 28, PolymerGroupId = 3, OperatingVoltageId = 4, Diameter = 3.7m, CableShortNameId = 4 }
+                new InsulatedBillet{ConductorId = 22, PolymerGroupId = 3, OperatingVoltageId = 4, Diameter = 1.5m, CableBrandNameId = 4 },
+                new InsulatedBillet{ConductorId = 23, PolymerGroupId = 3, OperatingVoltageId = 4, Diameter = 1.8m, CableBrandNameId = 4 },
+                new InsulatedBillet{ConductorId = 24, PolymerGroupId = 3, OperatingVoltageId = 4, Diameter = 2.1m, CableBrandNameId = 4 },
+                new InsulatedBillet{ConductorId = 25, PolymerGroupId = 3, OperatingVoltageId = 4, Diameter = 2.5m, CableBrandNameId = 4 },
+                new InsulatedBillet{ConductorId = 26, PolymerGroupId = 3, OperatingVoltageId = 4, Diameter = 2.7m, CableBrandNameId = 4 },
+                new InsulatedBillet{ConductorId = 27, PolymerGroupId = 3, OperatingVoltageId = 4, Diameter = 3.3m, CableBrandNameId = 4 },
+                new InsulatedBillet{ConductorId = 28, PolymerGroupId = 3, OperatingVoltageId = 4, Diameter = 3.7m, CableBrandNameId = 4 }
             };
 
-            using (var _dbContext = new CablesContext(_connectionString))
-            {
-                _dbContext.AddRange(kevvBillets);
-                _dbContext.AddRange(kersBillets);
-                _dbContext.SaveChanges();
-            }
-            return recordsCount;
+            _dbContext.AddRange(kevvBillets);
+            _dbContext.AddRange(kersBillets);
+            
+            return _dbContext.SaveChanges();
         }
 
-        public void ParseKip()
+        public int AddKipBillets()
         {
             var cond078 = _dbContext.Conductors.Where(c => c.WiresDiameter == 0.26m && c.WiresCount == 7 && c.MetalId == 2).Single();
             var cond060 = _dbContext.Conductors.Where(c => c.WiresDiameter == 0.20m && c.WiresCount == 7 && c.MetalId == 2).Single();
             var polymerGroupPE = _dbContext.PolymerGroups.Where(p => p.Title.ToUpper() == "PE").Single();
             var polymerGroupPVC = _dbContext.PolymerGroups.Where(p => p.Title.ToUpper() == "PVC").Single();
 
-            var operatingVoltage = _dbContext.OperatingVoltages.Add(new OperatingVoltage { ACVoltage = 300, ACFriquency = 50, Description = "Переменное - 300В, 50Гц" }).Entity;
-            var cableShortName = _dbContext.CableShortNames.Add(new CableShortName { ShortName = "КИП" }).Entity;
-            var foamPE = _dbContext.PolymerGroups.Add(new PolymerGroup { Title = "Foamed PE", TitleRus = "Вспененный полиэтилен" }).Entity;
+            var operatingVoltage = _dbContext.OperatingVoltages.Where(v => v.Description == "Переменное - 300В, 50Гц").First();
+            var cableBrandName = _dbContext.CableBrandNames.Where(b => b.BrandName == "КИП").First();
+            var foamPE = _dbContext.PolymerGroups.Where(g => g.Title == "Foamed PE").First();
 
             var kipBillets = new List<InsulatedBillet>
                 {
                     new InsulatedBillet
                     {
-                        CableShortName = cableShortName,
+                        CableBrandName = cableBrandName,
                         Conductor = cond060,
                         Diameter = 1.42m,
                         OperatingVoltage = operatingVoltage,
@@ -97,7 +116,7 @@ namespace CableDataParsing
                     },
                     new InsulatedBillet
                     {
-                        CableShortName = cableShortName,
+                        CableBrandName = cableBrandName,
                         Conductor = cond060,
                         Diameter = 1.50m,
                         OperatingVoltage = operatingVoltage,
@@ -105,7 +124,7 @@ namespace CableDataParsing
                     },
                     new InsulatedBillet
                     {
-                        CableShortName = cableShortName,
+                        CableBrandName = cableBrandName,
                         Conductor = cond078,
                         Diameter = 1.78m,
                         OperatingVoltage = operatingVoltage,
@@ -113,19 +132,19 @@ namespace CableDataParsing
                     },
                     new InsulatedBillet
                     {
-                        CableShortName = cableShortName,
+                        CableBrandName = cableBrandName,
                         Conductor = cond078,
                         Diameter = 1.60m,
                         OperatingVoltage = operatingVoltage,
                         PolymerGroup = polymerGroupPVC
                     }
                 };
-
-            _dbContext.InsulatedBillets.AddRange(kipBillets);
-            _dbContext.SaveChanges();
+            _dbContext.AddRange(kipBillets);
+            
+            return _dbContext.SaveChanges();
         }
 
-        public int ParseKpsvev()
+        public int AddKpsvevBillets()
         {
             var conuctor05 = _dbContext.Conductors.Find(17);
             var conuctor075 = _dbContext.Conductors.Find(18);
@@ -133,7 +152,7 @@ namespace CableDataParsing
             var conuctor15 = _dbContext.Conductors.Find(20);
             var conuctor25 = _dbContext.Conductors.Find(21);
 
-            var cableShortName = _dbContext.CableShortNames.Find(6); // КПСВ(Э)
+            var cableBrandName = _dbContext.CableBrandNames.Find(6); // КПСВ(Э)
             var operatingVoltage = _dbContext.OperatingVoltages.Find(6); // 300В 50Гц, постоянка - до 500В
 
             var polymerGroups = new List<PolymerGroup>
@@ -152,7 +171,7 @@ namespace CableDataParsing
                 {
                     new InsulatedBillet
                     {
-                        CableShortName = cableShortName,
+                        CableBrandName = cableBrandName,
                         Conductor = conuctor05,
                         Diameter = 1.8m,
                         OperatingVoltage = operatingVoltage,
@@ -160,7 +179,7 @@ namespace CableDataParsing
                     },
                     new InsulatedBillet
                     {
-                        CableShortName = cableShortName,
+                        CableBrandName = cableBrandName,
                         Conductor = conuctor075,
                         Diameter = group.Id == 6 || group.Id == 7 ? 2.06m : 1.96m,
                         OperatingVoltage = operatingVoltage,
@@ -168,7 +187,7 @@ namespace CableDataParsing
                     },
                     new InsulatedBillet
                     {
-                        CableShortName = cableShortName,
+                        CableBrandName = cableBrandName,
                         Conductor = conuctor1,
                         Diameter = group.Id == 6 || group.Id == 7 ? 2.29m : 2.19m,
                         OperatingVoltage = operatingVoltage,
@@ -176,7 +195,7 @@ namespace CableDataParsing
                     },
                     new InsulatedBillet
                     {
-                        CableShortName = cableShortName,
+                        CableBrandName = cableBrandName,
                         Conductor = conuctor15,
                         Diameter = 2.66m,
                         OperatingVoltage = operatingVoltage,
@@ -184,7 +203,7 @@ namespace CableDataParsing
                     },
                     new InsulatedBillet
                     {
-                        CableShortName = cableShortName,
+                        CableBrandName = cableBrandName,
                         Conductor = conuctor25,
                         Diameter = 3.06m,
                         OperatingVoltage = operatingVoltage,
@@ -196,40 +215,37 @@ namespace CableDataParsing
             return _dbContext.SaveChanges();
         }
 
-        public int ParseSkab()
+        public int AddSkabBillets()
         {
-            int recordsCount = 0;
             var conductorsIdList = new List<int> { 1, 3, 5, 7, 9 }; // 0.5, 0.75, 1.0, 1.5, 2.5
             var polymerGroupsId = new List<int> { 6, 4, 3 }; //6 - PVC-LS, 4 - HF, 3 - Rubber
             var skabOperatingVoltageIdList = new List<int> { 2, 3 }; //2 - СКАБ250, 3 - СКАБ660
 
-            var cableBillet = new InsulatedBillet();
             decimal minThickness;
-            using (var _dbContext = new CablesContext(_connectionString))
+            foreach (var voltageId in skabOperatingVoltageIdList)
             {
-                foreach (var voltageId in skabOperatingVoltageIdList)
+                foreach (var condId in conductorsIdList)
                 {
-                    foreach (var condId in conductorsIdList)
+                    foreach (var polymerId in polymerGroupsId)
                     {
-                        foreach (var polymerId in polymerGroupsId)
+                        var cableBillet = new InsulatedBillet
                         {
-                            cableBillet.CableShortNameId = 2;
-                            cableBillet.OperatingVoltageId = voltageId;
-                            cableBillet.ConductorId = condId;
-                            cableBillet.Diameter = GetSkabDiameter(voltageId, condId, polymerId);
-                            cableBillet.PolymerGroupId = polymerId;
-                            minThickness = GetSkabMinInsThickness(voltageId, polymerId);
-                            cableBillet.MinThickness = minThickness;
-                            cableBillet.NominalThickness = minThickness + 0.1m;
+                            CableBrandNameId = 2,
+                            OperatingVoltageId = voltageId,
+                            ConductorId = condId,
+                            Diameter = GetSkabDiameter(voltageId, condId, polymerId),
+                            PolymerGroupId = polymerId
+                        };
+                        minThickness = GetSkabMinInsThickness(voltageId, polymerId);
+                        cableBillet.MinThickness = minThickness;
+                        cableBillet.NominalThickness = minThickness + 0.1m;
 
-                            _dbContext.InsulatedBillets.Add(cableBillet);
-                            recordsCount++;
-                        }
+                        _dbContext.InsulatedBillets.Add(cableBillet);
                     }
                 }
-                _dbContext.SaveChanges();
             }
-            return recordsCount;
+            
+            return _dbContext.SaveChanges();
         }
 
         private decimal GetSkabMinInsThickness(int voltageId, int polymerGroupId)
@@ -277,6 +293,11 @@ namespace CableDataParsing
                     default: return PVCDiamDict660[condId];
                 }
             }
+        }
+
+        public void Dispose()
+        {
+            _dbContext?.Dispose();
         }
     }
 }

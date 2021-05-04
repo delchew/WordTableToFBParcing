@@ -71,7 +71,7 @@ namespace CableDataParsing
 
             _coverPolymerGroups = new[] { polymerLS, polymerHF };
 
-            _billets = _dbContext.InsulatedBillets.Where(b => b.CableShortName.ShortName == "КПС(Э)")
+            _billets = _dbContext.InsulatedBillets.Where(b => b.CableBrandName.BrandName == "КПС(Э)")
                                                      .Include(b => b.Conductor)
                                                      .ToList();
 

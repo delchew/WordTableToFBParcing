@@ -44,12 +44,12 @@ namespace CableDataParsing
             var colorBlack = _dbContext.Colors.Find(2);
             var colorOrange = _dbContext.Colors.Find(8);
 
-            var pvcBillets = _dbContext.InsulatedBillets.Where(b => b.CableShortName.ShortName.ToLower().StartsWith("кэв"))
+            var pvcBillets = _dbContext.InsulatedBillets.Where(b => b.CableBrandName.BrandName.ToLower().StartsWith("кэв"))
                                                    .Include(b => b.Conductor)
                                                    .Include(b => b.PolymerGroup)
                                                    .ToList();
 
-            var rubberBillets = _dbContext.InsulatedBillets.Where(b => b.CableShortName.ShortName.ToLower().StartsWith("кэрс"))
+            var rubberBillets = _dbContext.InsulatedBillets.Where(b => b.CableBrandName.BrandName.ToLower().StartsWith("кэрс"))
                                                   .Include(b => b.Conductor)
                                                   .Include(b => b.PolymerGroup)
                                                   .ToList();
