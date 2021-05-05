@@ -55,17 +55,17 @@ namespace CableDataParsing
 
             var coverPolymerGroupList8TC = new List<(PolymerGroup polymerGroup, FireProtectionClass fireClass)>
             {
-                (_dbContext.PolymerGroups.Where(p => p.Title.ToUpper() == "PVC").Single(), noFireClass),
-                (_dbContext.PolymerGroups.Where(p => p.Title.ToUpper() == "PE").Single(), noFireClass),
-                (_dbContext.PolymerGroups.Add(new PolymerGroup{Title = "PVC Term", TitleRus = "ПВХ пластикат термостойкий"}).Entity, noFireClass),
-                (_dbContext.PolymerGroups.Add(new PolymerGroup{Title = "PVC Cold", TitleRus = "ПВХ пластикат морозостойкий"}).Entity, noFireClass)
+                (_dbContext.PolymerGroups.Where(p => p.Title == "PVC").Single(), noFireClass),
+                (_dbContext.PolymerGroups.Where(p => p.Title == "PE").Single(), noFireClass),
+                (_dbContext.PolymerGroups.Where(p => p.Title == "PVC Term").Single(), noFireClass),
+                (_dbContext.PolymerGroups.Where(p => p.Title == "PVC Cold").Single(), noFireClass)
             };
 
-            var hfPolymerGroup = _dbContext.PolymerGroups.Where(p => p.Title.ToUpper() == "HFCOMPOUND").Single();
+            var hfPolymerGroup = _dbContext.PolymerGroups.Where(p => p.Title == "HFCompound").Single();
 
             var coverPolymerGroupList25TC = new List<(PolymerGroup polymerGroup, FireProtectionClass fireClass)>
             {
-                (_dbContext.PolymerGroups.Where(p => p.Title.ToUpper() == "PVC LS").Single(), lsFireClass),
+                (_dbContext.PolymerGroups.Where(p => p.Title == "PVC LS").Single(), lsFireClass),
                 (hfPolymerGroup, hfFireClass)
             };
             var coverPolymerGroupList42TC = new List<(PolymerGroup polymerGroup, FireProtectionClass fireClass)>
