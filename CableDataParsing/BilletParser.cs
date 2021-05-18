@@ -23,7 +23,25 @@ namespace CableDataParsing
             var c4 = AddKipBillets();
             var c5 = AddKpsvevBillets();
             var c6 = AddSkabBillets();
-            return c1 + c2 + c3 + c4 + c5 + c6;
+            var c7 = AddKsbBillets();
+            return c1 + c2 + c3 + c4 + c5 + c6 + c7;
+        }
+
+        public int AddKsbBillets()
+        {
+            var ksbBillets = new List<InsulatedBillet>
+            {
+                new InsulatedBillet{ConductorId = 31, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 1.95m, MinThickness = null, NominalThickness = null, CableBrandNameId = 8 },
+                new InsulatedBillet{ConductorId = 17, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 2.4m, MinThickness = null, NominalThickness = null, CableBrandNameId = 8 },
+                new InsulatedBillet{ConductorId = 18, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 2.8m, MinThickness = null, NominalThickness = null, CableBrandNameId = 8 },
+                new InsulatedBillet{ConductorId = 19, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 2.8m, MinThickness = null, NominalThickness = null, CableBrandNameId = 8 },
+                new InsulatedBillet{ConductorId = 20, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 3.2m, MinThickness = null, NominalThickness = null, CableBrandNameId = 8 },
+                new InsulatedBillet{ConductorId = 21, PolymerGroupId = 3, OperatingVoltageId = 5, Diameter = 3.35m, MinThickness = null, NominalThickness = null, CableBrandNameId = 8 }
+            };
+
+            _dbContext.AddRange(ksbBillets);
+
+            return _dbContext.SaveChanges();
         }
 
         public int AddKunrsBillets()

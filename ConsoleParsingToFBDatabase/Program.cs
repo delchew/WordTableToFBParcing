@@ -36,7 +36,7 @@ namespace ConsoleParsingToFBDatabase
             using var parser = new BilletParser(_connectionString2);
             //parser.ParseReport += Parser_ParseReport;
             //var recordsCount = parser.ParseDataToDatabase();
-            var recordsCount = parser.AddAllBillets();
+            var recordsCount = parser.AddKsbBillets();
             Console.WriteLine("{0} записей внесено в базу.", recordsCount);
 
             Console.ReadKey();
